@@ -33,30 +33,16 @@ python -m venv venv
 source venv/bin/activate  # En Windows: venv\Scripts\activate
 ```
 
-3. Instalar las dependencias:
+3. Instalar Django:
 ```bash
-pip install -r requirements.txt
+pip install django
 ```
 
-4. Realizar las migraciones de la base de datos:
-```bash
-python manage.py migrate
-```
-
-5. Crear un superusuario (opcional):
-```bash
-python manage.py createsuperuser
-```
+*Nota: Las instrucciones completas de instalación y configuración se actualizarán una vez que se desarrolle la estructura del proyecto Django.*
 
 ## Uso
 
-Para iniciar el servidor de desarrollo:
-
-```bash
-python manage.py runserver
-```
-
-La aplicación estará disponible en `http://localhost:8000`
+*Instrucciones de uso se proporcionarán una vez que la aplicación esté completamente desarrollada.*
 
 ## Licencia
 

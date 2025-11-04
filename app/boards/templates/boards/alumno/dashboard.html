@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Mis Tests - StepUp{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2 style="color: #667eea; margin-bottom: 1rem;">📚 Mis Tests - Alumno</h2>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1.5rem; border-radius: 8px;">
+            <div style="font-size: 2rem; font-weight: bold;">{{ total_intentos }}</div>
+            <div>Tests Realizados</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 1.5rem; border-radius: 8px;">
+            <div style="font-size: 2rem; font-weight: bold;">{{ promedio_puntuacion|floatformat:1 }}%</div>
+            <div>Promedio</div>
+        </div>
+    </div>
+
+    <h3 style="color: #667eea; margin-top: 2rem;">Tests Disponibles</h3>
+    {% if tests_disponibles %}
+        <div style="display: grid; gap: 1rem; margin-top: 1rem;">
+            {% for test in tests_disponibles %}
+            <div style="border: 2px solid #667eea; border-radius: 8px; padding: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h4 style="margin: 0; color: #667eea;">{{ test.nombre }}</h4>
+                    <p style="margin: 0.5rem 0; color: #666;">{{ test.descripcion }}</p>
+                    <small style="color: #999;">⏱️ {{ test.tiempo_limite }} minutos | 📝 {{ test.total_preguntas }} preguntas</small>
+                </div>
+                <a href="{% url 'boards:iniciar_test' test.id %}" 
+                   style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 6px; font-weight: 600; white-space: nowrap;">
+                    Iniciar Test
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p style="color: #999; padding: 2rem; text-align: center; background: #f8f9fa; border-radius: 8px;">
+            No hay tests disponibles en este momento.
+        </p>
+    {% endif %}
+
+    <h3 style="color: #667eea; margin-top: 3rem;">Mis Últimos Intentos</h3>
+    {% if intentos_previos %}
+        <table style="margin-top: 1rem;">
+            <thead>
+                <tr>
+                    <th>Test</th>
+                    <th>Fecha</th>
+                    <th>Puntuación</th>
+                    <th>Estado</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for intento in intentos_previos %}
+                <tr>
+                    <td>{{ intento.test.nombre }}</td>
+                    <td>{{ intento.fecha_inicio|date:"d/m/Y H:i" }}</td>
+                    <td>
+                        <span style="font-weight: bold; color: {% if intento.puntuacion >= 70 %}#27ae60{% elif intento.puntuacion >= 50 %}#f39c12{% else %}#e74c3c{% endif %};">
+                            {{ intento.puntuacion|floatformat:1 }}%
+                        </span>
+                    </td>
+                    <td>
+                        {% if intento.completado %}
+                            <span style="color: #27ae60;">✓ Completado</span>
+                        {% else %}
+                            <span style="color: #f39c12;">⏳ En progreso</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if intento.completado %}
+                            <a href="{% url 'boards:resultado_test' intento.id %}" style="color: #667eea; text-decoration: none;">Ver resultados</a>
+                        {% else %}
+                            <a href="{% url 'boards:realizar_test' intento.id %}" style="color: #667eea; text-decoration: none;">Continuar</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p style="color: #999; padding: 2rem; text-align: center; background: #f8f9fa; border-radius: 8px; margin-top: 1rem;">
+            Aún no has realizado ningún test. ¡Comienza ahora!
+        </p>
+    {% endif %}
+</div>
+{% endblock %}

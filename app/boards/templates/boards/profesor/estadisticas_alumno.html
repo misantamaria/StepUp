@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Estadísticas de {{ alumno.username }} - StepUp{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2 style="color: #667eea; margin-bottom: 1.5rem;">📊 Estadísticas de {{ alumno.username }}</h2>
+    
+    <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+            <div>
+                <div style="font-size: 0.9rem; color: #666;">Nombre de usuario</div>
+                <div style="font-size: 1.2rem; font-weight: bold;">{{ alumno.username }}</div>
+            </div>
+            <div>
+                <div style="font-size: 0.9rem; color: #666;">Email</div>
+                <div style="font-size: 1.2rem; font-weight: bold;">{{ alumno.email|default:"No configurado" }}</div>
+            </div>
+            <div>
+                <div style="font-size: 0.9rem; color: #666;">Total Intentos</div>
+                <div style="font-size: 1.2rem; font-weight: bold; color: #667eea;">{{ intentos.count }}</div>
+            </div>
+            <div>
+                <div style="font-size: 0.9rem; color: #666;">Promedio</div>
+                <div style="font-size: 1.2rem; font-weight: bold; color: #27ae60;">{{ promedio|floatformat:1 }}%</div>
+            </div>
+        </div>
+    </div>
+
+    <h3 style="color: #667eea; margin-bottom: 1rem;">Historial de Tests</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Test</th>
+                <th>Fecha</th>
+                <th>Puntuación</th>
+                <th>Correctas</th>
+                <th>Tiempo</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for intento in intentos %}
+            <tr>
+                <td><strong>{{ intento.test.nombre }}</strong></td>
+                <td>{{ intento.fecha_fin|date:"d/m/Y H:i" }}</td>
+                <td>
+                    <span style="font-weight: bold; color: {% if intento.puntuacion >= 70 %}#27ae60{% elif intento.puntuacion >= 50 %}#f39c12{% else %}#e74c3c{% endif %};">
+                        {{ intento.puntuacion|floatformat:1 }}%
+                    </span>
+                </td>
+                <td>{{ intento.respuestas_correctas }}/{{ intento.total_preguntas }}</td>
+                <td>
+                    {% widthratio intento.fecha_fin|timeuntil:intento.fecha_inicio 60 1 %} min
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="text-align: center; color: #999; padding: 2rem;">
+                    El alumno no ha realizado ningún test aún.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div style="margin-top: 2rem; text-align: center;">
+        <a href="{% url 'boards:dashboard_profesor' %}" style="background: #667eea; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 6px; font-weight: 600;">
+            ← Volver al Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}

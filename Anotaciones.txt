@@ -1,0 +1,6 @@
+cd .\Desktop\PIE_ED\PIE_ED\
+
+Activar: PowerShell como admin -> venv\Scripts\activate
+Desactivar/Salir del venv: PowerShell como admin -> deactivate
+
+CTRL-BREAK = Control+C

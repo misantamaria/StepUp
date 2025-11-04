@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}{{ test.nombre }} - StepUp{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2 style="color: #667eea;">📝 {{ test.nombre }}</h2>
+    <p>{{ test.descripcion }}</p>
+    
+    <div style="background: #f8f9fa; padding: 1rem; border-radius: 6px; margin: 1.5rem 0;">
+        <strong>⏱️ Tiempo límite:</strong> {{ test.tiempo_limite }} minutos |
+        <strong>📊 Total preguntas:</strong> {{ preguntas.count }}
+    </div>
+
+    <form method="post" style="margin-top: 2rem;">
+        {% csrf_token %}
+        
+        {% for pregunta in preguntas %}
+        <div style="border: 1px solid #ddd; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; background: white;">
+            <h4 style="color: #667eea; margin-bottom: 1rem;">Pregunta {{ forloop.counter }}</h4>
+            <p style="font-size: 1.1rem; margin-bottom: 1rem;">{{ pregunta.titulo }}</p>
+            
+            {% if pregunta.tipo == 'multiple' %}
+                <div style="margin-left: 1rem;">
+                    <label style="display: block; padding: 0.5rem; cursor: pointer;">
+                        <input type="radio" name="pregunta_{{ pregunta.id }}" value="A" required>
+                        <strong>A)</strong> {{ pregunta.opcion_a }}
+                    </label>
+                    <label style="display: block; padding: 0.5rem; cursor: pointer;">
+                        <input type="radio" name="pregunta_{{ pregunta.id }}" value="B" required>
+                        <strong>B)</strong> {{ pregunta.opcion_b }}
+                    </label>
+                    <label style="display: block; padding: 0.5rem; cursor: pointer;">
+                        <input type="radio" name="pregunta_{{ pregunta.id }}" value="C" required>
+                        <strong>C)</strong> {{ pregunta.opcion_c }}
+                    </label>
+                    <label style="display: block; padding: 0.5rem; cursor: pointer;">
+                        <input type="radio" name="pregunta_{{ pregunta.id }}" value="D" required>
+                        <strong>D)</strong> {{ pregunta.opcion_d }}
+                    </label>
+                </div>
+            {% elif pregunta.tipo == 'verdadero_falso' %}
+                <div style="margin-left: 1rem;">
+                    <label style="display: block; padding: 0.5rem; cursor: pointer;">
+                        <input type="radio" name="pregunta_{{ pregunta.id }}" value="verdadero" required>
+                        Verdadero
+                    </label>
+                    <label style="display: block; padding: 0.5rem; cursor: pointer;">
+                        <input type="radio" name="pregunta_{{ pregunta.id }}" value="falso" required>
+                        Falso
+                    </label>
+                </div>
+            {% else %}
+                <input type="text" name="pregunta_{{ pregunta.id }}" required 
+                       style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px;"
+                       placeholder="Escribe tu respuesta aquí">
+            {% endif %}
+            
+            <small style="color: #999; display: block; margin-top: 0.5rem;">
+                Dificultad: {{ pregunta.get_dificultad_display }} | Tema: {{ pregunta.tema|default:"General" }}
+            </small>
+        </div>
+        {% endfor %}
+        
+        <div style="margin-top: 2rem; padding: 1.5rem; background: #f8f9fa; border-radius: 8px; text-align: center;">
+            <p style="margin-bottom: 1rem; color: #666;">¿Estás seguro de que quieres enviar el test?</p>
+            <button type="submit" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 1rem 3rem; border-radius: 6px; font-size: 1.1rem; cursor: pointer; font-weight: 600;">
+                Enviar Test
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

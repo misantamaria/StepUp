@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Iniciar sesión - StepUp{% endblock %}
+
+{% block content %}
+  <div class="card" style="max-width: 500px; margin: 2rem auto;">
+    <h2 style="color: #667eea; margin-bottom: 1.5rem;">🔐 Iniciar sesión</h2>
+    <form method="post">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+      <div>
+        <label for="id_username">👤 Usuario</label>
+        {{ form.username }}
+      </div>
+      <div>
+        <label for="id_password">🔑 Contraseña</label>
+        {{ form.password }}
+      </div>
+      <button type="submit">Entrar</button>
+    </form>
+    
+    <hr style="margin: 2rem 0; border: none; border-top: 1px solid #ddd;">
+    <p style="text-align: center;">
+      <a href="/accounts/password_reset/" style="color: #667eea; text-decoration: none;">
+        ¿Olvidaste tu contraseña?
+      </a>
+    </p>
+  </div>
+{% endblock %}

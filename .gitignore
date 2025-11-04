@@ -1,0 +1,10 @@
+# Django
+__pycache__/
+*.py[cod]
+
+# Archivos de configuración sensibles
+.env
+
+# Archivos temporales o logs
+*.log
+*.tmp

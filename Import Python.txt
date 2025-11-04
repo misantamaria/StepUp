@@ -1,0 +1,106 @@
+# pip install lxml mysql-connector-python
+from lxml import etree
+import mysql.connector
+
+def pct_to_unit(pct_str: str) -> float:
+    try:
+        return float(pct_str) / 100.0
+    except:
+        return 0.0
+
+def import_one_multichoice(xml_path, db_cfg, category_id=1):
+    tree = etree.parse(xml_path)
+    root = tree.getroot()
+    q = root.find(".//question[@type='multichoice']")
+    if q is None:
+        raise ValueError("No multichoice question found")
+
+    def get_text(node, path):
+        n = node.find(path)
+        return (n.text or "") if n is not None else ""
+
+    def get_text_in(node, tag):
+        n = node.find(tag)
+        if n is None: return ""
+        t = n.find("text")
+        return (t.text or "") if t is not None else ""
+
+    name = get_text_in(q, "name")
+    qtext = get_text_in(q, "questiontext")
+    qfmt = q.find("questiontext").get("format", "html").lower() if q.find("questiontext") is not None else "html"
+    genfb = get_text_in(q, "generalfeedback")
+    defaultmark = float(get_text(q, "defaultgrade") or 1.0)
+    penalty = float(get_text(q, "penalty") or 0.0)
+    hidden = int(get_text(q, "hidden") or 0)
+    idnumber = get_text(q, "idnumber") or None
+
+    single = 1 if (get_text(q, "single") or "true").lower() == "true" else 0
+    shuffle = 1 if (get_text(q, "shuffleanswers") or "true").lower() == "true" else 0
+    numbering = (get_text(q, "answernumbering") or "abc").lower()
+    show_std = int(get_text(q, "showstandardinstruction") or 0)
+    # <shownumcorrect/> present => 1, absent => 0
+    show_num_correct = 1 if q.find("shownumcorrect") is not None else 0
+
+    fb_format = "html"  # from your XML
+    fb_correct = get_text_in(q, "correctfeedback")
+    fb_partial = get_text_in(q, "partiallycorrectfeedback")
+    fb_incorrect = get_text_in(q, "incorrectfeedback")
+
+    cn = mysql.connector.connect(**db_cfg)
+    cn.autocommit = False
+    cur = cn.cursor()
+
+    # Insert base question
+    cur.execute("""
+        INSERT INTO question (
+            category_id, qtype, name, idnumber,
+            question_text, question_format,
+            general_feedback, default_mark, penalty, hidden, original_xml
+        ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+    """, (
+        category_id, "multichoice", name, idnumber,
+        qtext, qfmt, genfb, defaultmark, penalty, hidden,
+        etree.tostring(q, encoding="unicode")
+    ))
+    qid = cur.lastrowid
+
+    # Insert multichoice specifics
+    cur.execute("""
+        INSERT INTO question_multichoice (
+            question_id, single, shuffle_answers, answer_numbering,
+            show_standard_instruction, show_num_correct,
+            correct_feedback, partially_correct_feedback, incorrect_feedback, feedback_format
+        ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+    """, (
+        qid, single, shuffle, numbering,
+        show_std, show_num_correct,
+        fb_correct, fb_partial, fb_incorrect, fb_format
+    ))
+
+    # Answers (respecting order)
+    seq = 1
+    for ans in q.findall("answer"):
+        frac = pct_to_unit(ans.get("fraction", "0"))
+        a_fmt = ans.get("format", "html").lower()
+        a_text = get_text_in(ans, "text")
+        a_fb_text = get_text_in(ans, "feedback")
+        cur.execute("""
+            INSERT INTO answer (question_id, seq, answer_text, answer_format, fraction, feedback_text, feedback_format)
+            VALUES (%s,%s,%s,%s,%s,%s,%s)
+        """, (qid, seq, a_text, a_fmt, frac, a_fb_text, fb_format))
+        seq += 1
+
+    # Hints
+    hseq = 1
+    for h in q.findall("hint"):
+        h_fmt = h.get("format", "html").lower()
+        h_text = get_text_in(h, "text")
+        cur.execute("""
+            INSERT INTO hint (question_id, seq, hint_text, hint_format)
+            VALUES (%s,%s,%s,%s)
+        """, (qid, hseq, h_text, h_fmt))
+        hseq += 1
+
+    cn.commit()
+    cur.close()
+    cn.close()

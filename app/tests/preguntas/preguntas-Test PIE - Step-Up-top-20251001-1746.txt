@@ -1,0 +1,25 @@
+// question: 0  name: Switch category to $course$/top/Por defecto en Test PIE - Step-Up
+$CATEGORY: $course$/top/Por defecto en Test PIE - Step-Up
+
+
+// question: 1395491  name: Imprime «Hola mundo»
+
+
+// question: 1395488  name: Empareja correctamente
+::Empareja correctamente::[html]<p>No hay mucho más.</p>{
+	=<p>2+2</p> -> 4
+	=<p>3+3</p> -> 6
+	=<p>5+5</p> -> 10
+}
+
+
+// question: 1395486  name: Pregunta 1
+// [id:1]
+::Pregunta 1::[html]<p>¿2+2?</p>{
+	=<p>4</p>
+	~%-33.33333%<p>5</p>
+	~%-33.33333%<p>7</p>
+	~%-33.33333%<p>Viva er Betih</p>
+}
+
+

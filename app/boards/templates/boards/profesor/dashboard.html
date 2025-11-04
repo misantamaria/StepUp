@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard Profesor - StepUp{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2 style="color: #667eea; margin-bottom: 1.5rem;">🎓 Dashboard del Profesor</h2>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1.5rem; border-radius: 8px;">
+            <div style="font-size: 2.5rem; font-weight: bold;">{{ total_alumnos }}</div>
+            <div>Alumnos Activos</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 1.5rem; border-radius: 8px;">
+            <div style="font-size: 2.5rem; font-weight: bold;">{{ total_intentos }}</div>
+            <div>Tests Realizados</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 1.5rem; border-radius: 8px;">
+            <div style="font-size: 2.5rem; font-weight: bold;">{{ promedio_general|floatformat:1 }}%</div>
+            <div>Promedio General</div>
+        </div>
+    </div>
+
+    <div style="margin-top: 2rem; padding: 1.5rem; background: #e8f5e9; border-radius: 8px;">
+        <h3 style="color: #27ae60; margin-bottom: 1rem;">🔧 Acceso Rápido</h3>
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            <a href="/admin/boards/question/add/" style="background: #667eea; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 6px; font-weight: 600;">
+                ➕ Crear Pregunta
+            </a>
+            <a href="/admin/boards/test/add/" style="background: #764ba2; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 6px; font-weight: 600;">
+                📝 Crear Test
+            </a>
+            <a href="/admin/boards/question/" style="background: #3498db; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 6px; font-weight: 600;">
+                📚 Gestionar Preguntas
+            </a>
+            <a href="/admin/boards/test/" style="background: #e74c3c; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 6px; font-weight: 600;">
+                📋 Gestionar Tests
+            </a>
+        </div>
+    </div>
+
+    <h3 style="color: #667eea; margin-top: 2.5rem; margin-bottom: 1rem;">📊 Tests Disponibles</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Test</th>
+                <th>Preguntas</th>
+                <th>Intentos</th>
+                <th>Tiempo Límite</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for test in tests %}
+            <tr>
+                <td><strong>{{ test.nombre }}</strong></td>
+                <td>{{ test.total_preguntas }}</td>
+                <td>{{ test.num_intentos }}</td>
+                <td>{{ test.tiempo_limite }} min</td>
+                <td>
+                    {% if test.activo %}
+                        <span style="color: #27ae60; font-weight: bold;">✓ Activo</span>
+                    {% else %}
+                        <span style="color: #95a5a6;">✗ Inactivo</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="/admin/boards/test/{{ test.id }}/change/" style="color: #667eea; text-decoration: none;">Editar</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="text-align: center; color: #999; padding: 2rem;">
+                    No hay tests creados. <a href="/admin/boards/test/add/" style="color: #667eea;">Crear el primero</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h3 style="color: #667eea; margin-top: 2.5rem; margin-bottom: 1rem;">📈 Últimos Intentos</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Alumno</th>
+                <th>Test</th>
+                <th>Fecha</th>
+                <th>Puntuación</th>
+                <th>Correctas</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for intento in ultimos_intentos %}
+            <tr>
+                <td><strong>{{ intento.alumno.username }}</strong></td>
+                <td>{{ intento.test.nombre }}</td>
+                <td>{{ intento.fecha_fin|date:"d/m/Y H:i" }}</td>
+                <td>
+                    <span style="font-weight: bold; color: {% if intento.puntuacion >= 70 %}#27ae60{% elif intento.puntuacion >= 50 %}#f39c12{% else %}#e74c3c{% endif %};">
+                        {{ intento.puntuacion|floatformat:1 }}%
+                    </span>
+                </td>
+                <td>{{ intento.respuestas_correctas }}/{{ intento.total_preguntas }}</td>
+                <td>
+                    <a href="{% url 'boards:estadisticas_alumno' intento.alumno.id %}" style="color: #667eea; text-decoration: none;">
+                        Ver alumno
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="text-align: center; color: #999; padding: 2rem;">
+                    No hay intentos registrados aún.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if preguntas_por_tema %}
+    <h3 style="color: #667eea; margin-top: 2.5rem; margin-bottom: 1rem;">📚 Preguntas por Tema</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;">
+        {% for item in preguntas_por_tema %}
+        <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; border-left: 4px solid #667eea;">
+            <div style="font-size: 1.5rem; font-weight: bold; color: #667eea;">{{ item.total }}</div>
+            <div style="color: #666;">{{ item.tema|default:"Sin tema" }}</div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

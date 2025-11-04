@@ -1,0 +1,11 @@
+asgiref==3.10.0
+distlib==0.4.0
+Django==5.2.7
+filelock==3.20.0
+mysql-connector-python==9.5.0
+platformdirs==4.5.0
+sqlparse==0.5.3
+tzdata==2025.2
+virtualenv==20.35.3
+PyMySQL==1.1.1
+dotenv==1.2.1

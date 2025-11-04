@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Crear Usuario - StepUp{% endblock %}
+
+{% block content %}
+  <div class="card">
+    <h2 style="color: #667eea; margin-bottom: 1.5rem;">➕ Crear Usuario con Email</h2>
+    
+    <div class="message success">
+      <strong>✅ EMAILS REALES ACTIVADOS:</strong><br>
+      • Los emails se envían REALMENTE al usuario creado<br>
+      • Llegarán a la bandeja de entrada del usuario<br>
+      • Pueden tardar unos minutos en llegar<br>
+      • También revisa la carpeta de spam
+    </div>
+
+    <form method="post" style="margin-top: 2rem;">
+      {% csrf_token %}
+      <div>
+        <label for="username">👤 Usuario:</label>
+        <input type="text" name="username" required>
+        <small style="color: #666; display: block; margin-top: 0.5rem;">
+          Usuarios predefinidos: admin, macu (se asignarán emails automáticamente)
+        </small>
+      </div>
+      <div>
+        <label for="email">📧 Email (opcional si es usuario predefinido):</label>
+        <input type="email" name="email" placeholder="usuario@example.com">
+      </div>
+      <button type="submit">Crear Usuario y Enviar Email</button>
+    </form>
+
+    <hr style="margin: 3rem 0; border: none; border-top: 1px solid #ddd;">
+    
+    <h3 style="color: #667eea; margin-bottom: 1rem;">👥 Usuarios Existentes</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Usuario</th>
+          <th>Email</th>
+          <th>Rol</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in users %}
+        <tr>
+          <td>{{ user.username }}</td>
+          <td>{{ user.email|default:"Sin email" }}</td>
+          <td>
+            {% if user.is_superuser %}
+              <span style="color: #e74c3c; font-weight: bold;">🔧 Admin</span>
+            {% else %}
+              <span style="color: #3498db;">👤 Usuario</span>
+            {% endif %}
+          </td>
+          <td>
+            <a href="/admin/auth/user/{{ user.id }}/password/" style="color: #667eea; text-decoration: none;">
+              🔑 Cambiar contraseña
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

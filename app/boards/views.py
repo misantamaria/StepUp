@@ -32,6 +32,8 @@ def home(request):
         if modo == 'profesor' and request.user.is_staff:
             return redirect('boards:dashboard_profesor')
         else:
+            # Asegurar que la sesión tenga modo_actual = alumno
+            request.session['modo_actual'] = 'alumno'
             return redirect('boards:dashboard_alumno')
     
     # Si el usuario marcó "no preguntar", usar su preferencia
@@ -55,15 +57,17 @@ def home(request):
 # ==================== VISTAS PARA ALUMNOS ====================
 
 @login_required
-@user_passes_test(es_alumno, login_url='/admin/')
 def dashboard_alumno(request):
     """Dashboard para alumnos - muestra tests disponibles"""
+    # Permitir a staff ver el modo alumno cuando está en sesión
+    if request.user.is_staff:
+        request.session['modo_actual'] = 'alumno'
+    
     context = alumno_dashboard_data(request.user)
     return render(request, 'boards/alumno/dashboard.html', context)
 
 
 @login_required
-@user_passes_test(es_alumno, login_url='/admin/')
 def iniciar_test(request, test_id):
     """Inicia un nuevo intento de test"""
     test = get_object_or_404(Test, id=test_id, activo=True)
@@ -72,7 +76,6 @@ def iniciar_test(request, test_id):
 
 
 @login_required
-@user_passes_test(es_alumno, login_url='/admin/')
 def realizar_test(request, intento_id):
     """Muestra y procesa el test"""
     intento = get_object_or_404(IntentTest, id=intento_id, alumno=request.user)
@@ -96,7 +99,6 @@ def realizar_test(request, intento_id):
 
 
 @login_required
-@user_passes_test(es_alumno, login_url='/admin/')
 def resultado_test(request, intento_id):
     """Muestra los resultados de un test completado"""
     intento = get_object_or_404(IntentTest, id=intento_id, alumno=request.user, completado=True)

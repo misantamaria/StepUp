@@ -1,677 +1,138 @@
-{% extends "base.html" %}{% extends "base.html" %}{% extends "base.html" %}{% extends "base.html" %}
-
-
+{% extends "base.html" %}
 
 {% block title %}Dashboard Profesor - StepUp{% endblock %}
 
-
-
-{% block content %}{% block title %}Dashboard Profesor - StepUp{% endblock %}
-
+{% block content %}
 <div class="card">
-
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-
-        <h2 style="color: {{ THEME_COLORS.primary }}; margin: 0;">Panel del Profesor</h2>
-
-        <a href="#estadisticas" onclick="toggleEstadisticas(); return false;" class="btn" style="width: auto; margin: 0; padding: 0.6rem 1.5rem; font-size: 0.95rem;">{% block content %}{% block title %}Dashboard Profesor - StepUp{% endblock %}{% block title %}Dashboard Profesor - StepUp{% endblock %}
-
-            Ver Estadísticas
-
-        </a><div class="card">
-
+        <h2 style="color: {{ THEME_COLORS.primary }}; margin: 0;">🎓 Panel del Profesor</h2>
     </div>
 
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <!-- Resumen rápido -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+        <div style="background: linear-gradient(135deg, {{ THEME_COLORS.primary }} 0%, {{ THEME_COLORS.bg_medium }} 100%); color: white; padding: 1.5rem; border-radius: 8px;">
+            <div style="font-size: 2.5rem; font-weight: bold;">{{ total_alumnos }}</div>
+            <div>Alumnos Activos</div>
+        </div>
+        <div style="background: linear-gradient(135deg, {{ THEME_COLORS.primary_light }} 0%, #00a8e8 100%); color: white; padding: 1.5rem; border-radius: 8px;">
+            <div style="font-size: 2.5rem; font-weight: bold;">{{ total_intentos }}</div>
+            <div>Tests Realizados</div>
+        </div>
+        <div style="background: linear-gradient(135deg, {{ THEME_COLORS.success }} 0%, #20c997 100%); color: white; padding: 1.5rem; border-radius: 8px;">
+            <div style="font-size: 2.5rem; font-weight: bold;">{{ promedio_general|floatformat:1 }}%</div>
+            <div>Promedio General</div>
+        </div>
+    </div>
 
-    <!-- Acceso rápido a administración -->
-
-    <div style="margin-bottom: 2rem; padding: 1.5rem; background: #f8f9fa; border-radius: 8px;">        <h2 style="color: #003d6b; margin: 0;">Panel del Profesor</h2>
-
-        <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1rem; font-size: 1.1rem;">Gestión Rápida</h3>
-
-        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">        <a href="#estadisticas" onclick="toggleEstadisticas(); return false;" class="btn" style="width: auto; margin: 0; padding: 0.6rem 1.5rem; font-size: 0.95rem;">{% block content %}{% block content %}
-
+    <!-- Botones de Gestión Rápida -->
+    <div style="margin-bottom: 2rem; padding: 1.5rem; background: #f8f9fa; border-radius: 8px;">
+        <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1rem; font-size: 1.1rem;">🔧 Gestión Rápida</h3>
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
             <a href="/admin/boards/tema/" style="background: {{ THEME_COLORS.primary }}; color: white; padding: 0.6rem 1.2rem; text-decoration: none; border-radius: 6px; font-weight: 500; font-size: 0.9rem;">
-
-                Gestionar Temas            Ver Estadísticas
-
+                📚 Gestionar Temas
             </a>
-
-            <a href="/admin/boards/pregunta/" style="background: {{ THEME_COLORS.bg_medium }}; color: white; padding: 0.6rem 1.2rem; text-decoration: none; border-radius: 6px; font-weight: 500; font-size: 0.9rem;">        </a><div class="card"><div class="card">
-
-                Gestionar Preguntas
-
-            </a>    </div>
-
+            <a href="/admin/boards/pregunta/" style="background: {{ THEME_COLORS.bg_medium }}; color: white; padding: 0.6rem 1.2rem; text-decoration: none; border-radius: 6px; font-weight: 500; font-size: 0.9rem;">
+                ❓ Gestionar Preguntas
+            </a>
             <a href="/admin/boards/test/" style="background: {{ THEME_COLORS.primary_light }}; color: white; padding: 0.6rem 1.2rem; text-decoration: none; border-radius: 6px; font-weight: 500; font-size: 0.9rem;">
-
-                Gestionar Tests    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">    <h2 style="color: #667eea; margin-bottom: 1.5rem;">🎓 Dashboard del Profesor</h2>
-
+                📝 Gestionar Tests
             </a>
-
-            <a href="/admin/boards/progresotema/" style="background: {{ THEME_COLORS.success }}; color: white; padding: 0.6rem 1.2rem; text-decoration: none; border-radius: 6px; font-weight: 500; font-size: 0.9rem;">    <!-- Acceso rápido a administración -->
-
-                Ver Progreso Alumnos
-
-            </a>    <div style="margin-bottom: 2rem; padding: 1.5rem; background: #f8f9fa; border-radius: 8px;">        <h2 style="color: #003d6b; margin: 0;">Panel del Profesor</h2>    
-
+            <a href="/admin/boards/progresotema/" style="background: {{ THEME_COLORS.success }}; color: white; padding: 0.6rem 1.2rem; text-decoration: none; border-radius: 6px; font-weight: 500; font-size: 0.9rem;">
+                📊 Ver Progreso Alumnos
+            </a>
+            <a href="#estadisticas" onclick="toggleEstadisticas(); return false;" style="background: {{ THEME_COLORS.warning }}; color: white; padding: 0.6rem 1.2rem; text-decoration: none; border-radius: 6px; font-weight: 500; font-size: 0.9rem;">
+                📈 Ver Estadísticas Detalladas
+            </a>
         </div>
+    </div>
 
-    </div>        <h3 style="color: #003d6b; margin-bottom: 1rem; font-size: 1.1rem;">Gestión Rápida</h3>
+    <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem; font-size: 1.2rem;">📚 Tests por Tema</h3>
 
-
-
-    <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem; font-size: 1.2rem;">Tests Disponibles por Tema</h3>        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">        <a href="#estadisticas" class="btn" style="width: auto; margin: 0; padding: 0.6rem 1.5rem; font-size: 0.95rem;">    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
-
-
-
-    {% for item in temas_con_tests %}            <a href="/admin/boards/tema/" style="background: #003d6b; color: white; padding: 0.6rem 1.2rem; text-decoration: none; border-radius: 6px; font-weight: 500; font-size: 0.9rem;">
-
+    {% for item in temas_con_tests %}
     <div style="margin-bottom: 2rem; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
-
-        <!-- Encabezado del tema -->                Gestionar Temas            Ver Estadísticas        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1.5rem; border-radius: 8px;">
-
+        <!-- Encabezado del tema -->
         <div style="background: linear-gradient(135deg, {{ THEME_COLORS.primary }} 0%, {{ THEME_COLORS.bg_medium }} 100%); color: white; padding: 1rem 1.5rem;">
-
-            <div style="display: flex; justify-content: space-between; align-items: center;">            </a>
-
+            <div style="display: flex; justify-content: space-between; align-items: center;">
                 <h4 style="margin: 0; font-size: 1.1rem;">{{ item.tema.tema_id }}</h4>
-
-                <div style="font-size: 0.9rem; opacity: 0.9;">            <a href="/admin/boards/pregunta/" style="background: #005a9c; color: white; padding: 0.6rem 1.2rem; text-decoration: none; border-radius: 6px; font-weight: 500; font-size: 0.9rem;">        </a>            <div style="font-size: 2.5rem; font-weight: bold;">{{ total_alumnos }}</div>
-
+                <div style="font-size: 0.9rem; opacity: 0.9;">
                     {{ item.total_preguntas }} pregunta{{ item.total_preguntas|pluralize }} 
-
-                    (Fácil: {{ item.preguntas_faciles }}, Media: {{ item.preguntas_medias }}, Difícil: {{ item.preguntas_dificiles }})                Gestionar Preguntas
-
+                    (Fácil: {{ item.preguntas_faciles }}, Media: {{ item.preguntas_medias }}, Difícil: {{ item.preguntas_dificiles }})
                 </div>
-
-            </div>            </a>    </div>            <div>Alumnos Activos</div>
-
+            </div>
         </div>
-
-            <a href="/admin/boards/test/" style="background: #0077c8; color: white; padding: 0.6rem 1.2rem; text-decoration: none; border-radius: 6px; font-weight: 500; font-size: 0.9rem;">
 
         <!-- Tests del tema -->
-
-        <div style="padding: 1.5rem;">                Gestionar Tests        </div>
-
+        <div style="padding: 1.5rem;">
             {% if item.tests %}
-
-                <table style="margin: 0;">            </a>
-
+                <table style="margin: 0;">
                     <thead>
-
-                        <tr>            <a href="/admin/boards/progresotema/" style="background: #28a745; color: white; padding: 0.6rem 1.2rem; text-decoration: none; border-radius: 6px; font-weight: 500; font-size: 0.9rem;">    <!-- Acceso rápido a administración -->        <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 1.5rem; border-radius: 8px;">
-
-                            <th style="width: 50px;">Estado</th>
-
-                            <th>Test</th>                Ver Progreso Alumnos
-
-                            <th style="width: 100px;">Preguntas</th>
-
-                            <th style="width: 100px;">Tiempo</th>            </a>    <div style="margin-bottom: 2rem; padding: 1.5rem; background: #f8f9fa; border-radius: 8px;">            <div style="font-size: 2.5rem; font-weight: bold;">{{ total_intentos }}</div>
-
-                            <th style="width: 100px;">Intentos</th>
-
-                            <th style="width: 120px;">Acciones</th>        </div>
-
+                        <tr>
+                            <th style="width: 60px; text-align: center;">Visible</th>
+                            <th>Test</th>
+                            <th style="width: 100px; text-align: center;">Preguntas</th>
+                            <th style="width: 100px; text-align: center;">Tiempo</th>
+                            <th style="width: 100px; text-align: center;">Intentos</th>
+                            <th style="width: 120px; text-align: center;">Acciones</th>
                         </tr>
-
-                    </thead>    </div>        <h3 style="color: #003d6b; margin-bottom: 1rem; font-size: 1.1rem;">Gestión Rápida</h3>            <div>Tests Realizados</div>
-
+                    </thead>
                     <tbody>
-
                         {% for test in item.tests %}
-
                         <tr style="{% if test.visible_alumnos %}background: #e3f2fd;{% endif %}">
-
-                            <td style="text-align: center;">    <h3 style="color: #003d6b; margin-bottom: 1.5rem; font-size: 1.2rem;">Tests Disponibles por Tema</h3>        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">        </div>
-
+                            <td style="text-align: center;">
                                 {% if test.visible_alumnos %}
-
                                     <span style="font-size: 1.3rem; color: {{ THEME_COLORS.primary_light }};" title="Visible para alumnos">👁️</span>
-
                                 {% else %}
-
-                                    <span style="font-size: 1.3rem; color: {{ THEME_COLORS.text_inactive }};" title="No visible para alumnos">👁️‍🗨️</span>    {% for item in temas_con_tests %}            <a href="/admin/boards/tema/" style="background: #003d6b; color: white; padding: 0.6rem 1.2rem; text-decoration: none; border-radius: 6px; font-weight: 500; font-size: 0.9rem;">        <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 1.5rem; border-radius: 8px;">
-
+                                    <span style="font-size: 1.3rem; color: {{ THEME_COLORS.text_inactive }}; opacity: 0.4;" title="Oculto para alumnos">👁️‍��️</span>
                                 {% endif %}
-
-                            </td>    <div style="margin-bottom: 2rem; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
-
+                            </td>
                             <td>
-
-                                <strong style="{% if test.visible_alumnos %}color: {{ THEME_COLORS.primary_light }};{% else %}color: {{ THEME_COLORS.text_inactive }};{% endif %}">        <!-- Encabezado del tema -->                Gestionar Temas            <div style="font-size: 2.5rem; font-weight: bold;">{{ promedio_general|floatformat:1 }}%</div>
-
+                                <strong style="{% if test.visible_alumnos %}color: {{ THEME_COLORS.primary_light }};{% else %}color: {{ THEME_COLORS.text_inactive }};{% endif %}">
                                     {{ test.nombre }}
-
-                                </strong>        <div style="background: linear-gradient(135deg, #003d6b 0%, #005a9c 100%); color: white; padding: 1rem 1.5rem;">
-
+                                </strong>
                                 {% if test.descripcion %}
-
-                                <div style="font-size: 0.85rem; color: {{ THEME_COLORS.text_active }}; margin-top: 0.25rem;">{{ test.descripcion|truncatewords:15 }}</div>            <div style="display: flex; justify-content: space-between; align-items: center;">            </a>            <div>Promedio General</div>
-
+                                <div style="font-size: 0.85rem; color: {{ THEME_COLORS.text_active }}; margin-top: 0.25rem;">{{ test.descripcion|truncatewords:15 }}</div>
                                 {% endif %}
-
-                            </td>                <h4 style="margin: 0; font-size: 1.1rem;">{{ item.tema.tema_id }}</h4>
-
+                            </td>
                             <td style="text-align: center;">{{ test.total_preguntas }}</td>
-
-                            <td style="text-align: center;">{{ test.tiempo_limite }} min</td>                <div style="font-size: 0.9rem; opacity: 0.9;">            <a href="/admin/boards/pregunta/" style="background: #005a9c; color: white; padding: 0.6rem 1.2rem; text-decoration: none; border-radius: 6px; font-weight: 500; font-size: 0.9rem;">        </div>
-
+                            <td style="text-align: center;">{{ test.tiempo_limite }} min</td>
                             <td style="text-align: center;">{{ test.num_intentos|default:0 }}</td>
-
-                            <td>                    {{ item.total_preguntas }} pregunta{{ item.total_preguntas|pluralize }} 
-
+                            <td style="text-align: center;">
                                 <a href="/admin/boards/test/{{ test.id }}/change/" style="color: {{ THEME_COLORS.primary }}; text-decoration: none; font-weight: 500; font-size: 0.9rem;">
-
-                                    Editar                    (Fácil: {{ item.preguntas_faciles }}, Media: {{ item.preguntas_medias }}, Difícil: {{ item.preguntas_dificiles }})                Gestionar Preguntas    </div>
-
+                                    ✏️ Editar
                                 </a>
-
-                            </td>                </div>
-
+                            </td>
                         </tr>
-
-                        {% endfor %}            </div>            </a>
-
+                        {% endfor %}
                     </tbody>
-
-                </table>        </div>
-
+                </table>
             {% else %}
-
-                <div style="text-align: center; color: {{ THEME_COLORS.text_inactive }}; padding: 2rem;">            <a href="/admin/boards/test/" style="background: #0077c8; color: white; padding: 0.6rem 1.2rem; text-decoration: none; border-radius: 6px; font-weight: 500; font-size: 0.9rem;">    <div style="margin-top: 2rem; padding: 1.5rem; background: #e8f5e9; border-radius: 8px;">
-
+                <div style="text-align: center; color: {{ THEME_COLORS.text_inactive }}; padding: 2rem;">
                     No hay tests creados para este tema. 
-
-                    <a href="/admin/boards/test/add/" style="color: {{ THEME_COLORS.primary }};">Crear uno nuevo</a>        <!-- Tests del tema -->
-
+                    <a href="/admin/boards/test/add/" style="color: {{ THEME_COLORS.primary }};">Crear uno nuevo</a>
                 </div>
-
-            {% endif %}        <div style="padding: 1.5rem;">                Gestionar Tests        <h3 style="color: #27ae60; margin-bottom: 1rem;">🔧 Acceso Rápido</h3>
-
+            {% endif %}
         </div>
-
-    </div>            {% if item.tests %}
-
+    </div>
     {% empty %}
-
-    <div style="text-align: center; color: {{ THEME_COLORS.text_inactive }}; padding: 3rem; background: #f8f9fa; border-radius: 8px;">                <table style="margin: 0;">            </a>        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-
+    <div style="text-align: center; color: {{ THEME_COLORS.text_inactive }}; padding: 3rem; background: #f8f9fa; border-radius: 8px;">
         <p style="font-size: 1.1rem; margin-bottom: 1rem;">No hay temas creados aún.</p>
-
-        <a href="/admin/boards/tema/add/" class="btn" style="width: auto; display: inline-block;">                    <thead>
-
+        <a href="/admin/boards/tema/add/" class="btn" style="width: auto; display: inline-block;">
             Crear Primer Tema
-
-        </a>                        <tr>            <a href="/admin/boards/progresotema/" style="background: #28a745; color: white; padding: 0.6rem 1.2rem; text-decoration: none; border-radius: 6px; font-weight: 500; font-size: 0.9rem;">            <a href="/admin/boards/question/add/" style="background: #667eea; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 6px; font-weight: 600;">
-
+        </a>
     </div>
-
-    {% endfor %}                            <th style="width: 50px;">Estado</th>
-
+    {% endfor %}
 </div>
 
-                            <th>Test</th>                Ver Progreso Alumnos                ➕ Crear Pregunta
+<!-- Sección de estadísticas detalladas (colapsable) -->
+<div id="estadisticas" class="card" style="display: none;">
+    <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem;">📊 Estadísticas Detalladas</h3>
 
-<!-- Sección de estadísticas (colapsable) -->
-
-<div id="estadisticas" class="card" style="display: none;">                            <th style="width: 100px;">Preguntas</th>
-
-    <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem;">Estadísticas Generales</h3>
-
-                                <th style="width: 100px;">Tiempo</th>            </a>            </a>
-
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
-
-        <div style="background: linear-gradient(135deg, {{ THEME_COLORS.primary }} 0%, {{ THEME_COLORS.bg_medium }} 100%); color: white; padding: 1.5rem; border-radius: 8px;">                            <th style="width: 100px;">Intentos</th>
-
-            <div style="font-size: 2.5rem; font-weight: bold;">{{ total_alumnos }}</div>
-
-            <div>Alumnos Activos</div>                            <th style="width: 120px;">Acciones</th>        </div>            <a href="/admin/boards/test/add/" style="background: #764ba2; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 6px; font-weight: 600;">
-
-        </div>
-
-        <div style="background: linear-gradient(135deg, {{ THEME_COLORS.primary_light }} 0%, #00a8e8 100%); color: white; padding: 1.5rem; border-radius: 8px;">                        </tr>
-
-            <div style="font-size: 2.5rem; font-weight: bold;">{{ total_intentos }}</div>
-
-            <div>Tests Realizados</div>                    </thead>    </div>                📝 Crear Test
-
-        </div>
-
-        <div style="background: linear-gradient(135deg, {{ THEME_COLORS.success }} 0%, #20c997 100%); color: white; padding: 1.5rem; border-radius: 8px;">                    <tbody>
-
-            <div style="font-size: 2.5rem; font-weight: bold;">{{ promedio_general|floatformat:1 }}%</div>
-
-            <div>Promedio General</div>                        {% for test in item.tests %}            </a>
-
-        </div>
-
-    </div>                        <tr style="{% if test.visible_alumnos %}background: #e3f2fd;{% endif %}">
-
-
-
-    <h3 style="color: {{ THEME_COLORS.primary }}; margin-top: 2.5rem; margin-bottom: 1rem;">Últimos Intentos</h3>                            <td style="text-align: center;">    <h3 style="color: #003d6b; margin-bottom: 1.5rem; font-size: 1.2rem;">Tests Disponibles por Tema</h3>            <a href="/admin/boards/question/" style="background: #3498db; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 6px; font-weight: 600;">
-
+    <h4 style="color: {{ THEME_COLORS.primary }}; margin-top: 2rem; margin-bottom: 1rem;">📋 Últimos Intentos</h4>
     <table>
-
-        <thead>                                {% if test.visible_alumnos %}
-
+        <thead>
             <tr>
-
-                <th>Alumno</th>                                    <span style="font-size: 1.3rem; color: #0077c8;" title="Visible para alumnos">👁️</span>                📚 Gestionar Preguntas
-
+                <th>Alumno</th>
                 <th>Test</th>
-
-                <th>Tema</th>                                {% else %}
-
-                <th>Fecha</th>
-
-                <th>Puntuación</th>                                    <span style="font-size: 1.3rem; color: #ccc;" title="No visible para alumnos">👁️‍🗨️</span>    {% for item in temas_con_tests %}            </a>
-
-                <th>Correctas</th>
-
-                <th>Acciones</th>                                {% endif %}
-
-            </tr>
-
-        </thead>                            </td>    <div style="margin-bottom: 2rem; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">            <a href="/admin/boards/test/" style="background: #e74c3c; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 6px; font-weight: 600;">
-
-        <tbody>
-
-            {% for intento in ultimos_intentos %}                            <td>
-
-            <tr>
-
-                <td><strong>{{ intento.alumno.username }}</strong></td>                                <strong style="{% if test.visible_alumnos %}color: #0077c8;{% else %}color: #666;{% endif %}">        <!-- Encabezado del tema -->                📋 Gestionar Tests
-
-                <td>{{ intento.test.nombre }}</td>
-
-                <td>{{ intento.test.tema.tema_id|default:"-" }}</td>                                    {{ test.nombre }}
-
-                <td>{{ intento.fecha_fin|date:"d/m/Y H:i" }}</td>
-
-                <td>                                </strong>        <div style="background: linear-gradient(135deg, #003d6b 0%, #005a9c 100%); color: white; padding: 1rem 1.5rem;">            </a>
-
-                    <span style="font-weight: bold; color: {% if intento.puntuacion >= 70 %}{{ THEME_COLORS.success }}{% elif intento.puntuacion >= 50 %}{{ THEME_COLORS.warning }}{% else %}{{ THEME_COLORS.danger }}{% endif %};">
-
-                        {{ intento.puntuacion|floatformat:1 }}%                                {% if test.descripcion %}
-
-                    </span>
-
-                </td>                                <div style="font-size: 0.85rem; color: #666; margin-top: 0.25rem;">{{ test.descripcion|truncatewords:15 }}</div>            <div style="display: flex; justify-content: space-between; align-items: center;">        </div>
-
-                <td>{{ intento.respuestas_correctas }}/{{ intento.total_preguntas }}</td>
-
-                <td>                                {% endif %}
-
-                    <a href="{% url 'boards:estadisticas_alumno' intento.alumno.id %}" style="color: {{ THEME_COLORS.primary }}; text-decoration: none; font-weight: 500;">
-
-                        Ver alumno                            </td>                <h4 style="margin: 0; font-size: 1.1rem;">{{ item.tema.tema_id }}</h4>    </div>
-
-                    </a>
-
-                </td>                            <td style="text-align: center;">{{ test.total_preguntas }}</td>
-
-            </tr>
-
-            {% empty %}                            <td style="text-align: center;">{{ test.tiempo_limite }} min</td>                <div style="font-size: 0.9rem; opacity: 0.9;">
-
-            <tr>
-
-                <td colspan="7" style="text-align: center; color: {{ THEME_COLORS.text_inactive }}; padding: 2rem;">                            <td style="text-align: center;">{{ test.num_intentos|default:0 }}</td>
-
-                    No hay intentos registrados aún.
-
-                </td>                            <td>                    {{ item.total_preguntas }} pregunta{{ item.total_preguntas|pluralize }}     <h3 style="color: #667eea; margin-top: 2.5rem; margin-bottom: 1rem;">📊 Tests Disponibles</h3>
-
-            </tr>
-
-            {% endfor %}                                <a href="/admin/boards/test/{{ test.id }}/change/" style="color: #003d6b; text-decoration: none; font-weight: 500; font-size: 0.9rem;">
-
-        </tbody>
-
-    </table>                                    Editar                    (Fácil: {{ item.preguntas_faciles }}, Media: {{ item.preguntas_medias }}, Difícil: {{ item.preguntas_dificiles }})    <table>
-
-
-
-    <div style="text-align: center; margin-top: 2rem;">                                </a>
-
-        <button onclick="toggleEstadisticas()" class="btn-secondary" style="width: auto; padding: 0.6rem 1.5rem;">
-
-            Ocultar Estadísticas                            </td>                </div>        <thead>
-
-        </button>
-
-    </div>                        </tr>
-
-</div>
-
-                        {% endfor %}            </div>            <tr>
-
-<script>
-
-    // Toggle estadísticas                    </tbody>
-
-    function toggleEstadisticas() {
-
-        const stats = document.getElementById('estadisticas');                </table>        </div>                <th>Test</th>
-
-        const btn = document.querySelector('a[onclick*="toggleEstadisticas"]');
-
-                    {% else %}
-
-        if (stats.style.display === 'none') {
-
-            stats.style.display = 'block';                <div style="text-align: center; color: #999; padding: 2rem;">                <th>Preguntas</th>
-
-            if (btn) btn.textContent = 'Ocultar Estadísticas';
-
-            // Scroll suave a la sección                    No hay tests creados para este tema. 
-
-            stats.scrollIntoView({ behavior: 'smooth' });
-
-        } else {                    <a href="/admin/boards/test/add/" style="color: #003d6b;">Crear uno nuevo</a>        <!-- Tests del tema -->                <th>Intentos</th>
-
-            stats.style.display = 'none';
-
-            if (btn) btn.textContent = 'Ver Estadísticas';                </div>
-
-            // Scroll al inicio
-
-            window.scrollTo({ top: 0, behavior: 'smooth' });            {% endif %}        <div style="padding: 1.5rem;">                <th>Tiempo Límite</th>
-
-        }
-
-    }        </div>
-
-
-
-    // Si hay hash en la URL, mostrar estadísticas    </div>            {% if item.tests %}                <th>Estado</th>
-
-    if (window.location.hash === '#estadisticas') {
-
-        document.getElementById('estadisticas').style.display = 'block';    {% empty %}
-
-    }
-
-</script>    <div style="text-align: center; color: #999; padding: 3rem; background: #f8f9fa; border-radius: 8px;">                <table style="margin: 0;">                <th>Acciones</th>
-
-
-
-{% endblock %}        <p style="font-size: 1.1rem; margin-bottom: 1rem;">No hay temas creados aún.</p>
-
-
-        <a href="/admin/boards/tema/add/" class="btn" style="width: auto; display: inline-block;">                    <thead>            </tr>
-
-            Crear Primer Tema
-
-        </a>                        <tr>        </thead>
-
-    </div>
-
-    {% endfor %}                            <th style="width: 50px;">Estado</th>        <tbody>
-
-</div>
-
-                            <th>Test</th>            {% for test in tests %}
-
-<!-- Sección de estadísticas (colapsable) -->
-
-<div id="estadisticas" class="card" style="display: none;">                            <th style="width: 100px;">Preguntas</th>            <tr>
-
-    <h3 style="color: #003d6b; margin-bottom: 1.5rem;">Estadísticas Generales</h3>
-
-                                <th style="width: 100px;">Tiempo</th>                <td><strong>{{ test.nombre }}</strong></td>
-
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
-
-        <div style="background: linear-gradient(135deg, #003d6b 0%, #005a9c 100%); color: white; padding: 1.5rem; border-radius: 8px;">                            <th style="width: 100px;">Intentos</th>                <td>{{ test.total_preguntas }}</td>
-
-            <div style="font-size: 2.5rem; font-weight: bold;">{{ total_alumnos }}</div>
-
-            <div>Alumnos Activos</div>                            <th style="width: 120px;">Acciones</th>                <td>{{ test.num_intentos }}</td>
-
-        </div>
-
-        <div style="background: linear-gradient(135deg, #0077c8 0%, #00a8e8 100%); color: white; padding: 1.5rem; border-radius: 8px;">                        </tr>                <td>{{ test.tiempo_limite }} min</td>
-
-            <div style="font-size: 2.5rem; font-weight: bold;">{{ total_intentos }}</div>
-
-            <div>Tests Realizados</div>                    </thead>                <td>
-
-        </div>
-
-        <div style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 1.5rem; border-radius: 8px;">                    <tbody>                    {% if test.activo %}
-
-            <div style="font-size: 2.5rem; font-weight: bold;">{{ promedio_general|floatformat:1 }}%</div>
-
-            <div>Promedio General</div>                        {% for test in item.tests %}                        <span style="color: #27ae60; font-weight: bold;">✓ Activo</span>
-
-        </div>
-
-    </div>                        <tr style="{% if test.visible_alumnos %}background: #e3f2fd;{% endif %}">                    {% else %}
-
-
-
-    <h3 style="color: #003d6b; margin-top: 2.5rem; margin-bottom: 1rem;">Últimos Intentos</h3>                            <td style="text-align: center;">                        <span style="color: #95a5a6;">✗ Inactivo</span>
-
-    <table>
-
-        <thead>                                {% if test.visible_alumnos %}                    {% endif %}
-
-            <tr>
-
-                <th>Alumno</th>                                    <span style="font-size: 1.3rem; color: #0077c8;" title="Visible para alumnos">👁️</span>                </td>
-
-                <th>Test</th>
-
-                <th>Tema</th>                                {% else %}                <td>
-
-                <th>Fecha</th>
-
-                <th>Puntuación</th>                                    <span style="font-size: 1.3rem; color: #ccc;" title="No visible para alumnos">👁️‍🗨️</span>                    <a href="/admin/boards/test/{{ test.id }}/change/" style="color: #667eea; text-decoration: none;">Editar</a>
-
-                <th>Correctas</th>
-
-                <th>Acciones</th>                                {% endif %}                </td>
-
-            </tr>
-
-        </thead>                            </td>            </tr>
-
-        <tbody>
-
-            {% for intento in ultimos_intentos %}                            <td>            {% empty %}
-
-            <tr>
-
-                <td><strong>{{ intento.alumno.username }}</strong></td>                                <strong style="{% if test.visible_alumnos %}color: #0077c8;{% else %}color: #666;{% endif %}">            <tr>
-
-                <td>{{ intento.test.nombre }}</td>
-
-                <td>{{ intento.test.tema.tema_id|default:"-" }}</td>                                    {{ test.nombre }}                <td colspan="6" style="text-align: center; color: #999; padding: 2rem;">
-
-                <td>{{ intento.fecha_fin|date:"d/m/Y H:i" }}</td>
-
-                <td>                                </strong>                    No hay tests creados. <a href="/admin/boards/test/add/" style="color: #667eea;">Crear el primero</a>
-
-                    <span style="font-weight: bold; color: {% if intento.puntuacion >= 70 %}#28a745{% elif intento.puntuacion >= 50 %}#ffc107{% else %}#dc3545{% endif %};">
-
-                        {{ intento.puntuacion|floatformat:1 }}%                                {% if test.descripcion %}                </td>
-
-                    </span>
-
-                </td>                                <div style="font-size: 0.85rem; color: #666; margin-top: 0.25rem;">{{ test.descripcion|truncatewords:15 }}</div>            </tr>
-
-                <td>{{ intento.respuestas_correctas }}/{{ intento.total_preguntas }}</td>
-
-                <td>                                {% endif %}            {% endfor %}
-
-                    <a href="{% url 'boards:estadisticas_alumno' intento.alumno.id %}" style="color: #003d6b; text-decoration: none; font-weight: 500;">
-
-                        Ver alumno                            </td>        </tbody>
-
-                    </a>
-
-                </td>                            <td style="text-align: center;">{{ test.total_preguntas }}</td>    </table>
-
-            </tr>
-
-            {% empty %}                            <td style="text-align: center;">{{ test.tiempo_limite }} min</td>
-
-            <tr>
-
-                <td colspan="7" style="text-align: center; color: #999; padding: 2rem;">                            <td style="text-align: center;">{{ test.num_intentos|default:0 }}</td>    <h3 style="color: #667eea; margin-top: 2.5rem; margin-bottom: 1rem;">📈 Últimos Intentos</h3>
-
-                    No hay intentos registrados aún.
-
-                </td>                            <td>    <table>
-
-            </tr>
-
-            {% endfor %}                                <a href="/admin/boards/test/{{ test.id }}/change/" style="color: #003d6b; text-decoration: none; font-weight: 500; font-size: 0.9rem;">        <thead>
-
-        </tbody>
-
-    </table>                                    Editar            <tr>
-
-
-
-    <div style="text-align: center; margin-top: 2rem;">                                </a>                <th>Alumno</th>
-
-        <button onclick="toggleEstadisticas()" class="btn-secondary" style="width: auto; padding: 0.6rem 1.5rem;">
-
-            Ocultar Estadísticas                            </td>                <th>Test</th>
-
-        </button>
-
-    </div>                        </tr>                <th>Fecha</th>
-
-</div>
-
-                        {% endfor %}                <th>Puntuación</th>
-
-<script>
-
-    // Toggle estadísticas                    </tbody>                <th>Correctas</th>
-
-    function toggleEstadisticas() {
-
-        const stats = document.getElementById('estadisticas');                </table>                <th>Acciones</th>
-
-        const btn = document.querySelector('a[onclick*="toggleEstadisticas"]');
-
-                    {% else %}            </tr>
-
-        if (stats.style.display === 'none') {
-
-            stats.style.display = 'block';                <div style="text-align: center; color: #999; padding: 2rem;">        </thead>
-
-            if (btn) btn.textContent = 'Ocultar Estadísticas';
-
-            // Scroll suave a la sección                    No hay tests creados para este tema.         <tbody>
-
-            stats.scrollIntoView({ behavior: 'smooth' });
-
-        } else {                    <a href="/admin/boards/test/add/" style="color: #003d6b;">Crear uno nuevo</a>            {% for intento in ultimos_intentos %}
-
-            stats.style.display = 'none';
-
-            if (btn) btn.textContent = 'Ver Estadísticas';                </div>            <tr>
-
-            // Scroll al inicio
-
-            window.scrollTo({ top: 0, behavior: 'smooth' });            {% endif %}                <td><strong>{{ intento.alumno.username }}</strong></td>
-
-        }
-
-    }        </div>                <td>{{ intento.test.nombre }}</td>
-
-
-
-    // Si hay hash en la URL, mostrar estadísticas    </div>                <td>{{ intento.fecha_fin|date:"d/m/Y H:i" }}</td>
-
-    if (window.location.hash === '#estadisticas') {
-
-        document.getElementById('estadisticas').style.display = 'block';    {% empty %}                <td>
-
-    }
-
-</script>    <div style="text-align: center; color: #999; padding: 3rem; background: #f8f9fa; border-radius: 8px;">                    <span style="font-weight: bold; color: {% if intento.puntuacion >= 70 %}#27ae60{% elif intento.puntuacion >= 50 %}#f39c12{% else %}#e74c3c{% endif %};">
-
-
-
-{% endblock %}        <p style="font-size: 1.1rem; margin-bottom: 1rem;">No hay temas creados aún.</p>                        {{ intento.puntuacion|floatformat:1 }}%
-
-
-        <a href="/admin/boards/tema/add/" class="btn" style="width: auto; display: inline-block;">                    </span>
-
-            Crear Primer Tema                </td>
-
-        </a>                <td>{{ intento.respuestas_correctas }}/{{ intento.total_preguntas }}</td>
-
-    </div>                <td>
-
-    {% endfor %}                    <a href="{% url 'boards:estadisticas_alumno' intento.alumno.id %}" style="color: #667eea; text-decoration: none;">
-
-</div>                        Ver alumno
-
-                    </a>
-
-<!-- Sección de estadísticas (colapsable) -->                </td>
-
-<div id="estadisticas" class="card" style="display: none;">            </tr>
-
-    <h3 style="color: #003d6b; margin-bottom: 1.5rem;">Estadísticas Generales</h3>            {% empty %}
-
-                <tr>
-
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 2rem;">                <td colspan="6" style="text-align: center; color: #999; padding: 2rem;">
-
-        <div style="background: linear-gradient(135deg, #003d6b 0%, #005a9c 100%); color: white; padding: 1.5rem; border-radius: 8px;">                    No hay intentos registrados aún.
-
-            <div style="font-size: 2.5rem; font-weight: bold;">{{ total_alumnos }}</div>                </td>
-
-            <div>Alumnos Activos</div>            </tr>
-
-        </div>            {% endfor %}
-
-        <div style="background: linear-gradient(135deg, #0077c8 0%, #00a8e8 100%); color: white; padding: 1.5rem; border-radius: 8px;">        </tbody>
-
-            <div style="font-size: 2.5rem; font-weight: bold;">{{ total_intentos }}</div>    </table>
-
-            <div>Tests Realizados</div>
-
-        </div>    {% if preguntas_por_tema %}
-
-        <div style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 1.5rem; border-radius: 8px;">    <h3 style="color: #667eea; margin-top: 2.5rem; margin-bottom: 1rem;">📚 Preguntas por Tema</h3>
-
-            <div style="font-size: 2.5rem; font-weight: bold;">{{ promedio_general|floatformat:1 }}%</div>    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;">
-
-            <div>Promedio General</div>        {% for item in preguntas_por_tema %}
-
-        </div>        <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; border-left: 4px solid #667eea;">
-
-    </div>            <div style="font-size: 1.5rem; font-weight: bold; color: #667eea;">{{ item.total }}</div>
-
-            <div style="color: #666;">{{ item.tema|default:"Sin tema" }}</div>
-
-    <h3 style="color: #003d6b; margin-top: 2.5rem; margin-bottom: 1rem;">Últimos Intentos</h3>        </div>
-
-    <table>        {% endfor %}
-
-        <thead>    </div>
-
-            <tr>    {% endif %}
-
-                <th>Alumno</th></div>
-
-                <th>Test</th>{% endblock %}
-
                 <th>Tema</th>
                 <th>Fecha</th>
                 <th>Puntuación</th>
@@ -687,20 +148,20 @@
                 <td>{{ intento.test.tema.tema_id|default:"-" }}</td>
                 <td>{{ intento.fecha_fin|date:"d/m/Y H:i" }}</td>
                 <td>
-                    <span style="font-weight: bold; color: {% if intento.puntuacion >= 70 %}#28a745{% elif intento.puntuacion >= 50 %}#ffc107{% else %}#dc3545{% endif %};">
+                    <span style="font-weight: bold; color: {% if intento.puntuacion >= 70 %}{{ THEME_COLORS.success }}{% elif intento.puntuacion >= 50 %}{{ THEME_COLORS.warning }}{% else %}{{ THEME_COLORS.danger }}{% endif %};">
                         {{ intento.puntuacion|floatformat:1 }}%
                     </span>
                 </td>
                 <td>{{ intento.respuestas_correctas }}/{{ intento.total_preguntas }}</td>
                 <td>
-                    <a href="{% url 'boards:estadisticas_alumno' intento.alumno.id %}" style="color: #003d6b; text-decoration: none; font-weight: 500;">
-                        Ver alumno
+                    <a href="{% url 'boards:estadisticas_alumno' intento.alumno.id %}" style="color: {{ THEME_COLORS.primary }}; text-decoration: none; font-weight: 500;">
+                        Ver detalles
                     </a>
                 </td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="7" style="text-align: center; color: #999; padding: 2rem;">
+                <td colspan="7" style="text-align: center; color: {{ THEME_COLORS.text_inactive }}; padding: 2rem;">
                     No hay intentos registrados aún.
                 </td>
             </tr>
@@ -715,32 +176,22 @@
     </div>
 </div>
 
-<!-- Botón para mostrar estadísticas si están ocultas -->
 <script>
-    // Toggle estadísticas
-    function toggleEstadisticas() {
-        const stats = document.getElementById('estadisticas');
-        if (stats.style.display === 'none') {
-            stats.style.display = 'block';
-            // Scroll suave a la sección
-            stats.scrollIntoView({ behavior: 'smooth' });
-        } else {
-            stats.style.display = 'none';
-            // Scroll al inicio
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+function toggleEstadisticas() {
+    const stats = document.getElementById('estadisticas');
+    if (stats.style.display === 'none') {
+        stats.style.display = 'block';
+        stats.scrollIntoView({ behavior: 'smooth' });
+    } else {
+        stats.style.display = 'none';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+}
 
-    // Si hay hash en la URL, mostrar estadísticas
-    if (window.location.hash === '#estadisticas') {
-        document.getElementById('estadisticas').style.display = 'block';
-    }
-
-    // Escuchar clic en el botón de estadísticas
-    document.querySelector('a[href="#estadisticas"]').addEventListener('click', function(e) {
-        e.preventDefault();
-        toggleEstadisticas();
-    });
+// Si hay hash en la URL, mostrar estadísticas
+if (window.location.hash === '#estadisticas') {
+    document.getElementById('estadisticas').style.display = 'block';
+}
 </script>
 
 {% endblock %}

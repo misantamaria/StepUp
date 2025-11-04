@@ -30,6 +30,15 @@ class QuestionAdmin(admin.ModelAdmin):
         return obj.titulo[:50] + '...' if len(obj.titulo) > 50 else obj.titulo
     titulo_corto.short_description = 'Pregunta'
     
+    def has_delete_permission(self, request, obj=None):
+        """Solo profesores completos y admins pueden eliminar preguntas"""
+        if request.user.is_superuser:
+            return True
+        if request.user.groups.filter(name='Profesores').exists():
+            return True
+        # Profesores Ayudantes NO pueden eliminar
+        return False
+    
     def save_model(self, request, obj, form, change):
         if not change:  # Si es una nueva pregunta
             obj.creada_por = request.user
@@ -61,6 +70,14 @@ class TestAdmin(admin.ModelAdmin):
         return obj.total_preguntas()
     total_preguntas_count.short_description = 'N° Preguntas'
     
+    def has_delete_permission(self, request, obj=None):
+        """Solo profesores completos y admins pueden eliminar tests"""
+        if request.user.is_superuser:
+            return True
+        if request.user.groups.filter(name='Profesores').exists():
+            return True
+        return False
+    
     def save_model(self, request, obj, form, change):
         if not change:
             obj.creado_por = request.user
@@ -73,6 +90,18 @@ class IntentTestAdmin(admin.ModelAdmin):
     list_filter = ['completado', 'fecha_inicio', 'test']
     search_fields = ['alumno__username', 'test__nombre']
     readonly_fields = ['alumno', 'test', 'fecha_inicio', 'fecha_fin', 'puntuacion', 'total_preguntas', 'respuestas_correctas']
+    
+    def has_add_permission(self, request):
+        """Nadie puede crear intentos desde el admin (se crean automáticamente)"""
+        return False
+    
+    def has_delete_permission(self, request, obj=None):
+        """Solo admins pueden eliminar intentos"""
+        return request.user.is_superuser
+    
+    def has_change_permission(self, request, obj=None):
+        """Solo admins pueden modificar intentos"""
+        return request.user.is_superuser
     
     def puntuacion_display(self, obj):
         return f"{obj.puntuacion:.1f}%"
@@ -89,6 +118,18 @@ class RespuestaAlumnoAdmin(admin.ModelAdmin):
     list_filter = ['es_correcta', 'fecha_respuesta']
     search_fields = ['intento__alumno__username', 'pregunta__titulo']
     readonly_fields = ['intento', 'pregunta', 'respuesta', 'es_correcta', 'fecha_respuesta']
+    
+    def has_add_permission(self, request):
+        """Nadie puede crear respuestas desde el admin (se crean automáticamente)"""
+        return False
+    
+    def has_delete_permission(self, request, obj=None):
+        """Solo admins pueden eliminar respuestas"""
+        return request.user.is_superuser
+    
+    def has_change_permission(self, request, obj=None):
+        """Solo admins pueden modificar respuestas"""
+        return request.user.is_superuser
     
     def pregunta_corta(self, obj):
         return obj.pregunta.titulo[:40] + '...' if len(obj.pregunta.titulo) > 40 else obj.pregunta.titulo

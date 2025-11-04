@@ -10,17 +10,24 @@ StepUp es una plataforma educativa para gestionar tests y evaluar el progreso de
    - Realiza tests de preguntas
    - Ve sus resultados y estadísticas
    - Accede a explicaciones de respuestas
+   - **Sin acceso al panel de administración**
 
 2. **Profesor** (`profesor` / `profesor`)
-   - Gestiona preguntas y tests
+   - Gestiona preguntas y tests (crear, editar, eliminar)
    - Ve estadísticas de todos los alumnos
-   - Crea, edita y elimina preguntas
    - Monitoriza el progreso de los alumnos
+   - **Control total sobre preguntas y tests**
 
-3. **Administrador** (`admin` / `admin`)
+3. **Profesor Ayudante** (`profesor_ayudante` / `ayudante`)
+   - Crea y edita preguntas y tests
+   - Ve estadísticas de alumnos
+   - **NO puede eliminar preguntas ni tests**
+   - Ideal para profesores en prácticas o ayudantes
+
+4. **Administrador** (`admin` / `admin`)
    - Gestiona usuarios del sistema
    - Acceso completo al panel de administración Django
-   - Control total del sistema
+   - Control total del sistema (incluye eliminar intentos y respuestas)
 
 ---
 
@@ -416,10 +423,17 @@ py manage.py migrate
 
 ## 🎓 RESUMEN RÁPIDO
 
-**3 usuarios:**
-- `alumno` / `alumno` → Hace tests
-- `profesor` / `profesor` → Gestiona preguntas y ve estadísticas
+**4 tipos de usuarios con diferentes permisos:**
+- `alumno` / `alumno` → Hace tests (sin acceso admin)
+- `profesor` / `profesor` → Gestiona preguntas y ve estadísticas (puede eliminar)
+- `profesor_ayudante` / `ayudante` → Crea/edita preguntas (NO puede eliminar)
 - `admin` / `admin` → Administra todo el sistema
+
+**Permisos por rol:**
+- **Alumno**: Solo interfaz web de tests, sin acceso a admin
+- **Profesor Ayudante**: Crear y editar preguntas/tests, ver estadísticas (sin eliminar)
+- **Profesor**: Control total de preguntas/tests/estadísticas (incluye eliminar)
+- **Admin**: Superusuario, gestiona usuarios y puede modificar/eliminar intentos
 
 **Para empezar:**
 1. `cd app`

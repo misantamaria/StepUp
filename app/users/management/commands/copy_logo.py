@@ -9,7 +9,9 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         source = Path(settings.MEDIA_ROOT) / 'logo.png'
+        print(f"Copiando de {source}")
         dest_dir = Path(settings.BASE_DIR) / 'users' / 'static' / 'img'
+        print(f"Copiando a {dest_dir}")
         dest = dest_dir / 'logo.png'
 
         if not source.exists():

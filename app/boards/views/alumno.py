@@ -39,7 +39,8 @@ def realizar_test(request, intento_id):
     if intento.completado:
         return redirect('boards:resultado_test', intento_id=intento.id)
     
-    preguntas = intento.test.preguntas.filter(activa=True)
+    # Las preguntas de PIE_ED no tienen campo 'activa', obtenerlas todas
+    preguntas = intento.test.preguntas.all()
     
     if request.method == 'POST':
         intento = alumno_grade_attempt(intento, request.POST)

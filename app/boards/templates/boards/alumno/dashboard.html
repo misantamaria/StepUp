@@ -17,23 +17,47 @@
         </div>
     </div>
 
-    <h3 style="color: #667eea; margin-top: 2rem;">Tests Disponibles</h3>
-    {% if tests_disponibles %}
-        <div style="display: grid; gap: 1rem; margin-top: 1rem;">
-            {% for test in tests_disponibles %}
-            <div style="border: 2px solid #667eea; border-radius: 8px; padding: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <h4 style="margin: 0; color: #667eea;">{{ test.nombre }}</h4>
-                    <p style="margin: 0.5rem 0; color: #666;">{{ test.descripcion }}</p>
-                    <small style="color: #999;">⏱️ {{ test.tiempo_limite }} minutos | 📝 {{ test.total_preguntas }} preguntas</small>
+    <h3 style="color: #667eea; margin-top: 2rem;">Tests Disponibles por Tema</h3>
+    {% if tests_por_tema %}
+        {% for item in tests_por_tema %}
+        <div style="margin-bottom: 2rem;">
+            <!-- Encabezado del tema con progreso -->
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1rem 1.5rem; border-radius: 8px 8px 0 0; display: flex; justify-content: space-between; align-items: center;">
+                <h4 style="margin: 0; font-size: 1.1rem;">📚 {{ item.tema.tema_id }}</h4>
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <span style="font-size: 0.9rem; opacity: 0.9;">Progreso: {{ item.progreso.porcentaje_completado|floatformat:0 }}%</span>
+                    <div style="background: rgba(255,255,255,0.2); border-radius: 10px; width: 100px; height: 8px; overflow: hidden;">
+                        <div style="background: white; height: 100%; width: {{ item.progreso.porcentaje_completado }}%;"></div>
+                    </div>
                 </div>
-                <a href="{% url 'boards:iniciar_test' test.id %}" 
-                   style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 6px; font-weight: 600; white-space: nowrap;">
-                    Iniciar Test
-                </a>
             </div>
-            {% endfor %}
+            
+            <!-- Tests del tema -->
+            <div style="border: 2px solid #667eea; border-top: none; border-radius: 0 0 8px 8px; padding: 1rem;">
+                {% if item.tests %}
+                    <div style="display: grid; gap: 0.75rem;">
+                        {% for test in item.tests %}
+                        <div style="padding: 1rem; background: #f8f9fa; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h5 style="margin: 0; color: #667eea;">{{ test.nombre }}</h5>
+                                {% if test.descripcion %}
+                                <p style="margin: 0.5rem 0 0 0; color: #666; font-size: 0.9rem;">{{ test.descripcion }}</p>
+                                {% endif %}
+                                <small style="color: #999; margin-top: 0.25rem; display: block;">⏱️ {{ test.tiempo_limite }} minutos | 📝 {{ test.total_preguntas }} preguntas</small>
+                            </div>
+                            <a href="{% url 'boards:iniciar_test' test.id %}" 
+                               style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 6px; font-weight: 600; white-space: nowrap;">
+                                Iniciar Test
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p style="color: #999; text-align: center; margin: 1rem 0;">No hay tests disponibles para este tema.</p>
+                {% endif %}
+            </div>
         </div>
+        {% endfor %}
     {% else %}
         <p style="color: #999; padding: 2rem; text-align: center; background: #f8f9fa; border-radius: 8px;">
             No hay tests disponibles en este momento.

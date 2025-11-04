@@ -16,10 +16,6 @@ Aplicación principal para el Proyecto de Innovación Educativa (PIE) de la asig
 
 [📖 Ver documentación completa de StepUp](app/README.md)
 
-### 🔢 Calculadora Django (`calculatorDJango/`)
-Aplicación de ejemplo para demostración de Django con calculadora y gestión de usuarios.
-
-[📖 Ver documentación de Calculadora](calculatorDJango/README.md)
 
 ## Inicio rápido - StepUp
 
@@ -62,13 +58,9 @@ StepUp/
 │   ├── manage.py
 │   ├── requirements.txt
 │   ├── .env.example
-│   └── README.md
-├── calculatorDJango/             # 🔢 Calculadora (ejemplo)
 │   └── ...
-├── junit_ED/                     # Corrector de prácticas Java
-│   └── ...
-├── Gestion/                      # Scripts y bases de datos
-│   └── ...
+|── dump_PIE_ED.sql
+|── schema.sql
 └── README.md                     # Este archivo
 ```
 

@@ -4,6 +4,30 @@ __pycache__/
 
 # Archivos de configuración sensibles
 .env
+*.env
+app/.env
+docker/.env
+
+# Base de datos - No versionar datos de usuarios
+db.sqlite3
+db.sqlite3-journal
+*.db
+*.sqlite
+*.sqlite3
+
+# Dumps de base de datos con datos reales - NO versionar
+Gestion/dump_*.sql
+Gestion/*.sql
+!Gestion/schema.sql
+
+# Docker - Volúmenes y datos sensibles
+mysql_data/
+postgres_data/
+docker-compose.override.yml
+
+# Media files - pueden contener datos de usuarios
+media/
+/media/
 
 # Archivos temporales o logs
 *.log

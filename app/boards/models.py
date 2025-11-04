@@ -39,6 +39,23 @@ class Pregunta(models.Model):
     
     def __str__(self):
         return f"{self.enunciado[:50]}..."
+    
+    def get_respuestas(self):
+        """Obtiene las respuestas de esta pregunta"""
+        from django.db import connection
+        with connection.cursor() as cursor:
+            cursor.execute(
+                'SELECT Respuesta_ID, Contenido, Solucion FROM Respuesta WHERE Pregunta_ID = %s ORDER BY Respuesta_ID',
+                [self.pregunta_id]
+            )
+            respuestas = []
+            for row in cursor.fetchall():
+                respuestas.append({
+                    'id': row[0],
+                    'contenido': row[1],
+                    'es_correcta': row[2] == 'Correcta'
+                })
+            return respuestas
 
 
 class Respuesta(models.Model):
@@ -48,63 +65,19 @@ class Respuesta(models.Model):
         ('Incorrecta', 'Incorrecta'),
     ]
     
-    respuesta_id = models.IntegerField(db_column='Respuesta_ID')
+    respuesta_id = models.IntegerField(db_column='Respuesta_ID', primary_key=True)
     pregunta_id = models.IntegerField(db_column='Pregunta_ID')
     solucion = models.CharField(max_length=20, choices=SOLUCION_CHOICES, db_column='Solucion')
     contenido = models.TextField(db_column='Contenido')
     
     class Meta:
         db_table = 'Respuesta'
-        managed = True  # Django SÍ gestiona esta tabla
-        unique_together = (('respuesta_id', 'pregunta_id'),)
+        managed = False  # NO gestionar, tabla externa PIE_ED
         verbose_name = 'Respuesta'
         verbose_name_plural = 'Respuestas'
     
     def __str__(self):
         return f"{self.contenido[:30]} - {self.solucion}"
-
-
-# Modelos antiguos de Django - mantener por compatibilidad o migrar después
-class Question(models.Model):
-    """Modelo para preguntas de test"""
-    TIPO_CHOICES = [
-        ('multiple', 'Opción Múltiple'),
-        ('verdadero_falso', 'Verdadero/Falso'),
-        ('texto', 'Texto Corto'),
-    ]
-    
-    DIFICULTAD_CHOICES = [
-        ('facil', 'Fácil'),
-        ('media', 'Media'),
-        ('dificil', 'Difícil'),
-    ]
-    
-    titulo = models.CharField(max_length=500, help_text="Enunciado de la pregunta")
-    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES, default='multiple')
-    dificultad = models.CharField(max_length=10, choices=DIFICULTAD_CHOICES, default='media')
-    tema = models.CharField(max_length=100, blank=True, help_text="Tema o categoría")
-    
-    # Opciones para preguntas de opción múltiple
-    opcion_a = models.CharField(max_length=300, blank=True)
-    opcion_b = models.CharField(max_length=300, blank=True)
-    opcion_c = models.CharField(max_length=300, blank=True)
-    opcion_d = models.CharField(max_length=300, blank=True)
-    
-    respuesta_correcta = models.CharField(max_length=300, help_text="Respuesta correcta o letra (A, B, C, D)")
-    explicacion = models.TextField(blank=True, help_text="Explicación de la respuesta")
-    
-    activa = models.BooleanField(default=True)
-    creada_por = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='preguntas_creadas')
-    fecha_creacion = models.DateTimeField(auto_now_add=True)
-    fecha_modificacion = models.DateTimeField(auto_now=True)
-    
-    class Meta:
-        ordering = ['-fecha_creacion']
-        verbose_name = 'Pregunta'
-        verbose_name_plural = 'Preguntas'
-    
-    def __str__(self):
-        return f"{self.titulo[:50]}..."
 
 
 class Test(models.Model):

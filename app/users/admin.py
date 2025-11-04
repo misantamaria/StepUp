@@ -1,5 +1,27 @@
 from django.contrib import admin
 from django.contrib.auth.models import User
-from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from .models import UserProfile
 
-# Personalización del admin de usuarios si es necesario
+
+class UserProfileInline(admin.StackedInline):
+    model = UserProfile
+    can_delete = False
+    verbose_name_plural = 'Perfil'
+    fields = ['modo_preferido', 'no_preguntar_modo']
+
+
+class UserAdmin(BaseUserAdmin):
+    inlines = (UserProfileInline,)
+
+
+# Re-register UserAdmin
+admin.site.unregister(User)
+admin.site.register(User, UserAdmin)
+
+
+@admin.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = ['user', 'modo_preferido', 'no_preguntar_modo']
+    list_filter = ['modo_preferido', 'no_preguntar_modo']
+    search_fields = ['user__username', 'user__email']

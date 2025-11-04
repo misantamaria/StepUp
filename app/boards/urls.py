@@ -8,6 +8,11 @@ urlpatterns = [
     # Ruta principal
     path('', views.home, name='home'),
     
+    # Gestión de modo
+    path('seleccionar-modo/', views.seleccionar_modo, name='seleccionar_modo'),
+    path('cambiar-modo/', views.cambiar_modo, name='cambiar_modo'),
+    path('restablecer-preferencia/', views.restablecer_preferencia_modo, name='restablecer_preferencia'),
+    
     # Rutas para alumnos
     path('alumno/', views.dashboard_alumno, name='dashboard_alumno'),
     path('alumno/test/<int:test_id>/iniciar/', views.iniciar_test, name='iniciar_test'),

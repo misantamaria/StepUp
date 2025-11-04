@@ -73,6 +73,7 @@ TEMPLATES = [
                 'django.template.context_processors.media',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'stepup_config.settings.theme_context',  # Contexto de tema
             ],
         },
     },
@@ -161,3 +162,47 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'mi.santamaria@upm.es')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'mi.santamaria@upm.es')
 SERVER_EMAIL = os.getenv('SERVER_EMAIL', 'mi.santamaria@upm.es')
+
+
+# ==================== CONFIGURACIÓN DE TEMA Y COLORES ====================
+# Paleta de colores basada en la guía de estilo de ETSISI-UPM
+
+THEME_COLORS = {
+    # Colores principales (azules ETSISI)
+    'primary': '#003366',           # Azul oscuro principal (antes era #003d6b)
+    'primary_medium': '#005B99',    # Azul medio
+    'primary_light': '#0077c8',     # Azul claro
+    
+    # Colores de texto
+    'text_active': '#787878',       # Texto activo (gris medio)
+    'text_inactive': '#999999',     # Texto inactivo (gris claro)
+    
+    # Colores de fondo
+    'bg_normal': '#FFFFFF',         # Fondo normal (blanco)
+    'bg_inactive_light': '#A49999', # Fondo inactivo claro (gris)
+    'bg_medium': '#005B99',         # Fondo azul medio
+    'bg_dark': '#003366',           # Fondo azul oscuro
+    
+    # Colores de estado
+    'success': '#28a745',           # Verde para éxito
+    'warning': '#ffc107',           # Amarillo para advertencia
+    'danger': '#dc3545',            # Rojo para peligro/error
+    'info': '#17a2b8',              # Cyan para información
+    
+    # Colores de botones
+    'btn_inactive_text': '#626262', # Texto botón inactivo
+    'btn_inactive_bg': '#678CA6',   # Fondo botón inactivo
+}
+
+# Configuración de tipografía
+THEME_TYPOGRAPHY = {
+    'font_family': 'Oswald-Regular.ttf',  # Fuente principal
+    'font_size_base': 64,                  # Tamaño base
+}
+
+# Hacer los colores disponibles en templates
+def theme_context(request):
+    return {
+        'THEME_COLORS': THEME_COLORS,
+        'THEME_TYPOGRAPHY': THEME_TYPOGRAPHY,
+    }

@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}Seleccionar Modo - StepUp{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 600px; margin: 4rem auto;">
+    <h2 style="color: {{ THEME_COLORS.primary }}; text-align: center; margin-bottom: 2rem;">Selecciona tu modo de trabajo</h2>
+    
+    {% if messages %}
+    <div style="margin-bottom: 1rem;">
+        {% for message in messages %}
+        <div style="padding: 1rem; background: {% if message.tags == 'error' %}#fee; border-left: 4px solid #c00{% else %}#efe; border-left: 4px solid #0c0{% endif %}; margin-bottom: 0.5rem;">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <form method="post" action="{% url 'boards:seleccionar_modo' %}" style="display: flex; flex-direction: column; gap: 1.5rem;">
+        {% csrf_token %}
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <!-- Modo Alumno -->
+            <label for="modo_alumno" style="cursor: pointer;">
+                <input type="radio" name="modo" value="alumno" id="modo_alumno" checked style="display: none;">
+                <div class="modo-card" data-modo="alumno" style="
+                    border: 3px solid #ddd;
+                    border-radius: 12px;
+                    padding: 2rem 1rem;
+                    text-align: center;
+                    transition: all 0.3s;
+                    background: white;
+                ">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">📚</div>
+                    <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 0.5rem;">Modo Alumno</h3>
+                    <p style="color: {{ THEME_COLORS.text_active }}; font-size: 0.9rem; margin: 0;">Realizar tests y ver mi progreso</p>
+                </div>
+            </label>
+            
+            <!-- Modo Profesor -->
+            <label for="modo_profesor" style="cursor: pointer;">
+                <input type="radio" name="modo" value="profesor" id="modo_profesor" style="display: none;">
+                <div class="modo-card" data-modo="profesor" style="
+                    border: 3px solid #ddd;
+                    border-radius: 12px;
+                    padding: 2rem 1rem;
+                    text-align: center;
+                    transition: all 0.3s;
+                    background: white;
+                ">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🎓</div>
+                    <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 0.5rem;">Modo Profesor</h3>
+                    <p style="color: {{ THEME_COLORS.text_active }}; font-size: 0.9rem; margin: 0;">Gestionar tests y ver estadísticas</p>
+                </div>
+            </label>
+        </div>
+        
+        <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px;">
+            <label for="no_preguntar" style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; margin: 0;">
+                <input type="checkbox" name="no_preguntar" id="no_preguntar" style="width: auto; margin: 0;">
+                <span style="color: #666; font-size: 0.9rem;">No volver a preguntar (puedes cambiar más tarde)</span>
+            </label>
+        </div>
+        
+        <button type="submit" style="
+            background: linear-gradient(135deg, {{ THEME_COLORS.primary }} 0%, {{ THEME_COLORS.bg_medium }} 100%);
+            padding: 1rem;
+            font-size: 1.1rem;
+        ">
+            Continuar
+        </button>
+    </form>
+</div>
+
+<style>
+    .modo-card {
+        position: relative;
+    }
+    
+    input[type="radio"]:checked + .modo-card {
+        border-color: {{ THEME_COLORS.primary }} !important;
+        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%) !important;
+        transform: scale(1.05);
+        box-shadow: 0 8px 20px rgba(0, 61, 107, 0.2);
+    }
+    
+    .modo-card:hover {
+        border-color: {{ THEME_COLORS.bg_medium }};
+        transform: scale(1.02);
+    }
+</style>
+
+<script>
+    // Mejorar la interactividad de la selección
+    document.querySelectorAll('.modo-card').forEach(card => {
+        card.addEventListener('click', function(e) {
+            e.preventDefault(); // Prevenir doble submit
+            const modo = this.dataset.modo;
+            const radioBtn = document.getElementById('modo_' + modo);
+            
+            // Marcar el radio button
+            radioBtn.checked = true;
+            console.log('Modo seleccionado:', modo, 'Radio checked:', radioBtn.checked);
+            
+            // Actualizar estilos de todas las cards
+            document.querySelectorAll('.modo-card').forEach(c => {
+                c.style.borderColor = '#ddd';
+                c.style.background = 'white';
+                c.style.transform = 'scale(1)';
+                c.style.boxShadow = 'none';
+            });
+            
+            // Aplicar estilos a la card seleccionada
+            this.style.borderColor = '{{ THEME_COLORS.primary }}';
+            this.style.background = 'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)';
+            this.style.transform = 'scale(1.05)';
+            this.style.boxShadow = '0 8px 20px rgba(0, 61, 107, 0.2)';
+        });
+    });
+    
+    // Seleccionar el primer card por defecto al cargar
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelector('[data-modo="alumno"]').click();
+    });
+    
+    // Debug: verificar valores antes de enviar
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const modoSeleccionado = document.querySelector('input[name="modo"]:checked');
+        console.log('=== ENVIANDO FORMULARIO ===');
+        console.log('Modo seleccionado:', modoSeleccionado ? modoSeleccionado.value : 'NINGUNO');
+        console.log('No preguntar:', document.getElementById('no_preguntar').checked);
+        console.log('URL destino:', this.action);
+        console.log('Método:', this.method);
+        
+        if (!modoSeleccionado) {
+            e.preventDefault();
+            alert('Por favor selecciona un modo');
+            return false;
+        }
+        
+        // Preservar logs durante 5 segundos antes de redirigir
+        console.log('⏳ Esperando redirección...');
+    });
+    
+    // Capturar errores de red
+    window.addEventListener('error', function(e) {
+        console.error('❌ Error capturado:', e.message, e);
+    });
+    
+    // Preservar logs
+    console.log('%c 🔍 Logs preservados - No se borrarán', 'background: #222; color: #bada55; font-size: 16px; padding: 5px;');
+</script>
+{% endblock %}

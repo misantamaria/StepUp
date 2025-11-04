@@ -24,8 +24,8 @@ CREATE TABLE Pregunta (
     Pregunta_ID INT PRIMARY KEY,
     Tema VARCHAR(100),
     Enunciado TEXT,
-    Dificultad ENUM('Fácil', 'Media', 'Difícil'),
-    Puntuación INT
+    Dificultad ENUM('Facil', 'Media', 'Dificil'),
+    Puntuacion INT
 );
 
 CREATE TABLE Profesor (
@@ -47,7 +47,7 @@ CREATE TABLE Juega (
     Alumno_ID INT,
     Tema_ID VARCHAR(100),
     Fecha DATE,
-    Puntuación INT,
+    Puntuacion INT,
     Intento INT,
     PRIMARY KEY (Alumno_ID, Tema_ID, Intento),
     FOREIGN KEY (Alumno_ID) REFERENCES Alumno(Alumno_ID),
@@ -59,7 +59,7 @@ CREATE TABLE Responde (
     Pregunta_ID INT,
     Fecha DATE,
     Hora TIME,
-    Puntuación INT,
+    Puntuacion INT,
     PRIMARY KEY (Alumno_ID, Pregunta_ID, Fecha, Hora),
     FOREIGN KEY (Alumno_ID) REFERENCES Alumno(Alumno_ID),
     FOREIGN KEY (Pregunta_ID) REFERENCES Pregunta(Pregunta_ID)
@@ -78,7 +78,7 @@ CREATE TABLE Crea (
 CREATE TABLE Otorga (
     Logro_ID INT,
     Tema_ID VARCHAR(100),
-    Puntuación_Máxima INT,
+    Puntuacion_Maxima INT,
     PRIMARY KEY (Logro_ID, Tema_ID),
     FOREIGN KEY (Logro_ID) REFERENCES Logro(Logro_ID),
     FOREIGN KEY (Tema_ID) REFERENCES Tema(Tema_ID)
@@ -99,3 +99,27 @@ CREATE TABLE Contiene (
     FOREIGN KEY (Tema_ID) REFERENCES Tema(Tema_ID),
     FOREIGN KEY (Pregunta_ID) REFERENCES Pregunta(Pregunta_ID)
 );
+
+-- Insertar datos de ejemplo
+INSERT INTO Tema (Tema_ID) VALUES 
+    ('Tema pruebas aplicacion 1'),
+    ('Tema pruebas aplicacion 2');
+
+INSERT INTO Pregunta (Pregunta_ID, Tema, Enunciado, Dificultad, Puntuacion) VALUES
+    (1, 'Tema pruebas aplicacion 1', '¿2+2?', 'Facil', 1),
+    (2, 'Tema pruebas aplicacion 2', 'Empareja correctamente', 'Media', 2);
+
+INSERT INTO Respuesta (Respuesta_ID, Pregunta_ID, Solucion, Contenido) VALUES
+    -- Respuestas para pregunta 1 (¿2+2?)
+    (1, 1, 'Correcta', '4'),
+    (2, 1, 'Incorrecta', '5'),
+    (3, 1, 'Incorrecta', '7'),
+    (4, 1, 'Incorrecta', 'Viva er Betih'),
+    -- Respuestas para pregunta 2 (Empareja correctamente)
+    (1, 2, 'Correcta', '2+2 -> 4'),
+    (2, 2, 'Correcta', '3+3 -> 6'),
+    (3, 2, 'Correcta', '5+5 -> 10');
+
+INSERT INTO Contiene (Tema_ID, Pregunta_ID) VALUES
+    ('Tema pruebas aplicacion 1', 1),
+    ('Tema pruebas aplicacion 2', 2);

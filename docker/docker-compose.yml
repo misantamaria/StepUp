@@ -13,7 +13,7 @@ services:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
-      - ../Gestion/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ../Gestion/dump_PIE_ED.sql:/docker-entrypoint-initdb.d/01-dump.sql:ro
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]

@@ -16,9 +16,7 @@ db.sqlite3-journal
 *.sqlite3
 
 # Dumps de base de datos con datos reales - NO versionar
-Gestion/dump_*.sql
-Gestion/*.sql
-!Gestion/schema.sql
+*.sql
 
 # Docker - Volúmenes y datos sensibles
 mysql_data/

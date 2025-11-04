@@ -18,9 +18,18 @@ RUN if [ -f requirements.txt ]; then pip install --no-cache-dir -r requirements.
 # Copy project
 COPY app/ /app/
 
+# Create user with UID and GID from environment variables
+ARG UID=1000
+ARG GID=1000
+RUN groupadd -g ${GID} appuser && \
+    useradd -m -u ${UID} -g ${GID} appuser && \
+    chown -R ${UID}:${GID} /app
+
 # Copy entrypoint
 COPY docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
+USER appuser
+
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:${DJANGO_PORT:-8000} ${DJANGO_WSGI_MODULE:-stepup_config.wsgi:application}"]
+CMD ["sh", "-c", "gunicorn --workers ${MAX_USERS:-4} --bind 0.0.0.0:${DJANGO_PORT:-8000} ${DJANGO_WSGI_MODULE:-stepup_config.wsgi:application}"]

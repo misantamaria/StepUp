@@ -24,6 +24,9 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile
+      args:
+        - UID=${UID:-1000}
+        - GID=${GID:-1000}
     env_file:
       - ../app/.env
     ports:
@@ -34,6 +37,7 @@ services:
       - DJANGO_PORT=${DJANGO_PORT}
       - DJANGO_WSGI_MODULE=${DJANGO_WSGI_MODULE:-stepup_config.wsgi:application}
       - DB_HOST=db
+      - MAX_USERS=${MAX_USERS:-4}
     depends_on:
       db:
         condition: service_healthy

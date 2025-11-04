@@ -1,0 +1,62 @@
+"""
+Módulo de vistas de la aplicación boards.
+
+Organización:
+- home.py: Navegación principal y gestión de modos
+- alumno.py: Vistas del modo alumno
+- profesor.py: Vistas del modo profesor  
+- decorators.py: Decoradores de acceso y permisos
+"""
+
+# Importar vistas de navegación
+from .home import (
+    home,
+    seleccionar_modo,
+    cambiar_modo,
+    restablecer_preferencia_modo,
+)
+
+# Importar vistas de alumno
+from .alumno import (
+    dashboard_alumno,
+    iniciar_test,
+    realizar_test,
+    resultado_test,
+)
+
+# Importar vistas de profesor
+from .profesor import (
+    dashboard_profesor,
+    estadisticas_alumno,
+)
+
+# Importar decoradores
+from .decorators import (
+    es_alumno,
+    es_profesor,
+    modo_requerido,
+)
+
+# Exportar todo para que sea accesible desde boards.views
+__all__ = [
+    # Navegación
+    'home',
+    'seleccionar_modo',
+    'cambiar_modo',
+    'restablecer_preferencia_modo',
+    
+    # Alumno
+    'dashboard_alumno',
+    'iniciar_test',
+    'realizar_test',
+    'resultado_test',
+    
+    # Profesor
+    'dashboard_profesor',
+    'estadisticas_alumno',
+    
+    # Decoradores
+    'es_alumno',
+    'es_profesor',
+    'modo_requerido',
+]

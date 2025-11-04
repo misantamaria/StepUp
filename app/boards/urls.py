@@ -22,6 +22,7 @@ urlpatterns = [
     # Rutas para profesores
     path('profesor/', views.dashboard_profesor, name='dashboard_profesor'),
     path('profesor/alumno/<int:alumno_id>/estadisticas/', views.estadisticas_alumno, name='estadisticas_alumno'),
+    path('profesor/test/<int:test_id>/toggle-visibility/', views.toggle_test_visibility, name='toggle_test_visibility'),
     
     # Rutas para gestión de preguntas desde BDD
     path('profesor/preguntas/', views_bdd.listar_preguntas, name='listar_preguntas_bdd'),

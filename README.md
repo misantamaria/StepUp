@@ -4,7 +4,7 @@ Repositorio de aplicaciones educativas basadas en Django para la Universidad Pol
 
 ## Proyectos incluidos
 
-### 📚 StepUp - Estructuras de Datos (`app/`)
+###  StepUp - Estructuras de Datos (`app/`)
 Aplicación principal para el Proyecto de Innovación Educativa (PIE) de la asignatura Estructuras de Datos.
 
 **Características:**
@@ -50,7 +50,7 @@ Abre [http://127.0.0.1:8000](http://127.0.0.1:8000)
 
 ```
 StepUp/
-├── app/                          # 📚 StepUp - Estructuras de Datos (PRINCIPAL)
+├── app/                          #  StepUp - Estructuras de Datos (PRINCIPAL)
 │   ├── stepup_config/            # Configuración Django
 │   ├── boards/                   # App de tableros
 │   ├── users/                    # App de usuarios

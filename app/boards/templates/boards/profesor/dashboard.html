@@ -5,7 +5,7 @@
 {% block content %}
 <div class="card">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-        <h2 style="color: {{ THEME_COLORS.primary }}; margin: 0;">🎓 Panel del Profesor</h2>
+        <h2 style="color: {{ THEME_COLORS.primary }}; margin: 0;"> Panel del Profesor</h2>
     </div>
 
     <!-- Resumen rápido -->
@@ -29,24 +29,24 @@
         <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1rem; font-size: 1.1rem;">🔧 Gestión Rápida</h3>
         <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
             <a href="/admin/boards/tema/" style="background: {{ THEME_COLORS.primary }}; color: white; padding: 0.6rem 1.2rem; text-decoration: none; border-radius: 6px; font-weight: 500; font-size: 0.9rem;">
-                📚 Gestionar Temas
+                 Gestionar Temas
             </a>
             <a href="/admin/boards/pregunta/" style="background: {{ THEME_COLORS.bg_medium }}; color: white; padding: 0.6rem 1.2rem; text-decoration: none; border-radius: 6px; font-weight: 500; font-size: 0.9rem;">
-                ❓ Gestionar Preguntas
+                 Gestionar Preguntas
             </a>
             <a href="/admin/boards/test/" style="background: {{ THEME_COLORS.primary_light }}; color: white; padding: 0.6rem 1.2rem; text-decoration: none; border-radius: 6px; font-weight: 500; font-size: 0.9rem;">
-                📝 Gestionar Tests
+                 Gestionar Tests
             </a>
             <a href="/admin/boards/progresotema/" style="background: {{ THEME_COLORS.success }}; color: white; padding: 0.6rem 1.2rem; text-decoration: none; border-radius: 6px; font-weight: 500; font-size: 0.9rem;">
-                📊 Ver Progreso Alumnos
+                 Ver Progreso Alumnos
             </a>
             <a href="#estadisticas" onclick="toggleEstadisticas(); return false;" style="background: {{ THEME_COLORS.warning }}; color: white; padding: 0.6rem 1.2rem; text-decoration: none; border-radius: 6px; font-weight: 500; font-size: 0.9rem;">
-                📈 Ver Estadísticas Detalladas
+                 Ver Estadísticas Detalladas
             </a>
         </div>
     </div>
 
-    <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem; font-size: 1.2rem;">📚 Tests por Tema</h3>
+    <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem; font-size: 1.2rem;"> Tests por Tema</h3>
 
     {% for item in temas_con_tests %}
     <div style="margin-bottom: 2rem; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
@@ -67,7 +67,7 @@
                 <table style="margin: 0;">
                     <thead>
                         <tr>
-                            <th style="width: 60px; text-align: center;">Visible</th>
+                            <th style="width: 80px; text-align: center;">Visible</th>
                             <th>Test</th>
                             <th style="width: 100px; text-align: center;">Preguntas</th>
                             <th style="width: 100px; text-align: center;">Tiempo</th>
@@ -77,13 +77,15 @@
                     </thead>
                     <tbody>
                         {% for test in item.tests %}
-                        <tr style="{% if test.visible_alumnos %}background: #e3f2fd;{% endif %}">
+                        <tr id="test-row-{{ test.id }}" style="{% if test.visible_alumnos %}background: #e3f2fd;{% endif %}">
                             <td style="text-align: center;">
-                                {% if test.visible_alumnos %}
-                                    <span style="font-size: 1.3rem; color: {{ THEME_COLORS.primary_light }};" title="Visible para alumnos">👁️</span>
-                                {% else %}
-                                    <span style="font-size: 1.3rem; color: {{ THEME_COLORS.text_inactive }}; opacity: 0.4;" title="Oculto para alumnos">👁️‍��️</span>
-                                {% endif %}
+                                <label style="display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                                    <input type="checkbox" 
+                                           class="visibility-checkbox"
+                                           data-test-id="{{ test.id }}"
+                                           {% if test.visible_alumnos %}checked{% endif %}
+                                           style="width: 20px; height: 20px; cursor: pointer; accent-color: {{ THEME_COLORS.primary }};">
+                                </label>
                             </td>
                             <td>
                                 <strong style="{% if test.visible_alumnos %}color: {{ THEME_COLORS.primary_light }};{% else %}color: {{ THEME_COLORS.text_inactive }};{% endif %}">
@@ -125,7 +127,7 @@
 
 <!-- Sección de estadísticas detalladas (colapsable) -->
 <div id="estadisticas" class="card" style="display: none;">
-    <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem;">📊 Estadísticas Detalladas</h3>
+    <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem;"> Estadísticas Detalladas</h3>
 
     <h4 style="color: {{ THEME_COLORS.primary }}; margin-top: 2rem; margin-bottom: 1rem;">📋 Últimos Intentos</h4>
     <table>
@@ -191,6 +193,63 @@ function toggleEstadisticas() {
 // Si hay hash en la URL, mostrar estadísticas
 if (window.location.hash === '#estadisticas') {
     document.getElementById('estadisticas').style.display = 'block';
+}
+
+// Manejar cambios de visibilidad con AJAX
+document.addEventListener('DOMContentLoaded', function() {
+    const checkboxes = document.querySelectorAll('.visibility-checkbox');
+    
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', async function() {
+            const testId = this.dataset.testId;
+            const row = document.getElementById(`test-row-${testId}`);
+            const testName = row.querySelector('strong');
+            
+            try {
+                const response = await fetch(`/boards/profesor/test/${testId}/toggle-visibility/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'Content-Type': 'application/json',
+                    },
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Actualizar el estilo de la fila
+                    if (data.visible) {
+                        row.style.background = '#e3f2fd';
+                        testName.style.color = '{{ THEME_COLORS.primary_light }}';
+                    } else {
+                        row.style.background = '';
+                        testName.style.color = '{{ THEME_COLORS.text_inactive }}';
+                    }
+                }
+            } catch (error) {
+                console.error('Error al cambiar visibilidad:', error);
+                // Revertir el checkbox en caso de error
+                this.checked = !this.checked;
+                alert('Error al cambiar la visibilidad del test. Por favor, intenta de nuevo.');
+            }
+        });
+    });
+});
+
+// Función para obtener el CSRF token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
 }
 </script>
 

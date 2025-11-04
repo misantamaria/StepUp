@@ -28,6 +28,7 @@ from .alumno import (
 from .profesor import (
     dashboard_profesor,
     estadisticas_alumno,
+    toggle_test_visibility,
 )
 
 # Importar decoradores
@@ -54,6 +55,7 @@ __all__ = [
     # Profesor
     'dashboard_profesor',
     'estadisticas_alumno',
+    'toggle_test_visibility',
     
     # Decoradores
     'es_alumno',

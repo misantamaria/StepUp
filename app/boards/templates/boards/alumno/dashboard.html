@@ -4,16 +4,17 @@
 
 {% block content %}
 <div class="card">
-    <h2 style="color: #667eea; margin-bottom: 1rem;">📚 Mis Tests - Alumno</h2>
+    <h2 style="color: #667eea; margin-bottom: 1rem;"> Mis Tests - Alumno</h2>
     
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1.5rem; border-radius: 8px;">
-            <div style="font-size: 2rem; font-weight: bold;">{{ total_intentos }}</div>
-            <div>Tests Realizados</div>
+        <!-- Tarjetas de resumen -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+        <div style="background: linear-gradient(135deg, {{ THEME_COLORS.primary }} 0%, {{ THEME_COLORS.bg_medium }} 100%); color: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+            <div style="font-size: 3rem; font-weight: bold; margin-bottom: 0.5rem;">{{ total_intentos }}</div>
+            <div style="font-size: 1.1rem; opacity: 0.9;">Tests Realizados</div>
         </div>
-        <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 1.5rem; border-radius: 8px;">
-            <div style="font-size: 2rem; font-weight: bold;">{{ promedio_puntuacion|floatformat:1 }}%</div>
-            <div>Promedio</div>
+        <div style="background: linear-gradient(135deg, {% if promedio_puntuacion >= 70 %}#27ae60{% elif promedio_puntuacion >= 50 %}#f39c12{% else %}#e74c3c{% endif %} 0%, {% if promedio_puntuacion >= 70 %}#2ecc71{% elif promedio_puntuacion >= 50 %}#f1c40f{% else %}#e67e22{% endif %} 100%); color: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+            <div style="font-size: 3rem; font-weight: bold; margin-bottom: 0.5rem;">{{ promedio_puntuacion|floatformat:1 }}%</div>
+            <div style="font-size: 1.1rem; opacity: 0.9;">Promedio</div>
         </div>
     </div>
 
@@ -22,18 +23,20 @@
         {% for item in tests_por_tema %}
         <div style="margin-bottom: 2rem;">
             <!-- Encabezado del tema con progreso -->
-            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1rem 1.5rem; border-radius: 8px 8px 0 0; display: flex; justify-content: space-between; align-items: center;">
-                <h4 style="margin: 0; font-size: 1.1rem;">📚 {{ item.tema.tema_id }}</h4>
+            <div style="background: linear-gradient(135deg, {{ THEME_COLORS.primary }} 0%, {{ THEME_COLORS.bg_medium }} 100%); color: white; padding: 1rem 1.5rem; border-radius: 8px 8px 0 0; display: flex; justify-content: space-between; align-items: center;">
+                <h4 style="margin: 0; font-size: 1.1rem;"> {{ item.tema.tema_id }}</h4>
                 <div style="display: flex; align-items: center; gap: 1rem;">
-                    <span style="font-size: 0.9rem; opacity: 0.9;">Progreso: {{ item.progreso.porcentaje_completado|floatformat:0 }}%</span>
-                    <div style="background: rgba(255,255,255,0.2); border-radius: 10px; width: 100px; height: 8px; overflow: hidden;">
-                        <div style="background: white; height: 100%; width: {{ item.progreso.porcentaje_completado }}%;"></div>
+                    <span style="font-size: 0.9rem; opacity: 0.9;">{{ item.progreso.preguntas_correctas }}/{{ item.progreso.total_preguntas }} correctas</span>
+                    <div style="display: flex; gap: 3px; align-items: center;">
+                        {% for i in item.progreso.total_preguntas|make_list %}
+                            <div style="width: 8px; height: 12px; border-radius: 2px; background: {% if forloop.counter <= item.progreso.preguntas_correctas %}linear-gradient(180deg, #27ae60 0%, #2ecc71 100%){% else %}rgba(255,255,255,0.3){% endif %}; transition: all 0.3s ease;"></div>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
             
             <!-- Tests del tema -->
-            <div style="border: 2px solid #667eea; border-top: none; border-radius: 0 0 8px 8px; padding: 1rem;">
+            <div style="border: 2px solid {{ THEME_COLORS.primary }}; border-top: none; border-radius: 0 0 8px 8px; padding: 1rem;">
                 {% if item.tests %}
                     <div style="display: grid; gap: 0.75rem;">
                         {% for test in item.tests %}
@@ -43,7 +46,7 @@
                                 {% if test.descripcion %}
                                 <p style="margin: 0.5rem 0 0 0; color: #666; font-size: 0.9rem;">{{ test.descripcion }}</p>
                                 {% endif %}
-                                <small style="color: #999; margin-top: 0.25rem; display: block;">⏱️ {{ test.tiempo_limite }} minutos | 📝 {{ test.total_preguntas }} preguntas</small>
+                                <small style="color: #999; margin-top: 0.25rem; display: block;">⏱️ {{ test.tiempo_limite }} minutos |  {{ test.total_preguntas }} preguntas</small>
                             </div>
                             <a href="{% url 'boards:iniciar_test' test.id %}" 
                                style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 6px; font-weight: 600; white-space: nowrap;">

@@ -3,17 +3,20 @@ Vistas para el modo profesor: dashboard, estadísticas.
 """
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
 from .decorators import es_profesor
 from core.profesor.services import get_dashboard_data as profesor_dashboard_data, get_student_stats
+from boards.models import Test
 
 
 @login_required
 @user_passes_test(es_profesor, login_url='/')
 def dashboard_profesor(request):
     """Dashboard para profesores - estadísticas y gestión"""
-    print(f"📊 Accediendo a dashboard_profesor - Usuario: {request.user.username}")
+    print(f" Accediendo a dashboard_profesor - Usuario: {request.user.username}")
     context = profesor_dashboard_data()
-    print(f"📊 Context generado: {list(context.keys())}")
+    print(f" Context generado: {list(context.keys())}")
     return render(request, 'boards/profesor/dashboard.html', context)
 
 
@@ -26,3 +29,18 @@ def estadisticas_alumno(request, alumno_id):
     intentos, promedio = get_student_stats(alumno)
     context = {'alumno': alumno, 'intentos': intentos, 'promedio': promedio}
     return render(request, 'boards/profesor/estadisticas_alumno.html', context)
+
+
+@login_required
+@user_passes_test(es_profesor, login_url='/')
+@require_POST
+def toggle_test_visibility(request, test_id):
+    """Cambia la visibilidad de un test (AJAX)"""
+    test = get_object_or_404(Test, id=test_id)
+    test.visible_alumnos = not test.visible_alumnos
+    test.save()
+    
+    return JsonResponse({
+        'success': True,
+        'visible': test.visible_alumnos
+    })

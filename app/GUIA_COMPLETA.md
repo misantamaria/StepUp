@@ -183,7 +183,7 @@ Abre tu navegador en: **http://127.0.0.1:8000**
 
 ---
 
-### 🎓 COMO ALUMNO
+###  COMO ALUMNO
 
 **Credenciales:** `alumno` / `alumno`
 
@@ -371,7 +371,7 @@ Edita `boards/models.py` y añade nuevos tipos en `TIPO_CHOICES`
 
 ---
 
-## ❓ SOLUCIÓN DE PROBLEMAS
+##  SOLUCIÓN DE PROBLEMAS
 
 ### Error: No module named 'django'
 ```powershell
@@ -412,7 +412,7 @@ py manage.py migrate
 
 ---
 
-## 📊 URLs IMPORTANTES
+##  URLs IMPORTANTES
 
 - **Inicio:** http://127.0.0.1:8000
 - **Login:** http://127.0.0.1:8000/accounts/login/
@@ -421,7 +421,7 @@ py manage.py migrate
 
 ---
 
-## 🎓 RESUMEN RÁPIDO
+##  RESUMEN RÁPIDO
 
 **4 tipos de usuarios con diferentes permisos:**
 - `alumno` / `alumno` → Hace tests (sin acceso admin)

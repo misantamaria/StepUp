@@ -1,6 +1,6 @@
 # 🔐 SISTEMA DE PERMISOS - STEPUP
 
-## 📊 Resumen de Roles y Permisos
+##  Resumen de Roles y Permisos
 
 | Rol | Usuario | Contraseña | Permisos |
 |-----|---------|------------|----------|
@@ -13,7 +13,7 @@
 
 ## 🎯 Permisos Detallados
 
-### 👨‍🎓 ALUMNO
+### 👨‍ ALUMNO
 **Grupo Django**: `Alumnos`  
 **is_staff**: `False`  
 **is_superuser**: `False`

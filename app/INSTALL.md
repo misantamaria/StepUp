@@ -145,7 +145,7 @@ py manage.py initusers
 
 ---
 
-## 📚 Siguientes pasos
+##  Siguientes pasos
 
 1. **Explorar el admin**: http://127.0.0.1:8000/admin/
 2. **Crear usuarios**: http://127.0.0.1:8000/users/create-user/

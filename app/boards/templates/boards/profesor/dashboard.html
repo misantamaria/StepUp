@@ -206,7 +206,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const testName = row.querySelector('strong');
             
             try {
-                const response = await fetch(`/boards/profesor/test/${testId}/toggle-visibility/`, {
+                const response = await fetch(`/profesor/test/${testId}/toggle-visibility/`, {
                     method: 'POST',
                     headers: {
                         'X-CSRFToken': getCookie('csrftoken'),

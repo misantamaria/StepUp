@@ -25,19 +25,3 @@ StepUp/
 |── schema.sql
 └── README.md                     # Este archivo
 ```
-
-## Tests de preguntas
-
-Los archivos XML de preguntas se encuentran en `app/tests/preguntas/`:
-- Formato compatible con Moodle XML
-- Importables mediante comandos de gestión (implementación futura)
-- Organizados por tema y dificultad
-
-## Recursos adicionales
-
-- **Corrector JUnit ED**: Herramientas para corrección automática de prácticas Java (`junit_ED/`)
-- **Gestión**: Scripts SQL y herramientas de gestión (`Gestion/`)
-
-## Licencia
-
-Proyecto educativo - Universidad Politécnica de Madrid

@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load custom_filters %}
 
 {% block title %}{{ nivel_nombre }} - {{ tema.tema_id }} - StepUp{% endblock %}
 
@@ -9,7 +10,7 @@
             ← Volver a {{ tema.tema_id }}
         </a>
         
-        <div style="background: linear-gradient(135deg, {{ nivel_color }} 0%, {{ nivel_color }}dd 100%); color: white; padding: 2rem; border-radius: 12px; margin-bottom: 2rem;">
+        <div style="background: linear-gradient(135deg, {{ nivel_color }} 0%, {{ nivel_color_light }} 100%); color: white; padding: 2rem; border-radius: 12px; margin-bottom: 2rem;">
             <h2 style="margin: 0 0 0.5rem 0; font-size: 1.8rem; display: flex; align-items: center; gap: 0.5rem;">
                 <span>{{ nivel_emoji }}</span>
                 <span>{{ nivel_nombre }}</span>
@@ -45,8 +46,17 @@
                                 <div style="display: flex; align-items: center; gap: 0.5rem;">
                                     <span style="font-size: 1.1rem;">🎯</span>
                                     <span style="font-size: 0.9rem; color: {% if item.mejor_puntuacion >= 70 %}#27ae60{% else %}#f39c12{% endif %}; font-weight: bold;">
-                                        {{ item.mejor_puntuacion|floatformat:1 }}%
+                                        {{ item.mejor_puntuacion|nota_sobre_10 }}/10
                                     </span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem; color: #666;">
+                                    <span style="font-size: 1.1rem;">🔄</span>
+                                    <span style="font-size: 0.9rem;"><strong>{{ item.total_intentos }}</strong> intento{{ item.total_intentos|pluralize:"s" }}</span>
+                                </div>
+                            {% else %}
+                                <div style="display: flex; align-items: center; gap: 0.5rem; color: #999;">
+                                    <span style="font-size: 1.1rem;">⭐</span>
+                                    <span style="font-size: 0.9rem;">Sin completar</span>
                                 </div>
                             {% endif %}
                         </div>
@@ -64,7 +74,7 @@
                         {% if item.disponible %}
                             <a href="{% url 'boards:iniciar_test' item.test.id %}" 
                                class="btn-iniciar-test"
-                               style="background: linear-gradient(135deg, {{ nivel_color }} 0%, {{ nivel_color }}dd 100%); 
+                               style="background: linear-gradient(135deg, {{ nivel_color }} 0%, {{ nivel_color_light }} 100%); 
                                       color: white; 
                                       padding: 1rem 2rem; 
                                       text-decoration: none; 

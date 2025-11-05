@@ -73,11 +73,26 @@ def get_dashboard_data(user) -> Dict[str, Any]:
         .aggregate(Avg('puntuacion'))['puntuacion__avg'] or 0
     )
     
+    # Convertir promedio a nota del 1 al 10
+    promedio_nota = (promedio_puntuacion / 10) if promedio_puntuacion > 0 else 0
+    
+    # Calcular progreso como % de tests completados
+    tests_disponibles_total = Test.objects.filter(activo=True, visible_alumnos=True).count()
+    tests_completados = IntentTest.objects.filter(
+        alumno=user,
+        completado=True
+    ).values('test').distinct().count()
+    progreso_tests = (tests_completados / tests_disponibles_total * 100) if tests_disponibles_total > 0 else 0
+    
     return {
         'tests_por_tema': tests_por_tema,
         'intentos_previos': intentos_previos,
         'total_intentos': total_intentos,
         'promedio_puntuacion': promedio_puntuacion,
+        'promedio_nota': promedio_nota,
+        'progreso_tests': progreso_tests,
+        'tests_completados': tests_completados,
+        'tests_disponibles_total': tests_disponibles_total,
     }
 
 

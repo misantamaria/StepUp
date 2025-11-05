@@ -24,7 +24,7 @@
         <a href="{% if niveles_info.facil.disponible %}{% url 'boards:tests_nivel' tema.tema_id 'facil' %}{% else %}#{% endif %}" 
            class="nivel-card {% if not niveles_info.facil.disponible %}bloqueado{% endif %}">
             <div class="nivel-content"
-                 style="background: {% if niveles_info.facil.disponible %}linear-gradient(135deg, #27ae60 0%, #2ecc71 100%){% else %}linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%){% endif %}; 
+                 style="background: {% if niveles_info.facil.disponible %}linear-gradient(135deg, #2c5282 0%, #3b69b0 100%){% else %}linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%){% endif %}; 
                         color: white; 
                         padding: 2rem 1.5rem; 
                         border-radius: 12px; 
@@ -57,7 +57,7 @@
         <a href="{% if niveles_info.intermedio.disponible %}{% url 'boards:tests_nivel' tema.tema_id 'intermedio' %}{% else %}#{% endif %}" 
            class="nivel-card {% if not niveles_info.intermedio.disponible %}bloqueado{% endif %}">
             <div class="nivel-content"
-                 style="background: {% if niveles_info.intermedio.disponible %}linear-gradient(135deg, #f39c12 0%, #f1c40f 100%){% else %}linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%){% endif %}; 
+                 style="background: {% if niveles_info.intermedio.disponible %}linear-gradient(135deg, #1a4d7a 0%, #2563a8 100%){% else %}linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%){% endif %}; 
                         color: white; 
                         padding: 2rem 1.5rem; 
                         border-radius: 12px; 
@@ -95,7 +95,7 @@
         <a href="{% if niveles_info.dificil.disponible %}{% url 'boards:tests_nivel' tema.tema_id 'dificil' %}{% else %}#{% endif %}" 
            class="nivel-card {% if not niveles_info.dificil.disponible %}bloqueado{% endif %}">
             <div class="nivel-content"
-                 style="background: {% if niveles_info.dificil.disponible %}linear-gradient(135deg, #e74c3c 0%, #c0392b 100%){% else %}linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%){% endif %}; 
+                 style="background: {% if niveles_info.dificil.disponible %}linear-gradient(135deg, #0f3057 0%, #1a4d7a 100%){% else %}linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%){% endif %}; 
                         color: white; 
                         padding: 2rem 1.5rem; 
                         border-radius: 12px; 

@@ -125,18 +125,26 @@ def tests_nivel(request, tema_id, nivel):
             completado=True
         ).order_by('-puntuacion').first()
         
+        # Calcular intentos del alumno en este test
+        total_intentos = IntentTest.objects.filter(
+            alumno=request.user,
+            test=test,
+            completado=True
+        ).count()
+        
         tests_data.append({
             'test': test,
             'disponible': disponible,
             'completado': mejor_intento is not None,
             'mejor_puntuacion': mejor_intento.puntuacion if mejor_intento else None,
+            'total_intentos': total_intentos,
         })
     
     # Información del nivel
     nivel_info = {
-        'facil': {'nombre': 'Fácil', 'emoji': '📗', 'color': '#27ae60'},
-        'intermedio': {'nombre': 'Intermedio', 'emoji': '📙', 'color': '#f39c12'},
-        'dificil': {'nombre': 'Difícil', 'emoji': '📕', 'color': '#e74c3c'},
+        'facil': {'nombre': 'Fácil', 'emoji': '📗', 'color': '#2c5282', 'color_light': '#3b69b0'},
+        'intermedio': {'nombre': 'Intermedio', 'emoji': '📙', 'color': '#1a4d7a', 'color_light': '#2563a8'},
+        'dificil': {'nombre': 'Difícil', 'emoji': '📕', 'color': '#0f3057', 'color_light': '#1a4d7a'},
     }
     
     context = {
@@ -145,6 +153,7 @@ def tests_nivel(request, tema_id, nivel):
         'nivel_nombre': nivel_info[nivel]['nombre'],
         'nivel_emoji': nivel_info[nivel]['emoji'],
         'nivel_color': nivel_info[nivel]['color'],
+        'nivel_color_light': nivel_info[nivel]['color_light'],
         'tests': tests_data,
     }
     

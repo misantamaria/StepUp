@@ -99,8 +99,8 @@ class Test(models.Model):
         verbose_name_plural = 'Tests'
     
     def __str__(self):
-        tema_str = f"{self.tema.tema_id} - " if self.tema else ""
-        return f"{tema_str}{self.nombre}"
+        tema_str = "{} - ".format(str(self.tema.tema_id)) if self.tema else ""
+        return "{}{}".format(tema_str, self.nombre)
     
     def total_preguntas(self):
         return self.preguntas.count()
@@ -185,7 +185,12 @@ class ProgresoTema(models.Model):
         verbose_name_plural = 'Progresos de Temas'
     
     def __str__(self):
-        return f"{self.alumno.username} - {self.tema.tema_id} ({self.porcentaje_completado:.0f}%)"
+        porcentaje = int(self.porcentaje_completado)
+        return "{} - {} ({}%)".format(
+            self.alumno.username,
+            str(self.tema.tema_id),
+            porcentaje
+        )
     
     def actualizar_progreso(self):
         """Actualiza el progreso del alumno en este tema"""

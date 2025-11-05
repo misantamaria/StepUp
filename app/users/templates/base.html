@@ -36,9 +36,17 @@
       color: white;
     }
     .brand img {
-      height: 45px;
+      height: 60px;
       width: auto;
       display: block;
+      background: linear-gradient(
+        135deg, {{ THEME_COLORS.logo_bg_overlay_start }} 0%, 
+        {{ THEME_COLORS.logo_bg_overlay_end }} 100%
+      );
+      padding: 0.6rem;
+      border-radius: 8px;
+      border: 1px solid {{ THEME_COLORS.logo_border }};
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     }
     .brand-title {
       font-size: 1.4rem;

@@ -183,6 +183,15 @@ THEME_COLORS = {
     'bg_medium': '#005B99',         # Fondo azul medio
     'bg_dark': '#003366',           # Fondo azul oscuro
     
+    # Colores para header con gradiente
+    'header_gradient_start': '#003d6b',  # Inicio del gradiente del header
+    'header_gradient_end': '#004a7f',    # Fin del gradiente del header
+    
+    # Colores para logo
+    'logo_bg_overlay_start': 'rgba(255,255,255,1)',   # Inicio gradiente logo (más opaco)
+    'logo_bg_overlay_end': 'rgba(255,255,255,0.6)',     # Fin gradiente logo (más opaco)
+    'logo_border': 'rgba(255,255,255,0.3)',             # Borde del logo (más visible)
+    
     # Colores de estado
     'success': '#28a745',           # Verde para éxito
     'warning': '#ffc107',           # Amarillo para advertencia

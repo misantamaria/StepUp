@@ -8,6 +8,12 @@ La aplicación tiene las siguientes herramientas:
 - Panel de administración Django
 - Base de datos inicial con MySQL
 
+
+## Requisitos
+- Python 3.11+
+- MySQL (o SQLite)
+- pip/venv
+  
 ## Estructura del repositorio
 
 ```

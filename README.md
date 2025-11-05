@@ -1,11 +1,6 @@
 # StepUp Code
 
-Repositorio de aplicaciones educativas basadas en Django para la Universidad Politécnica de Madrid.
-
-## Proyectos incluidos
-
-###  StepUp - Estructuras de Datos (`app/`)
-Aplicación principal para el Proyecto de Innovación Educativa (PIE) de la asignatura Estructuras de Datos.
+Repositorio GitHub para la aplicación [StepUP Code](https://www.youtube.com/watch?v=p-fRdRLUs44&feature=youtu.be), desarrollada dentro de un Proyecto de Innovación Educativa (PIE) para la realización de pruebas de tipo test en la asignatura Estructuras de Datos.
 
 **Características:**
 - Sistema completo de gestión de usuarios

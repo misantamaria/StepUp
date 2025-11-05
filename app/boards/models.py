@@ -90,6 +90,10 @@ class Test(models.Model):
     
     visible_alumnos = models.BooleanField(default=False, help_text="¿Visible para los alumnos?")
     activo = models.BooleanField(default=True)
+    test_requisito = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, 
+                                       related_name='tests_desbloqueados',
+                                       help_text="Test que debe superarse antes de poder hacer este")
+    porcentaje_minimo = models.FloatField(default=70.0, help_text="Porcentaje mínimo requerido en el test requisito")
     creado_por = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     
@@ -112,6 +116,26 @@ class Test(models.Model):
             self.preguntas.set(preguntas_tema)
             return preguntas_tema.count()
         return 0
+    
+    def alumno_cumple_requisitos(self, alumno):
+        """Verifica si el alumno cumple con los requisitos para acceder a este test"""
+        # Si no hay test requisito, puede acceder
+        if not self.test_requisito:
+            return True
+        
+        # Buscar el mejor intento del alumno en el test requisito
+        mejor_intento = IntentTest.objects.filter(
+            alumno=alumno,
+            test=self.test_requisito,
+            completado=True
+        ).order_by('-puntuacion').first()
+        
+        # Si no ha completado el test requisito, no puede acceder
+        if not mejor_intento:
+            return False
+        
+        # Verificar si superó el porcentaje mínimo
+        return mejor_intento.puntuacion >= self.porcentaje_minimo
 
 
 class IntentTest(models.Model):

@@ -8,15 +8,12 @@ from boards.models import Test, IntentTest, RespuestaAlumno, Tema, ProgresoTema,
 
 def get_dashboard_data(user) -> Dict[str, Any]:
     """Datos para el dashboard del alumno - organizado por temas."""
-    # Obtener todos los temas con tests visibles
-    temas_con_tests = Tema.objects.filter(
-        tests__activo=True,
-        tests__visible_alumnos=True
-    ).distinct().prefetch_related('tests')
+    # Obtener TODOS los temas (con o sin tests visibles)
+    todos_los_temas = Tema.objects.all().prefetch_related('tests').order_by('tema_id')
     
     # Organizar tests por tema
     tests_por_tema = []
-    for tema in temas_con_tests:
+    for tema in todos_los_temas:
         # Obtener o crear el progreso del tema para este alumno
         progreso, created = ProgresoTema.objects.get_or_create(
             alumno=user,
@@ -28,16 +25,27 @@ def get_dashboard_data(user) -> Dict[str, Any]:
             progreso.total_preguntas = Pregunta.objects.filter(tema=tema.tema_id).count()
             progreso.save()
         
-        # Actualizar el progreso
-        progreso.actualizar_progreso()
+        # Obtener tests del tema que están activos y visibles
+        tests_del_tema = tema.tests.filter(activo=True, visible_alumnos=True)
         
-        # Obtener tests del tema visibles para alumnos
-        tests = tema.tests.filter(activo=True, visible_alumnos=True)
+        # Filtrar tests según requisitos del alumno
+        tests_disponibles = []
+        for test in tests_del_tema:
+            if test.alumno_cumple_requisitos(user):
+                tests_disponibles.append(test)
+        
+        # Actualizar el progreso si hay tests completados
+        if tests_disponibles:
+            progreso.actualizar_progreso()
+        
+        tiene_tests_visibles = len(tests_disponibles) > 0
         
         tests_por_tema.append({
             'tema': tema,
             'progreso': progreso,
-            'tests': tests,
+            'tests': tests_disponibles,
+            'tiene_tests_visibles': tiene_tests_visibles,
+            'bloqueado': not tiene_tests_visibles,
         })
     
     # Últimos intentos del alumno

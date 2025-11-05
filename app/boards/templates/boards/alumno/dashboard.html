@@ -18,13 +18,16 @@
         </div>
     </div>
 
-    <h3 style="color: #667eea; margin-top: 2rem;">Tests Disponibles por Tema</h3>
+    <h3 style="color: #667eea; margin-top: 2rem;">📚 Tests Disponibles por Tema</h3>
     {% if tests_por_tema %}
         {% for item in tests_por_tema %}
         <div style="margin-bottom: 2rem;">
             <!-- Encabezado del tema con progreso -->
-            <div style="background: linear-gradient(135deg, {{ THEME_COLORS.primary }} 0%, {{ THEME_COLORS.bg_medium }} 100%); color: white; padding: 1rem 1.5rem; border-radius: 8px 8px 0 0; display: flex; justify-content: space-between; align-items: center;">
-                <h4 style="margin: 0; font-size: 1.1rem;"> {{ item.tema.tema_id }}</h4>
+            <div style="background: {% if item.bloqueado %}linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%){% else %}linear-gradient(135deg, {{ THEME_COLORS.primary }} 0%, {{ THEME_COLORS.bg_medium }} 100%){% endif %}; color: white; padding: 1rem 1.5rem; border-radius: 8px 8px 0 0; display: flex; justify-content: space-between; align-items: center;">
+                <h4 style="margin: 0; font-size: 1.1rem;">
+                    {% if item.bloqueado %}🔒{% else %}📖{% endif %} {{ item.tema.tema_id }}
+                </h4>
+                {% if not item.bloqueado %}
                 <div style="display: flex; align-items: center; gap: 1rem;">
                     <span style="font-size: 0.9rem; opacity: 0.9;">{{ item.progreso.preguntas_correctas }}/{{ item.progreso.total_preguntas }} correctas</span>
                     <div style="display: flex; gap: 3px; align-items: center;">
@@ -33,11 +36,16 @@
                         {% endfor %}
                     </div>
                 </div>
+                {% else %}
+                <div style="font-size: 0.9rem; opacity: 0.8;">
+                    <span>⏳ Próximamente disponible</span>
+                </div>
+                {% endif %}
             </div>
             
             <!-- Tests del tema -->
-            <div style="border: 2px solid {{ THEME_COLORS.primary }}; border-top: none; border-radius: 0 0 8px 8px; padding: 1rem;">
-                {% if item.tests %}
+            <div style="border: 2px solid {% if item.bloqueado %}#95a5a6{% else %}{{ THEME_COLORS.primary }}{% endif %}; border-top: none; border-radius: 0 0 8px 8px; padding: 1rem; {% if item.bloqueado %}opacity: 0.7;{% endif %}">
+                {% if item.tiene_tests_visibles %}
                     <div style="display: grid; gap: 0.75rem;">
                         {% for test in item.tests %}
                         <div style="padding: 1rem; background: #f8f9fa; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
@@ -46,7 +54,7 @@
                                 {% if test.descripcion %}
                                 <p style="margin: 0.5rem 0 0 0; color: #666; font-size: 0.9rem;">{{ test.descripcion }}</p>
                                 {% endif %}
-                                <small style="color: #999; margin-top: 0.25rem; display: block;">⏱️ {{ test.tiempo_limite }} minutos |  {{ test.total_preguntas }} preguntas</small>
+                                <small style="color: #999; margin-top: 0.25rem; display: block;">⏱️ {{ test.tiempo_limite }} minutos | 📝 {{ test.total_preguntas }} preguntas</small>
                             </div>
                             <a href="{% url 'boards:iniciar_test' test.id %}" 
                                style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 6px; font-weight: 600; white-space: nowrap;">
@@ -56,14 +64,18 @@
                         {% endfor %}
                     </div>
                 {% else %}
-                    <p style="color: #999; text-align: center; margin: 1rem 0;">No hay tests disponibles para este tema.</p>
+                    <div style="text-align: center; padding: 2rem;">
+                        <div style="font-size: 3rem; margin-bottom: 0.5rem;">🔒</div>
+                        <p style="color: #7f8c8d; margin: 0; font-weight: 500;">Este tema aún no está disponible</p>
+                        <p style="color: #95a5a6; margin: 0.5rem 0 0 0; font-size: 0.9rem;">Los tests se habilitarán próximamente</p>
+                    </div>
                 {% endif %}
             </div>
         </div>
         {% endfor %}
     {% else %}
         <p style="color: #999; padding: 2rem; text-align: center; background: #f8f9fa; border-radius: 8px;">
-            No hay tests disponibles en este momento.
+            No hay temas disponibles en este momento.
         </p>
     {% endif %}
 

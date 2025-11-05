@@ -1,4 +1,4 @@
-# 🔐 SISTEMA DE PERMISOS - STEPUP
+# SISTEMA DE PERMISOS - STEPUP
 
 ##  Resumen de Roles y Permisos
 
@@ -11,9 +11,9 @@
 
 ---
 
-## 🎯 Permisos Detallados
+## Permisos Detallados
 
-### 👨‍ ALUMNO
+### ALUMNO
 **Grupo Django**: `Alumnos`  
 **is_staff**: `False`  
 **is_superuser**: `False`
@@ -33,7 +33,7 @@
 
 ---
 
-### 👨‍🏫 PROFESOR AYUDANTE
+### PROFESOR AYUDANTE
 **Grupo Django**: `Profesores Ayudantes`  
 **is_staff**: `True`  
 **is_superuser**: `False`
@@ -64,7 +64,7 @@
 
 ---
 
-### 👨‍🏫 PROFESOR
+### PROFESOR
 **Grupo Django**: `Profesores`  
 **is_staff**: `True`  
 **is_superuser**: `False`
@@ -92,7 +92,7 @@
 
 ---
 
-### 🔧 ADMINISTRADOR
+### ADMINISTRADOR
 **Grupo Django**: Ninguno (superuser)  
 **is_staff**: `True`  
 **is_superuser**: `True`
@@ -109,7 +109,7 @@
 
 ---
 
-## 🛠️ Cómo Crear Usuarios con Roles Específicos
+## Cómo Crear Usuarios con Roles Específicos
 
 ### Usuarios predefinidos (automático)
 ```powershell
@@ -166,7 +166,7 @@ usuario.groups.add(grupo_profesores)
 
 ---
 
-## 🔍 Verificar Permisos de un Usuario
+## Verificar Permisos de un Usuario
 
 ```python
 # En Django shell
@@ -188,7 +188,7 @@ for perm in usuario.user_permissions.all():
 
 ---
 
-## 🚨 Protecciones Implementadas
+## Protecciones Implementadas
 
 ### En el Admin (`boards/admin.py`)
 - **QuestionAdmin**: `has_delete_permission()` verifica grupo Profesores o superuser
@@ -209,7 +209,7 @@ for perm in usuario.user_permissions.all():
 
 ---
 
-## 📝 Notas Importantes
+## Notas Importantes
 
 1. **Profesor Ayudante vs Profesor**:
    - La única diferencia es el permiso de eliminación
@@ -232,7 +232,7 @@ for perm in usuario.user_permissions.all():
 
 ---
 
-## 🔄 Cambiar Permisos (si necesitas personalizarlos)
+## Cambiar Permisos (si necesitas personalizarlos)
 
 Para modificar los permisos de un grupo:
 

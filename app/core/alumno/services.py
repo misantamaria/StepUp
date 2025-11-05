@@ -28,11 +28,23 @@ def get_dashboard_data(user) -> Dict[str, Any]:
         # Obtener tests del tema que están activos y visibles
         tests_del_tema = tema.tests.filter(activo=True, visible_alumnos=True)
         
-        # Filtrar tests según requisitos del alumno
-        tests_disponibles = []
+        # Filtrar tests según requisitos del alumno y organizar por nivel
+        tests_por_nivel = {
+            'Facil': [],
+            'Media': [],
+            'Dificil': [],
+        }
+        
         for test in tests_del_tema:
             if test.alumno_cumple_requisitos(user):
-                tests_disponibles.append(test)
+                tests_por_nivel[test.nivel].append(test)
+        
+        # Calcular tests disponibles totales
+        tests_disponibles = (
+            tests_por_nivel['Facil'] +
+            tests_por_nivel['Media'] +
+            tests_por_nivel['Dificil']
+        )
         
         # Actualizar el progreso si hay tests completados
         if tests_disponibles:
@@ -44,6 +56,7 @@ def get_dashboard_data(user) -> Dict[str, Any]:
             'tema': tema,
             'progreso': progreso,
             'tests': tests_disponibles,
+            'tests_por_nivel': tests_por_nivel,
             'tiene_tests_visibles': tiene_tests_visibles,
             'bloqueado': not tiene_tests_visibles,
         })

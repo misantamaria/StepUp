@@ -118,7 +118,7 @@ class RespuestaAdmin(admin.ModelAdmin):
 # Modelo Test (temporal - usa Question antiguo)
 @admin.register(Test)
 class TestAdmin(admin.ModelAdmin):
-    list_display = ['nombre', 'tema', 'total_preguntas_count', 'visible_alumnos', 'tiempo_limite', 'activo', 'fecha_creacion']
+    list_display = ['nombre', 'tema', 'total_preguntas_count', 'requisito_display', 'visible_alumnos', 'tiempo_limite', 'activo', 'fecha_creacion']
     list_filter = ['tema', 'visible_alumnos', 'activo', 'fecha_creacion']
     search_fields = ['nombre', 'descripcion', 'tema__tema_id']
     filter_horizontal = ['preguntas']
@@ -129,6 +129,10 @@ class TestAdmin(admin.ModelAdmin):
         }),
         ('Configuración', {
             'fields': ('tiempo_limite', 'visible_alumnos', 'activo')
+        }),
+        ('Requisitos Previos', {
+            'fields': ('test_requisito', 'porcentaje_minimo'),
+            'description': 'Configura qué test debe superarse antes y con qué porcentaje mínimo.'
         }),
         ('Preguntas', {
             'fields': ('preguntas',),
@@ -145,6 +149,16 @@ class TestAdmin(admin.ModelAdmin):
     def total_preguntas_count(self, obj):
         return obj.total_preguntas()
     total_preguntas_count.short_description = 'N° Preguntas'
+    
+    def requisito_display(self, obj):
+        if obj.test_requisito:
+            return format_html(
+                '<span style="color:#856404;">🔒 {}</span><br><small style="color:#666;">Mínimo: {}%</small>',
+                obj.test_requisito.nombre[:30],
+                int(obj.porcentaje_minimo)
+            )
+        return format_html('<span style="color:#28a745;">✓ Sin requisitos</span>')
+    requisito_display.short_description = 'Requisito Previo'
     
     def marcar_visible(self, request, queryset):
         count = queryset.update(visible_alumnos=True)

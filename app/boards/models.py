@@ -82,9 +82,16 @@ class Respuesta(models.Model):
 
 class Test(models.Model):
     """Un test es una colección de preguntas"""
+    NIVEL_CHOICES = [
+        ('Facil', 'Fácil'),
+        ('Media', 'Intermedio'),
+        ('Dificil', 'Difícil'),
+    ]
+    
     nombre = models.CharField(max_length=200)
     descripcion = models.TextField(blank=True)
     tema = models.ForeignKey(Tema, on_delete=models.CASCADE, related_name='tests', null=True, blank=True, db_column='tema_id')
+    nivel = models.CharField(max_length=20, choices=NIVEL_CHOICES, default='Facil', help_text="Nivel de dificultad del test")
     preguntas = models.ManyToManyField(Pregunta, related_name='tests', blank=True)
     tiempo_limite = models.IntegerField(help_text="Tiempo en minutos", default=30)
     
@@ -118,24 +125,61 @@ class Test(models.Model):
         return 0
     
     def alumno_cumple_requisitos(self, alumno):
-        """Verifica si el alumno cumple con los requisitos para acceder a este test"""
-        # Si no hay test requisito, puede acceder
-        if not self.test_requisito:
+        """
+        Verifica si el alumno cumple con los requisitos para acceder a este test.
+        Para tests de nivel Intermedio/Difícil, debe haber superado TODOS los tests
+        del nivel anterior del mismo tema.
+        """
+        # Si es nivel Fácil, siempre puede acceder (si está visible)
+        if self.nivel == 'Facil':
             return True
         
-        # Buscar el mejor intento del alumno en el test requisito
-        mejor_intento = IntentTest.objects.filter(
-            alumno=alumno,
-            test=self.test_requisito,
-            completado=True
-        ).order_by('-puntuacion').first()
+        # Si no tiene tema asignado, usar lógica simple de test_requisito
+        if not self.tema:
+            if not self.test_requisito:
+                return True
+            mejor_intento = IntentTest.objects.filter(
+                alumno=alumno,
+                test=self.test_requisito,
+                completado=True
+            ).order_by('-puntuacion').first()
+            
+            if not mejor_intento:
+                return False
+            return mejor_intento.puntuacion >= self.porcentaje_minimo
         
-        # Si no ha completado el test requisito, no puede acceder
-        if not mejor_intento:
-            return False
+        # Determinar el nivel anterior requerido
+        nivel_requerido = 'Facil' if self.nivel == 'Media' else 'Media'
         
-        # Verificar si superó el porcentaje mínimo
-        return mejor_intento.puntuacion >= self.porcentaje_minimo
+        # Obtener TODOS los tests del nivel anterior del mismo tema
+        tests_nivel_anterior = Test.objects.filter(
+            tema=self.tema,
+            nivel=nivel_requerido,
+            activo=True
+        )
+        
+        # Si no hay tests del nivel anterior, puede acceder
+        if not tests_nivel_anterior.exists():
+            return True
+        
+        # Verificar que haya superado TODOS los tests del nivel anterior
+        for test_previo in tests_nivel_anterior:
+            mejor_intento = IntentTest.objects.filter(
+                alumno=alumno,
+                test=test_previo,
+                completado=True
+            ).order_by('-puntuacion').first()
+            
+            # Si no ha completado este test del nivel anterior, no puede avanzar
+            if not mejor_intento:
+                return False
+            
+            # Si no superó el porcentaje mínimo (70%), no puede avanzar
+            if mejor_intento.puntuacion < self.porcentaje_minimo:
+                return False
+        
+        # Ha superado TODOS los tests del nivel anterior
+        return True
 
 
 class IntentTest(models.Model):

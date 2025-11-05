@@ -4,7 +4,7 @@ Vistas para el modo alumno: dashboard, tests, resultados.
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from ..models import Test, IntentTest
+from ..models import Test, IntentTest, Tema, Pregunta, ProgresoTema
 from core.alumno.services import (
     get_dashboard_data as alumno_dashboard_data,
     start_test as alumno_start_test,
@@ -21,6 +21,68 @@ def dashboard_alumno(request):
     
     context = alumno_dashboard_data(request.user)
     return render(request, 'boards/alumno/dashboard.html', context)
+
+
+@login_required
+def detalle_tema(request, tema_id):
+    """Vista detallada de un tema con sus tests organizados por nivel"""
+    tema = get_object_or_404(Tema, tema_id=tema_id)
+    
+    # Obtener progreso del tema
+    progreso, _ = ProgresoTema.objects.get_or_create(
+        alumno=request.user,
+        tema=tema,
+        defaults={'total_preguntas': Pregunta.objects.filter(tema=tema_id).count()}
+    )
+    progreso.actualizar_progreso()
+    
+    # Obtener tests por nivel
+    tests_por_nivel = {
+        'Facil': [],
+        'Media': [],
+        'Dificil': [],
+    }
+    
+    tests_tema = tema.tests.filter(activo=True).order_by('nombre')
+    
+    for test in tests_tema:
+        # Verificar si está visible y cumple requisitos
+        disponible = test.visible_alumnos and test.alumno_cumple_requisitos(request.user)
+        
+        # Obtener mejor intento
+        mejor_intento = IntentTest.objects.filter(
+            alumno=request.user,
+            test=test,
+            completado=True
+        ).order_by('-puntuacion').first()
+        
+        test_data = {
+            'test': test,
+            'disponible': disponible,
+            'completado': mejor_intento is not None,
+            'mejor_puntuacion': mejor_intento.puntuacion if mejor_intento else None,
+        }
+        
+        tests_por_nivel[test.nivel].append(test_data)
+    
+    # Calcular progreso por nivel
+    def calcular_progreso_nivel(tests_nivel):
+        total = len(tests_nivel)
+        completados = sum(1 for t in tests_nivel if t['completado'])
+        return (completados / total * 100) if total > 0 else 0
+    
+    context = {
+        'tema': tema,
+        'progreso': progreso,
+        'tests_facil': tests_por_nivel['Facil'],
+        'tests_intermedio': tests_por_nivel['Media'],
+        'tests_dificil': tests_por_nivel['Dificil'],
+        'progreso_facil': calcular_progreso_nivel(tests_por_nivel['Facil']),
+        'progreso_intermedio': calcular_progreso_nivel(tests_por_nivel['Media']),
+        'progreso_dificil': calcular_progreso_nivel(tests_por_nivel['Dificil']),
+    }
+    
+    return render(request, 'boards/alumno/detalle_tema.html', context)
 
 
 @login_required

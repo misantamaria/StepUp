@@ -15,6 +15,7 @@ urlpatterns = [
     
     # Rutas para alumnos
     path('alumno/', views.dashboard_alumno, name='dashboard_alumno'),
+    path('alumno/tema/<str:tema_id>/', views.detalle_tema, name='detalle_tema'),
     path('alumno/test/<int:test_id>/iniciar/', views.iniciar_test, name='iniciar_test'),
     path('alumno/intento/<int:intento_id>/', views.realizar_test, name='realizar_test'),
     path('alumno/resultado/<int:intento_id>/', views.resultado_test, name='resultado_test'),

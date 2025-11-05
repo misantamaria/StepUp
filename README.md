@@ -2,44 +2,11 @@
 
 Repositorio GitHub para la aplicación [StepUP Code](https://www.youtube.com/watch?v=p-fRdRLUs44&feature=youtu.be), desarrollada dentro de un Proyecto de Innovación Educativa (PIE) para la realización de pruebas de tipo test en la asignatura Estructuras de Datos.
 
-**Características:**
-- Sistema completo de gestión de usuarios
-- Autenticación y recuperación de contraseñas por email
-- Tests de preguntas importables desde XML
+La aplicación tiene las siguientes herramientas:
+- Sistema de gestión de usuarios
+- Tests de prueba iniciales
 - Panel de administración Django
-- Soporte para MySQL/MariaDB y SQLite
-
-[📖 Ver documentación completa de StepUp](app/README.md)
-
-
-## Inicio rápido - StepUp
-
-```powershell
-# 1) Ve al directorio de la aplicación
-cd app
-
-# 2) Crea entorno virtual e instala dependencias
-py -3.11 -m venv .venv
-.venv\Scripts\activate
-pip install -r requirements.txt
-
-# 3) Configura variables de entorno
-copy .env.example .env
-# Edita .env con tus configuraciones
-
-# 4) Aplica migraciones y crea usuarios
-py manage.py migrate
-py manage.py initusers
-
-# 5) Inicia el servidor
-py manage.py runserver
-```
-
-Abre [http://127.0.0.1:8000](http://127.0.0.1:8000)
-
-**Credenciales por defecto:**
-- Usuario: `alumno` / Contraseña: `alumno`
-- Admin: `admin` / Contraseña: `admin123`
+- Base de datos inicial con MySQL
 
 ## Estructura del repositorio
 

@@ -1,72 +1,274 @@
 {% extends "base.html" %}
+{% load custom_filters %}
 
 {% block title %}Resultados - StepUp{% endblock %}
 
 {% block content %}
-<div class="card">
+<div class="card" style="max-width: 1200px; margin: 0 auto;">
+    <!-- Header de resultados -->
     <div style="text-align: center; margin-bottom: 2rem;">
-        <h2 style="color: #667eea;"> Resultados del Test</h2>
-        <h3>{{ intento.test.nombre }}</h3>
+        <h2 style="color: #2c5282;">📊 Resultados del Test</h2>
+        <h3 style="color: #666;">{{ intento.test.nombre }}</h3>
     </div>
     
-    <div style="background: {% if intento.puntuacion >= 70 %}linear-gradient(135deg, #11998e 0%, #38ef7d 100%){% elif intento.puntuacion >= 50 %}linear-gradient(135deg, #f093fb 0%, #f5576c 100%){% else %}linear-gradient(135deg, #e74c3c 0%, #c0392b 100%){% endif %}; 
-                color: white; padding: 2rem; border-radius: 12px; text-align: center; margin-bottom: 2rem;">
-        <div style="font-size: 3rem; font-weight: bold;">{{ intento.puntuacion|floatformat:1 }}%</div>
-        <div style="font-size: 1.2rem; margin-top: 0.5rem;">
-            {{ intento.respuestas_correctas }} de {{ intento.total_preguntas }} correctas
+    <!-- Panel de puntuación -->
+    <div style="background: {% if intento.puntuacion >= 70 %}linear-gradient(135deg, #28a745 0%, #20c997 100%){% elif intento.puntuacion >= 50 %}linear-gradient(135deg, #ffc107 0%, #ff8c00 100%){% else %}linear-gradient(135deg, #dc3545 0%, #c82333 100%){% endif %}; 
+                color: white; padding: 2.5rem; border-radius: 12px; text-align: center; margin-bottom: 2rem; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+        <div style="font-size: 4rem; font-weight: bold; margin-bottom: 0.5rem;">
+            {{ intento.puntuacion|nota_sobre_10 }}/10
         </div>
-        <div style="margin-top: 1rem;">
+        <div style="font-size: 1.5rem; opacity: 0.95; margin-bottom: 1rem;">
+            {{ intento.puntuacion|floatformat:1 }}% • {{ intento.respuestas_correctas }} de {{ intento.total_preguntas }} correctas
+        </div>
+        <div style="font-size: 1.2rem; padding: 0.75rem 1.5rem; background: rgba(255,255,255,0.2); border-radius: 8px; display: inline-block;">
             {% if intento.puntuacion >= 70 %}
-                🎉 ¡Excelente trabajo!
+                🎉 ¡Excelente trabajo! Has superado el test
             {% elif intento.puntuacion >= 50 %}
-                👍 Buen intento, sigue practicando
+                👍 Buen intento, estás cerca de superarlo
             {% else %}
-                💪 No te desanimes, repasa y vuelve a intentarlo
+                💪 Sigue practicando, ¡puedes mejorar!
             {% endif %}
         </div>
     </div>
-
-    <h3 style="color: #667eea; margin-bottom: 1rem;">Revisión de Respuestas</h3>
     
-    {% for respuesta in respuestas %}
-    <div style="border: 2px solid {% if respuesta.es_correcta %}#27ae60{% else %}#e74c3c{% endif %}; 
-                border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; background: white;">
-        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-            <span style="font-size: 2rem;">{% if respuesta.es_correcta %}✓{% else %}✗{% endif %}</span>
-            <h4 style="margin: 0; color: {% if respuesta.es_correcta %}#27ae60{% else %}#e74c3c{% endif %};">
-                Pregunta {{ forloop.counter }}
-            </h4>
+    <!-- Resumen de respuestas -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
+        <div style="background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); padding: 1.5rem; border-radius: 8px; border-left: 4px solid #28a745; text-align: center;">
+            <div style="font-size: 2.5rem; color: #28a745; font-weight: bold;">✓ {{ total_correctas }}</div>
+            <div style="color: #1b5e20; font-weight: 600;">Respuestas Correctas</div>
         </div>
-        
-        <p style="font-size: 1.1rem; margin-bottom: 1rem;"><strong>{{ respuesta.pregunta.titulo }}</strong></p>
-        
-        <div style="background: #f8f9fa; padding: 1rem; border-radius: 6px; margin-bottom: 0.5rem;">
-            <strong>Tu respuesta:</strong> 
-            <span style="color: {% if respuesta.es_correcta %}#27ae60{% else %}#e74c3c{% endif %};">
-                {{ respuesta.respuesta }}
-            </span>
+        <div style="background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%); padding: 1.5rem; border-radius: 8px; border-left: 4px solid #dc3545; text-align: center;">
+            <div style="font-size: 2.5rem; color: #dc3545; font-weight: bold;">✗ {{ total_fallidas }}</div>
+            <div style="color: #b71c1c; font-weight: 600;">Respuestas Fallidas</div>
         </div>
-        
-        {% if not respuesta.es_correcta %}
-        <div style="background: #e8f5e9; padding: 1rem; border-radius: 6px; margin-bottom: 0.5rem;">
-            <strong>Respuesta correcta:</strong> 
-            <span style="color: #27ae60;">{{ respuesta.pregunta.respuesta_correcta }}</span>
-        </div>
-        {% endif %}
-        
-        {% if respuesta.pregunta.explicacion %}
-        <div style="background: #fff3cd; padding: 1rem; border-radius: 6px; margin-top: 0.5rem;">
-            <strong>💡 Explicación:</strong> {{ respuesta.pregunta.explicacion }}
-        </div>
-        {% endif %}
     </div>
-    {% endfor %}
     
-    <div style="margin-top: 2rem; text-align: center;">
+    <!-- Tabs para cambiar entre vistas -->
+    <div style="margin-bottom: 2rem;">
+        <div style="display: flex; gap: 1rem; border-bottom: 2px solid #e0e0e0; margin-bottom: 2rem;">
+            <button onclick="mostrarSeccion('fallidas')" id="tab-fallidas" class="tab-btn active">
+                ❌ Revisar Fallidas ({{ total_fallidas }})
+            </button>
+            <button onclick="mostrarSeccion('todas')" id="tab-todas" class="tab-btn">
+                📝 Ver Todas ({{ intento.total_preguntas }})
+            </button>
+        </div>
+        
+        <!-- Sección de preguntas fallidas -->
+        <div id="seccion-fallidas" class="seccion-respuestas">
+            {% if total_fallidas > 0 %}
+                <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 1rem; margin-bottom: 2rem; border-radius: 4px;">
+                    <p style="margin: 0; color: #856404;">
+                        <strong>💡 Repasa estas preguntas:</strong> Aquí están las preguntas que respondiste incorrectamente. 
+                        Lee atentamente la explicación de por qué cada respuesta es correcta o incorrecta.
+                    </p>
+                </div>
+                
+                {% for detalle in respuestas_fallidas %}
+                <div style="border: 3px solid #dc3545; border-radius: 12px; padding: 2rem; margin-bottom: 2rem; background: white; box-shadow: 0 2px 8px rgba(220,53,69,0.1);">
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+                        <span style="font-size: 3rem;">❌</span>
+                        <div>
+                            <h4 style="margin: 0; color: #dc3545; font-size: 1.2rem;">Pregunta {{ forloop.counter }}</h4>
+                            <small style="color: #666;">Dificultad: {{ detalle.pregunta.get_dificultad_display }} • Tema: {{ detalle.pregunta.tema }}</small>
+                        </div>
+                    </div>
+                    
+                    <h5 style="color: #2c5282; margin-bottom: 1.5rem; font-size: 1.2rem; line-height: 1.6;">
+                        {{ detalle.pregunta.enunciado }}
+                    </h5>
+                    
+                    <!-- Tu respuesta (incorrecta) -->
+                    <div style="background: #ffebee; border-left: 4px solid #dc3545; padding: 1.25rem; margin-bottom: 1rem; border-radius: 6px;">
+                        <strong style="color: #c82333;">❌ Tu respuesta:</strong>
+                        <p style="margin: 0.5rem 0 0 0; color: #721c24; font-size: 1.05rem;">{{ detalle.respuesta_alumno_texto }}</p>
+                    </div>
+                    
+                    <!-- Respuesta correcta -->
+                    <div style="background: #e8f5e9; border-left: 4px solid #28a745; padding: 1.25rem; margin-bottom: 1rem; border-radius: 6px;">
+                        <strong style="color: #1e7e34;">✓ Respuesta correcta:</strong>
+                        <p style="margin: 0.5rem 0 0 0; color: #155724; font-size: 1.05rem; font-weight: 600;">{{ detalle.respuesta_correcta_texto }}</p>
+                    </div>
+                    
+                    <!-- Mostrar todas las opciones con explicación -->
+                    <details style="margin-top: 1.5rem; cursor: pointer;">
+                        <summary style="color: #2c5282; font-weight: 600; padding: 0.75rem; background: #f8f9fa; border-radius: 6px; user-select: none;">
+                            💡 Ver todas las opciones y explicación
+                        </summary>
+                        <div style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 6px;">
+                            {% for opcion in detalle.todas_opciones %}
+                            <div style="padding: 0.75rem; margin-bottom: 0.5rem; border-left: 3px solid {% if opcion.es_correcta %}#28a745{% else %}#6c757d{% endif %}; background: white; border-radius: 4px;">
+                                <span style="font-weight: 600; color: {% if opcion.es_correcta %}#28a745{% else %}#6c757d{% endif %};">
+                                    {% if opcion.es_correcta %}✓{% else %}○{% endif %}
+                                </span>
+                                {{ opcion.contenido }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </details>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div style="text-align: center; padding: 3rem; background: #e8f5e9; border-radius: 12px;">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">🎉</div>
+                    <h3 style="color: #28a745; margin: 0;">¡Perfecto!</h3>
+                    <p style="color: #155724; margin: 0.5rem 0 0 0;">No tienes respuestas incorrectas. ¡Excelente trabajo!</p>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Sección de todas las preguntas -->
+        <div id="seccion-todas" class="seccion-respuestas" style="display: none;">
+            <div style="background: #e3f2fd; border-left: 4px solid #2c5282; padding: 1rem; margin-bottom: 2rem; border-radius: 4px;">
+                <p style="margin: 0; color: #0d47a1;">
+                    <strong>📚 Revisión completa:</strong> Aquí puedes revisar todas tus respuestas, tanto correctas como incorrectas.
+                </p>
+            </div>
+            
+            {% for detalle in respuestas_detalle %}
+            <div style="border: 3px solid {% if detalle.es_correcta %}#28a745{% else %}#dc3545{% endif %}; border-radius: 12px; padding: 2rem; margin-bottom: 2rem; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+                    <span style="font-size: 3rem;">{% if detalle.es_correcta %}✅{% else %}❌{% endif %}</span>
+                    <div style="flex: 1;">
+                        <h4 style="margin: 0; color: {% if detalle.es_correcta %}#28a745{% else %}#dc3545{% endif %}; font-size: 1.2rem;">
+                            Pregunta {{ forloop.counter }}
+                        </h4>
+                        <small style="color: #666;">Dificultad: {{ detalle.pregunta.get_dificultad_display }} • Tema: {{ detalle.pregunta.tema }} • {{ detalle.pregunta.puntuacion }} pts</small>
+                    </div>
+                    <div style="text-align: right;">
+                        <span style="background: {% if detalle.es_correcta %}#28a745{% else %}#dc3545{% endif %}; color: white; padding: 0.5rem 1rem; border-radius: 20px; font-weight: bold; font-size: 0.9rem;">
+                            {% if detalle.es_correcta %}CORRECTA{% else %}INCORRECTA{% endif %}
+                        </span>
+                    </div>
+                </div>
+                
+                <h5 style="color: #2c5282; margin-bottom: 1.5rem; font-size: 1.2rem; line-height: 1.6;">
+                    {{ detalle.pregunta.enunciado }}
+                </h5>
+                
+                <!-- Tu respuesta -->
+                <div style="background: {% if detalle.es_correcta %}#e8f5e9{% else %}#ffebee{% endif %}; border-left: 4px solid {% if detalle.es_correcta %}#28a745{% else %}#dc3545{% endif %}; padding: 1.25rem; margin-bottom: 1rem; border-radius: 6px;">
+                    <strong style="color: {% if detalle.es_correcta %}#1e7e34{% else %}#c82333{% endif %};">
+                        {% if detalle.es_correcta %}✓{% else %}❌{% endif %} Tu respuesta:
+                    </strong>
+                    <p style="margin: 0.5rem 0 0 0; color: {% if detalle.es_correcta %}#155724{% else %}#721c24{% endif %}; font-size: 1.05rem;">
+                        {{ detalle.respuesta_alumno_texto }}
+                    </p>
+                </div>
+                
+                <!-- Respuesta correcta (solo si falló) -->
+                {% if not detalle.es_correcta %}
+                <div style="background: #e8f5e9; border-left: 4px solid #28a745; padding: 1.25rem; margin-bottom: 1rem; border-radius: 6px;">
+                    <strong style="color: #1e7e34;">✓ Respuesta correcta:</strong>
+                    <p style="margin: 0.5rem 0 0 0; color: #155724; font-size: 1.05rem; font-weight: 600;">
+                        {{ detalle.respuesta_correcta_texto }}
+                    </p>
+                </div>
+                {% endif %}
+                
+                <!-- Todas las opciones -->
+                <details style="margin-top: 1.5rem; cursor: pointer;">
+                    <summary style="color: #2c5282; font-weight: 600; padding: 0.75rem; background: #f8f9fa; border-radius: 6px; user-select: none;">
+                        💡 Ver todas las opciones
+                    </summary>
+                    <div style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 6px;">
+                        {% for opcion in detalle.todas_opciones %}
+                        <div style="padding: 0.75rem; margin-bottom: 0.5rem; border-left: 3px solid {% if opcion.es_correcta %}#28a745{% else %}#6c757d{% endif %}; background: white; border-radius: 4px;">
+                            <span style="font-weight: 600; color: {% if opcion.es_correcta %}#28a745{% else %}#6c757d{% endif %};">
+                                {% if opcion.es_correcta %}✓{% else %}○{% endif %}
+                            </span>
+                            {{ opcion.contenido }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </details>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Botones de acción -->
+    <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 3rem; flex-wrap: wrap;">
+        <a href="{% url 'boards:iniciar_test' intento.test.id %}" 
+           style="background: linear-gradient(135deg, #2c5282 0%, #1a4d7a 100%); color: white; padding: 1rem 2rem; text-decoration: none; border-radius: 8px; font-weight: 600; display: inline-block; box-shadow: 0 2px 8px rgba(44,82,130,0.3);">
+            🔄 Repetir Test
+        </a>
         <a href="{% url 'boards:dashboard_alumno' %}" 
-           style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1rem 2rem; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">
-            Volver a Mis Tests
+           style="background: linear-gradient(135deg, #6c757d 0%, #495057 100%); color: white; padding: 1rem 2rem; text-decoration: none; border-radius: 8px; font-weight: 600; display: inline-block; box-shadow: 0 2px 8px rgba(108,117,125,0.3);">
+            🏠 Volver al Dashboard
         </a>
     </div>
 </div>
+
+<style>
+.tab-btn {
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    padding: 1rem 1.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    color: #6c757d;
+    transition: all 0.3s;
+}
+
+.tab-btn:hover {
+    color: #2c5282;
+}
+
+.tab-btn.active {
+    color: #2c5282;
+    border-bottom-color: #2c5282;
+}
+
+.seccion-respuestas {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+details summary {
+    transition: all 0.3s;
+}
+
+details summary:hover {
+    background: #e9ecef !important;
+}
+
+details[open] summary {
+    margin-bottom: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .tab-btn {
+        font-size: 0.95rem;
+        padding: 0.75rem 1rem;
+    }
+}
+</style>
+
+<script>
+function mostrarSeccion(seccion) {
+    // Ocultar todas las secciones
+    document.querySelectorAll('.seccion-respuestas').forEach(s => s.style.display = 'none');
+    
+    // Quitar clase active de todos los tabs
+    document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+    
+    // Mostrar la sección seleccionada
+    document.getElementById('seccion-' + seccion).style.display = 'block';
+    document.getElementById('tab-' + seccion).classList.add('active');
+}
+</script>
+
 {% endblock %}

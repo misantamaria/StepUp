@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}{{ test.nombre }} - StepUp{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2 style="color: #667eea;"> {{ test.nombre }}</h2>
+    <p>{{ test.descripcion }}</p>
+    
+    <div style="background: #f8f9fa; padding: 1rem; border-radius: 6px; margin: 1.5rem 0;">
+        <strong>⏱️ Tiempo límite:</strong> {{ test.tiempo_limite }} minutos |
+        <strong> Total preguntas:</strong> {{ preguntas.count }}
+    </div>
+
+    <form method="post" style="margin-top: 2rem;">
+        {% csrf_token %}
+        
+        {% for pregunta in preguntas %}
+        <div style="border: 1px solid #ddd; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; background: white;">
+            <h4 style="color: {{ THEME_COLORS.primary_light }}; margin-bottom: 1rem;">Pregunta {{ forloop.counter }}</h4>
+            <p style="font-size: 1.1rem; margin-bottom: 1.5rem; line-height: 1.6;">{{ pregunta.enunciado }}</p>
+            
+            <div style="margin-left: 1rem;">
+                {% for respuesta in pregunta.get_respuestas %}
+                <label style="display: block; padding: 1rem; margin-bottom: 0.75rem; cursor: pointer; border: 2px solid #e0e0e0; border-radius: 8px; transition: all 0.3s; background: white;">
+                    <input type="radio" name="pregunta_{{ pregunta.pregunta_id }}" value="{{ respuesta.id }}" required style="display: none;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <span style="flex-shrink: 0; width: 28px; height: 28px; border: 2px solid #ddd; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem; background: white; transition: all 0.3s;">
+                            {{ forloop.counter }}
+                        </span>
+                        <span style="flex: 1;">{{ respuesta.contenido }}</span>
+                    </div>
+                </label>
+                {% endfor %}
+            </div>
+            
+            <small style="color: {{ THEME_COLORS.text_inactive }}; display: block; margin-top: 1rem;">
+                Dificultad: {{ pregunta.get_dificultad_display }} | Tema: {{ pregunta.tema }} | Puntos: {{ pregunta.puntuacion }}
+            </small>
+        </div>
+        {% endfor %}
+        
+        <div style="margin-top: 2rem; padding: 1.5rem; background: #f8f9fa; border-radius: 8px; text-align: center;">
+            <p style="margin-bottom: 1rem; color: #666;">¿Estás seguro de que quieres enviar el test?</p>
+            <button type="submit" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 1rem 3rem; border-radius: 6px; font-size: 1.1rem; cursor: pointer; font-weight: 600;">
+                Enviar Test
+            </button>
+        </div>
+    </form>
+</div>
+
+<style>
+    <style>
+    label:has(input:checked) {
+        border-color: {{ THEME_COLORS.primary }} !important;
+        background: linear-gradient(135deg, rgba(0, 51, 102, 0.05) 0%, rgba(0, 91, 153, 0.05) 100%) !important;
+        font-weight: 600;
+    }
+
+    label:has(input:checked) span:first-child {
+        background: {{ THEME_COLORS.primary }} !important;
+        color: white !important;
+        border-color: {{ THEME_COLORS.primary }} !important;
+    }
+
+    label:hover {
+        border-color: {{ THEME_COLORS.primary_light }};
+        background: #f8f9fa;
+    }
+</style>
+</style>
+{% endblock %}

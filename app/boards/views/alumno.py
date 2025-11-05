@@ -170,36 +170,159 @@ def iniciar_test(request, test_id):
 
 @login_required
 def realizar_test(request, intento_id):
-    """Muestra y procesa el test"""
+    """Muestra el test con navegación estilo DGT - pregunta por pregunta"""
     intento = get_object_or_404(IntentTest, id=intento_id, alumno=request.user)
     
     if intento.completado:
         return redirect('boards:resultado_test', intento_id=intento.id)
     
-    # Las preguntas de PIE_ED no tienen campo 'activa', obtenerlas todas
-    preguntas = intento.test.preguntas.all()
+    # Obtener todas las preguntas del test
+    preguntas = list(intento.test.preguntas.all())
+    total_preguntas = len(preguntas)
     
+    # Inicializar sesión de respuestas si no existe
+    session_key = f'test_{intento_id}_respuestas'
+    if session_key not in request.session:
+        request.session[session_key] = {}
+    
+    respuestas_guardadas = request.session[session_key]
+    
+    # Manejar POST - guardar respuesta y navegar
     if request.method == 'POST':
-        intento = alumno_grade_attempt(intento, request.POST)
-        messages.success(request, f'Test completado! Puntuación: {intento.puntuacion:.1f}%')
-        return redirect('boards:resultado_test', intento_id=intento.id)
+        action = request.POST.get('action')
+        pregunta_actual = int(request.POST.get('pregunta_actual', 0))
+        
+        # Guardar respuesta si existe
+        respuesta_id = request.POST.get(f'pregunta_{preguntas[pregunta_actual].pregunta_id}')
+        if respuesta_id:
+            respuestas_guardadas[str(pregunta_actual)] = respuesta_id
+            request.session.modified = True
+        
+        # Finalizar test
+        if action == 'finalizar':
+            # Crear POST data con todas las respuestas guardadas
+            post_data = {}
+            for idx, pregunta in enumerate(preguntas):
+                if str(idx) in respuestas_guardadas:
+                    post_data[f'pregunta_{pregunta.pregunta_id}'] = respuestas_guardadas[str(idx)]
+            
+            # Convertir dict a QueryDict
+            from django.http import QueryDict
+            query_dict = QueryDict('', mutable=True)
+            query_dict.update(post_data)
+            
+            # Calificar el intento
+            intento = alumno_grade_attempt(intento, query_dict)
+            
+            # Limpiar sesión
+            del request.session[session_key]
+            
+            messages.success(request, f'Test completado! Puntuación: {intento.puntuacion:.1f}%')
+            return redirect('boards:resultado_test', intento_id=intento.id)
+        
+        # Navegar entre preguntas
+        if action == 'siguiente' and pregunta_actual < total_preguntas - 1:
+            pregunta_actual += 1
+        elif action == 'anterior' and pregunta_actual > 0:
+            pregunta_actual -= 1
+        elif action == 'ir_a':
+            pregunta_actual = int(request.POST.get('ir_a_pregunta', pregunta_actual))
+        
+        # Guardar índice actual en sesión
+        request.session[f'test_{intento_id}_pregunta_actual'] = pregunta_actual
+        request.session.modified = True
+    
+    # Obtener pregunta actual
+    pregunta_actual_idx = request.session.get(f'test_{intento_id}_pregunta_actual', 0)
+    if pregunta_actual_idx >= total_preguntas:
+        pregunta_actual_idx = 0
+    
+    pregunta = preguntas[pregunta_actual_idx]
+    
+    # Preparar estado de preguntas para el grid
+    estado_preguntas = []
+    for idx, p in enumerate(preguntas):
+        estado_preguntas.append({
+            'numero': idx + 1,
+            'contestada': str(idx) in respuestas_guardadas,
+            'actual': idx == pregunta_actual_idx
+        })
+    
+    # Contar preguntas contestadas
+    preguntas_contestadas = len(respuestas_guardadas)
+    preguntas_sin_contestar = total_preguntas - preguntas_contestadas
+    
+    # Obtener respuesta guardada para pregunta actual
+    respuesta_seleccionada = respuestas_guardadas.get(str(pregunta_actual_idx))
     
     context = {
         'intento': intento,
-        'preguntas': preguntas,
         'test': intento.test,
+        'pregunta': pregunta,
+        'pregunta_actual': pregunta_actual_idx,
+        'total_preguntas': total_preguntas,
+        'es_primera': pregunta_actual_idx == 0,
+        'es_ultima': pregunta_actual_idx == total_preguntas - 1,
+        'estado_preguntas': estado_preguntas,
+        'preguntas_contestadas': preguntas_contestadas,
+        'preguntas_sin_contestar': preguntas_sin_contestar,
+        'respuesta_seleccionada': respuesta_seleccionada,
     }
+    
     return render(request, 'boards/alumno/realizar_test.html', context)
 
 
 @login_required
 def resultado_test(request, intento_id):
-    """Muestra los resultados de un test completado"""
+    """Muestra los resultados de un test completado con retroalimentación detallada"""
     intento = get_object_or_404(IntentTest, id=intento_id, alumno=request.user, completado=True)
-    respuestas = intento.respuestas.all().select_related('pregunta')
+    respuestas_alumno = intento.respuestas.all().select_related('pregunta')
+    
+    # Preparar información detallada de cada respuesta
+    respuestas_detalle = []
+    for resp_alumno in respuestas_alumno:
+        pregunta = resp_alumno.pregunta
+        
+        # Obtener todas las opciones de respuesta de esta pregunta
+        opciones = pregunta.get_respuestas()
+        
+        # Encontrar la respuesta correcta y la del alumno
+        respuesta_correcta_obj = None
+        respuesta_alumno_obj = None
+        
+        for opcion in opciones:
+            if opcion['es_correcta']:
+                respuesta_correcta_obj = opcion
+            if str(opcion['id']) == str(resp_alumno.respuesta):
+                respuesta_alumno_obj = opcion
+        
+        respuestas_detalle.append({
+            'pregunta': pregunta,
+            'respuesta_alumno': resp_alumno,
+            'respuesta_alumno_texto': respuesta_alumno_obj['contenido'] if respuesta_alumno_obj else 'No respondida',
+            'respuesta_correcta_texto': respuesta_correcta_obj['contenido'] if respuesta_correcta_obj else '',
+            'es_correcta': resp_alumno.es_correcta,
+            'todas_opciones': opciones,
+        })
+    
+    # Separar fallidas y correctas
+    respuestas_fallidas = [r for r in respuestas_detalle if not r['es_correcta']]
+    respuestas_correctas = [r for r in respuestas_detalle if r['es_correcta']]
+    
+    # Limpiar la sesión del test
+    session_key = f'test_{intento_id}_respuestas'
+    session_key_pregunta = f'test_{intento_id}_pregunta_actual'
+    if session_key in request.session:
+        del request.session[session_key]
+    if session_key_pregunta in request.session:
+        del request.session[session_key_pregunta]
     
     context = {
         'intento': intento,
-        'respuestas': respuestas,
+        'respuestas_detalle': respuestas_detalle,
+        'respuestas_fallidas': respuestas_fallidas,
+        'respuestas_correctas': respuestas_correctas,
+        'total_fallidas': len(respuestas_fallidas),
+        'total_correctas': len(respuestas_correctas),
     }
     return render(request, 'boards/alumno/resultado.html', context)

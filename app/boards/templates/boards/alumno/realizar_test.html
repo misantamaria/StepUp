@@ -3,70 +3,361 @@
 {% block title %}{{ test.nombre }} - StepUp{% endblock %}
 
 {% block content %}
-<div class="card">
-    <h2 style="color: #667eea;"> {{ test.nombre }}</h2>
-    <p>{{ test.descripcion }}</p>
-    
-    <div style="background: #f8f9fa; padding: 1rem; border-radius: 6px; margin: 1.5rem 0;">
-        <strong>⏱️ Tiempo límite:</strong> {{ test.tiempo_limite }} minutos |
-        <strong> Total preguntas:</strong> {{ preguntas.count }}
+<div class="card" style="max-width: 1200px; margin: 0 auto;">
+    <!-- Header del test -->
+    <div style="background: linear-gradient(135deg, #2c5282 0%, #1a4d7a 100%); color: white; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
+        <h2 style="margin: 0; color: white;">📝 {{ test.nombre }}</h2>
+        <div style="margin-top: 0.5rem; opacity: 0.9;">
+            ⏱️ Tiempo límite: {{ test.tiempo_limite }} minutos
+        </div>
     </div>
-
-    <form method="post" style="margin-top: 2rem;">
+    
+    <!-- Contador de preguntas -->
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <div style="display: inline-block; background: #f8f9fa; padding: 1rem 2rem; border-radius: 8px; border: 2px solid #2c5282;">
+            <span style="font-size: 1.5rem; font-weight: bold; color: #2c5282;">
+                Pregunta {{ pregunta_actual|add:1 }} de {{ total_preguntas }}
+            </span>
+        </div>
+    </div>
+    
+    <form method="post" id="formTest">
         {% csrf_token %}
+        <input type="hidden" name="pregunta_actual" value="{{ pregunta_actual }}">
+        <input type="hidden" name="action" id="action" value="">
+        <input type="hidden" name="ir_a_pregunta" id="ir_a_pregunta" value="">
         
-        {% for pregunta in preguntas %}
-        <div style="border: 1px solid #ddd; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; background: white;">
-            <h4 style="color: {{ THEME_COLORS.primary_light }}; margin-bottom: 1rem;">Pregunta {{ forloop.counter }}</h4>
-            <p style="font-size: 1.1rem; margin-bottom: 1.5rem; line-height: 1.6;">{{ pregunta.enunciado }}</p>
+        <!-- Pregunta actual -->
+        <div style="border: 2px solid #2c5282; padding: 2rem; border-radius: 12px; margin-bottom: 2rem; background: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <h3 style="color: #2c5282; margin-bottom: 1.5rem; font-size: 1.3rem; line-height: 1.6;">
+                {{ pregunta.enunciado }}
+            </h3>
             
-            <div style="margin-left: 1rem;">
+            <div style="margin-top: 1.5rem;">
                 {% for respuesta in pregunta.get_respuestas %}
-                <label style="display: block; padding: 1rem; margin-bottom: 0.75rem; cursor: pointer; border: 2px solid #e0e0e0; border-radius: 8px; transition: all 0.3s; background: white;">
-                    <input type="radio" name="pregunta_{{ pregunta.pregunta_id }}" value="{{ respuesta.id }}" required style="display: none;">
-                    <div style="display: flex; align-items: center; gap: 0.75rem;">
-                        <span style="flex-shrink: 0; width: 28px; height: 28px; border: 2px solid #ddd; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem; background: white; transition: all 0.3s;">
-                            {{ forloop.counter }}
-                        </span>
-                        <span style="flex: 1;">{{ respuesta.contenido }}</span>
+                <label class="respuesta-opcion" data-respuesta-id="{{ respuesta.id }}">
+                    <input type="radio" 
+                           name="pregunta_{{ pregunta.pregunta_id }}" 
+                           value="{{ respuesta.id }}" 
+                           {% if respuesta_seleccionada and respuesta_seleccionada|stringformat:"s" == respuesta.id|stringformat:"s" %}checked{% endif %}
+                           style="display: none;">
+                    <div class="respuesta-contenido">
+                        <span class="respuesta-numero">{{ forloop.counter }}</span>
+                        <span class="respuesta-texto">{{ respuesta.contenido }}</span>
                     </div>
                 </label>
                 {% endfor %}
             </div>
             
-            <small style="color: {{ THEME_COLORS.text_inactive }}; display: block; margin-top: 1rem;">
-                Dificultad: {{ pregunta.get_dificultad_display }} | Tema: {{ pregunta.tema }} | Puntos: {{ pregunta.puntuacion }}
-            </small>
+            <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #e0e0e0;">
+                <small style="color: #666;">
+                    <strong>Dificultad:</strong> {{ pregunta.get_dificultad_display }} | 
+                    <strong>Tema:</strong> {{ pregunta.tema }} | 
+                    <strong>Puntos:</strong> {{ pregunta.puntuacion }}
+                </small>
+            </div>
         </div>
-        {% endfor %}
         
-        <div style="margin-top: 2rem; padding: 1.5rem; background: #f8f9fa; border-radius: 8px; text-align: center;">
-            <p style="margin-bottom: 1rem; color: #666;">¿Estás seguro de que quieres enviar el test?</p>
-            <button type="submit" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 1rem 3rem; border-radius: 6px; font-size: 1.1rem; cursor: pointer; font-weight: 600;">
-                Enviar Test
+        <!-- Botones de navegación -->
+        <div style="display: flex; gap: 1rem; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap;">
+            <button type="submit" 
+                    onclick="document.getElementById('action').value='anterior'"
+                    {% if es_primera %}disabled{% endif %}
+                    class="btn-nav btn-anterior">
+                ← Anterior
             </button>
+            
+            <button type="button" 
+                    onclick="mostrarConfirmacion()"
+                    class="btn-nav btn-finalizar">
+                ✓ Finalizar Test
+            </button>
+            
+            <button type="submit" 
+                    onclick="document.getElementById('action').value='siguiente'"
+                    {% if es_ultima %}disabled{% endif %}
+                    class="btn-nav btn-siguiente">
+                Siguiente →
+            </button>
+        </div>
+        
+        <!-- Grid de preguntas (estilo DGT) -->
+        <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin-top: 2rem;">
+            <h4 style="color: #2c5282; margin-bottom: 1rem; text-align: center;">Estado de las Preguntas</h4>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(50px, 1fr)); gap: 0.5rem; max-width: 800px; margin: 0 auto;">
+                {% for estado in estado_preguntas %}
+                <button type="submit" 
+                        onclick="irAPregunta({{ estado.numero|add:-1 }}); return false;"
+                        class="pregunta-grid {% if estado.actual %}actual{% elif estado.contestada %}contestada{% else %}pendiente{% endif %}"
+                        title="Pregunta {{ estado.numero }}{% if estado.contestada %} - Contestada{% else %} - Pendiente{% endif %}">
+                    {{ estado.numero }}
+                </button>
+                {% endfor %}
+            </div>
+            
+            <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 1.5rem; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="width: 30px; height: 30px; background: #2c5282; border-radius: 4px; display: inline-block;"></span>
+                    <span>Actual</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="width: 30px; height: 30px; background: #4a90e2; border-radius: 4px; display: inline-block;"></span>
+                    <span>Contestada ({{ preguntas_contestadas }})</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="width: 30px; height: 30px; background: #ccc; border-radius: 4px; display: inline-block;"></span>
+                    <span>Pendiente ({{ preguntas_sin_contestar }})</span>
+                </div>
+            </div>
         </div>
     </form>
 </div>
 
+<!-- Modal de confirmación -->
+<div id="modalConfirmacion" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center;">
+    <div style="background: white; padding: 2rem; border-radius: 12px; max-width: 500px; margin: 1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.3);">
+        <h3 style="color: #2c5282; margin-bottom: 1rem;">⚠️ ¿Finalizar Test?</h3>
+        
+        <div id="avisoSinContestar" style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 1rem; margin-bottom: 1rem; border-radius: 4px;">
+            <p style="margin: 0; color: #856404;">
+                <strong>Atención:</strong> Tienes <strong id="numSinContestar">{{ preguntas_sin_contestar }}</strong> 
+                pregunta(s) sin contestar.
+            </p>
+        </div>
+        
+        <p style="margin-bottom: 1.5rem; color: #666;">
+            Has contestado <strong>{{ preguntas_contestadas }}</strong> de <strong>{{ total_preguntas }}</strong> preguntas.
+        </p>
+        
+        {% if preguntas_sin_contestar > 0 %}
+        <div style="background: #f8f9fa; padding: 1rem; border-radius: 6px; margin-bottom: 1rem;">
+            <p style="margin: 0 0 0.5rem 0; font-weight: bold; color: #2c5282;">Preguntas pendientes:</p>
+            <div id="listaSinContestar" style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                {% for estado in estado_preguntas %}
+                {% if not estado.contestada %}
+                <button type="button" 
+                        onclick="cerrarModal(); irAPregunta({{ estado.numero|add:-1 }})"
+                        style="background: #dc3545; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                    #{{ estado.numero }}
+                </button>
+                {% endif %}
+                {% endfor %}
+            </div>
+            <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem; color: #666;">
+                Haz clic en un número para ir a esa pregunta
+            </p>
+        </div>
+        {% endif %}
+        
+        <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
+            <button type="button" 
+                    onclick="cerrarModal()"
+                    style="background: #6c757d; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                Cancelar
+            </button>
+            <button type="button" 
+                    onclick="finalizarTest()"
+                    style="background: linear-gradient(135deg, #2c5282 0%, #1a4d7a 100%); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                Sí, Finalizar
+            </button>
+        </div>
+    </div>
+</div>
+
 <style>
-    <style>
-    label:has(input:checked) {
-        border-color: {{ THEME_COLORS.primary }} !important;
-        background: linear-gradient(135deg, rgba(0, 51, 102, 0.05) 0%, rgba(0, 91, 153, 0.05) 100%) !important;
-        font-weight: 600;
-    }
+/* Estilos para las opciones de respuesta */
+.respuesta-opcion {
+    display: block;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    border: 3px solid #e0e0e0;
+    border-radius: 10px;
+    transition: all 0.3s;
+    background: white;
+    user-select: none;
+}
 
-    label:has(input:checked) span:first-child {
-        background: {{ THEME_COLORS.primary }} !important;
-        color: white !important;
-        border-color: {{ THEME_COLORS.primary }} !important;
-    }
+.respuesta-opcion:hover {
+    border-color: #2c5282;
+    background: #f8f9fa;
+    transform: translateX(5px);
+}
 
-    label:hover {
-        border-color: {{ THEME_COLORS.primary_light }};
-        background: #f8f9fa;
+.respuesta-opcion:has(input:checked) {
+    border-color: #2c5282;
+    background: linear-gradient(135deg, rgba(44, 82, 130, 0.1) 0%, rgba(26, 77, 122, 0.1) 100%);
+    font-weight: 600;
+}
+
+.respuesta-contenido {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    pointer-events: none;
+}
+
+.respuesta-numero {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border: 3px solid #ddd;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.1rem;
+    background: white;
+    transition: all 0.3s;
+}
+
+.respuesta-opcion:has(input:checked) .respuesta-numero {
+    background: #2c5282;
+    color: white;
+    border-color: #2c5282;
+}
+
+.respuesta-texto {
+    flex: 1;
+    font-size: 1.05rem;
+    line-height: 1.5;
+}
+
+/* Botones de navegación */
+.btn-nav {
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    min-width: 150px;
+}
+
+.btn-anterior, .btn-siguiente {
+    background: linear-gradient(135deg, #2c5282 0%, #1a4d7a 100%);
+    color: white;
+}
+
+.btn-anterior:hover:not(:disabled), .btn-siguiente:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(44, 82, 130, 0.3);
+}
+
+.btn-anterior:disabled, .btn-siguiente:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.btn-finalizar {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+}
+
+.btn-finalizar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+/* Grid de preguntas */
+.pregunta-grid {
+    width: 100%;
+    aspect-ratio: 1;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    min-width: 40px;
+    min-height: 40px;
+}
+
+.pregunta-grid.pendiente {
+    background: #ccc;
+    color: #666;
+}
+
+.pregunta-grid.contestada {
+    background: #4a90e2;
+    color: white;
+}
+
+.pregunta-grid.actual {
+    background: #2c5282;
+    color: white;
+    border: 3px solid #fff;
+    box-shadow: 0 0 0 2px #2c5282;
+}
+
+.pregunta-grid:hover {
+    transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .btn-nav {
+        min-width: 120px;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
     }
+    
+    .respuesta-opcion {
+        padding: 1rem;
+    }
+    
+    .respuesta-numero {
+        width: 32px;
+        height: 32px;
+        font-size: 1rem;
+    }
+    
+    .respuesta-texto {
+        font-size: 1rem;
+    }
+}
 </style>
-</style>
+
+<script>
+function mostrarConfirmacion() {
+    const modal = document.getElementById('modalConfirmacion');
+    modal.style.display = 'flex';
+}
+
+function cerrarModal() {
+    const modal = document.getElementById('modalConfirmacion');
+    modal.style.display = 'none';
+}
+
+function finalizarTest() {
+    document.getElementById('action').value = 'finalizar';
+    document.getElementById('formTest').submit();
+}
+
+function irAPregunta(numero) {
+    document.getElementById('action').value = 'ir_a';
+    document.getElementById('ir_a_pregunta').value = numero;
+    document.getElementById('formTest').submit();
+}
+
+// Cerrar modal con ESC
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        cerrarModal();
+    }
+});
+
+// Cerrar modal al hacer clic fuera
+document.getElementById('modalConfirmacion').addEventListener('click', function(e) {
+    if (e.target === this) {
+        cerrarModal();
+    }
+});
+</script>
+
 {% endblock %}

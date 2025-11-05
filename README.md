@@ -32,6 +32,12 @@ StepUp/
 │   ├── requirements.txt
 │   ├── .env.example
 │   └── ...
+├── docker/                          #  Docker para el lanzamiento en servidor
+|   |── .env.example                # Configuración de ejemplo básica
+|   |── Dockerfile
+|   |── docker-compose.yml
+|   |── entrypoint.sh 
+├── media/                          #  Ficheros media para la aplicación web
 |── dump_PIE_ED.sql
 |── schema.sql
 └── README.md                     # Este archivo

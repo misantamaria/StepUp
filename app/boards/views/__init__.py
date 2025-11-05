@@ -20,6 +20,7 @@ from .home import (
 from .alumno import (
     dashboard_alumno,
     detalle_tema,
+    tests_nivel,
     iniciar_test,
     realizar_test,
     resultado_test,
@@ -52,6 +53,7 @@ __all__ = [
     # Alumno
     'dashboard_alumno',
     'detalle_tema',
+    'tests_nivel',
     'iniciar_test',
     'realizar_test',
     'resultado_test',

@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}{{ nivel_nombre }} - {{ tema.tema_id }} - StepUp{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div style="margin-bottom: 2rem;">
+        <a href="{% url 'boards:detalle_tema' tema.tema_id %}" style="color: #667eea; text-decoration: none; font-size: 0.9rem; display: inline-block; margin-bottom: 1rem;">
+            ← Volver a {{ tema.tema_id }}
+        </a>
+        
+        <div style="background: linear-gradient(135deg, {{ nivel_color }} 0%, {{ nivel_color }}dd 100%); color: white; padding: 2rem; border-radius: 12px; margin-bottom: 2rem;">
+            <h2 style="margin: 0 0 0.5rem 0; font-size: 1.8rem; display: flex; align-items: center; gap: 0.5rem;">
+                <span>{{ nivel_emoji }}</span>
+                <span>{{ nivel_nombre }}</span>
+            </h2>
+            <p style="margin: 0; opacity: 0.9; font-size: 0.95rem;">{{ tema.tema_id }}</p>
+        </div>
+    </div>
+
+    {% if tests %}
+        <div style="display: grid; gap: 1rem;">
+            {% for item in tests %}
+            <div style="padding: 1.5rem; 
+                        background: {% if item.disponible %}#f8f9fa{% else %}#e9ecef{% endif %}; 
+                        border-radius: 8px; 
+                        border-left: 4px solid {{ nivel_color }};
+                        {% if not item.disponible %}opacity: 0.7;{% endif %}">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+                    <div style="flex: 1; min-width: 250px;">
+                        <h4 style="margin: 0 0 0.75rem 0; color: {% if item.disponible %}#667eea{% else %}#999{% endif %}; font-size: 1.2rem;">
+                            {% if item.completado %}<span style="color: #27ae60;">✓</span> {% endif %}{{ item.test.nombre }}
+                        </h4>
+                        
+                        <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 0.75rem;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; color: #666;">
+                                <span style="font-size: 1.1rem;">⏱️</span>
+                                <span style="font-size: 0.9rem;"><strong>{{ item.test.tiempo_limite }}</strong> minutos</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem; color: #666;">
+                                <span style="font-size: 1.1rem;">📝</span>
+                                <span style="font-size: 0.9rem;"><strong>{{ item.test.total_preguntas }}</strong> preguntas</span>
+                            </div>
+                            {% if item.completado %}
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span style="font-size: 1.1rem;">🎯</span>
+                                    <span style="font-size: 0.9rem; color: {% if item.mejor_puntuacion >= 70 %}#27ae60{% else %}#f39c12{% endif %}; font-weight: bold;">
+                                        {{ item.mejor_puntuacion|floatformat:1 }}%
+                                    </span>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        {% if not item.disponible and not item.completado %}
+                            <div style="background: #fff3cd; border-left: 3px solid #ffc107; padding: 0.75rem; border-radius: 4px; margin-top: 0.5rem;">
+                                <small style="color: #856404; font-size: 0.85rem;">
+                                    ⚠️ Este test está bloqueado. Completa los requisitos previos para desbloquearlo.
+                                </small>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div style="display: flex; align-items: center;">
+                        {% if item.disponible %}
+                            <a href="{% url 'boards:iniciar_test' item.test.id %}" 
+                               class="btn-iniciar-test"
+                               style="background: linear-gradient(135deg, {{ nivel_color }} 0%, {{ nivel_color }}dd 100%); 
+                                      color: white; 
+                                      padding: 1rem 2rem; 
+                                      text-decoration: none; 
+                                      border-radius: 8px; 
+                                      font-weight: 600; 
+                                      white-space: nowrap;
+                                      font-size: 1rem;
+                                      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+                                      transition: transform 0.2s, box-shadow 0.2s;">
+                                {% if item.completado %}🔄 Reintentar{% else %}▶️ Iniciar{% endif %}
+                            </a>
+                        {% else %}
+                            <span class="btn-bloqueado"
+                                  style="color: #999; 
+                                         padding: 1rem 2rem; 
+                                         border: 2px dashed #ddd; 
+                                         border-radius: 8px; 
+                                         font-size: 0.9rem;
+                                         white-space: nowrap;">
+                                🔒 Bloqueado
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div style="background: #f8f9fa; padding: 3rem; border-radius: 8px; text-align: center;">
+            <p style="color: #999; margin: 0; font-size: 1.1rem;">
+                No hay tests disponibles en este nivel.
+            </p>
+        </div>
+    {% endif %}
+
+    <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; text-align: center; margin-top: 2rem;">
+        <p style="color: #666; margin: 0; font-size: 0.9rem;">
+            💡 <strong>Consejo:</strong> Lee bien cada pregunta y tómate tu tiempo. ¡Puedes reintentar los tests cuando quieras!
+        </p>
+    </div>
+</div>
+
+<style>
+    .btn-iniciar-test {
+        display: inline-block;
+    }
+    
+    .btn-iniciar-test:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
+    }
+    
+    @media (max-width: 768px) {
+        .card > div:first-child > div {
+            padding: 1.5rem 1rem !important;
+        }
+        
+        .card > div:first-child > div h2 {
+            font-size: 1.4rem !important;
+        }
+        
+        .btn-iniciar-test,
+        .btn-bloqueado {
+            padding: 0.75rem 1.5rem !important;
+            font-size: 0.9rem !important;
+        }
+    }
+</style>
+{% endblock %}

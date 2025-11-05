@@ -36,7 +36,7 @@ def detalle_tema(request, tema_id):
     )
     progreso.actualizar_progreso()
     
-    # Obtener tests por nivel
+    # Obtener tests por nivel y calcular estadísticas
     tests_por_nivel = {
         'Facil': [],
         'Media': [],
@@ -65,24 +65,90 @@ def detalle_tema(request, tema_id):
         
         tests_por_nivel[test.nivel].append(test_data)
     
-    # Calcular progreso por nivel
-    def calcular_progreso_nivel(tests_nivel):
+    # Calcular progreso y disponibilidad por nivel
+    def calcular_info_nivel(tests_nivel):
         total = len(tests_nivel)
+        if total == 0:
+            return {'progreso': 0, 'completados': 0, 'total': 0, 'disponible': False}
         completados = sum(1 for t in tests_nivel if t['completado'])
-        return (completados / total * 100) if total > 0 else 0
+        disponibles = sum(1 for t in tests_nivel if t['disponible'])
+        return {
+            'progreso': (completados / total * 100) if total > 0 else 0,
+            'completados': completados,
+            'total': total,
+            'disponible': disponibles > 0
+        }
+    
+    niveles_info = {
+        'facil': calcular_info_nivel(tests_por_nivel['Facil']),
+        'intermedio': calcular_info_nivel(tests_por_nivel['Media']),
+        'dificil': calcular_info_nivel(tests_por_nivel['Dificil']),
+    }
     
     context = {
         'tema': tema,
         'progreso': progreso,
-        'tests_facil': tests_por_nivel['Facil'],
-        'tests_intermedio': tests_por_nivel['Media'],
-        'tests_dificil': tests_por_nivel['Dificil'],
-        'progreso_facil': calcular_progreso_nivel(tests_por_nivel['Facil']),
-        'progreso_intermedio': calcular_progreso_nivel(tests_por_nivel['Media']),
-        'progreso_dificil': calcular_progreso_nivel(tests_por_nivel['Dificil']),
+        'niveles_info': niveles_info,
     }
     
     return render(request, 'boards/alumno/detalle_tema.html', context)
+
+
+@login_required
+def tests_nivel(request, tema_id, nivel):
+    """Muestra los tests de un nivel específico de un tema"""
+    tema = get_object_or_404(Tema, tema_id=tema_id)
+    
+    # Mapear nivel URL a nivel en BD
+    nivel_map = {
+        'facil': 'Facil',
+        'intermedio': 'Media',
+        'dificil': 'Dificil',
+    }
+    
+    nivel_bd = nivel_map.get(nivel)
+    if not nivel_bd:
+        return redirect('boards:detalle_tema', tema_id=tema_id)
+    
+    # Obtener tests del nivel
+    tests_tema = tema.tests.filter(activo=True, nivel=nivel_bd).order_by('nombre')
+    
+    tests_data = []
+    for test in tests_tema:
+        # Verificar si está visible y cumple requisitos
+        disponible = test.visible_alumnos and test.alumno_cumple_requisitos(request.user)
+        
+        # Obtener mejor intento
+        mejor_intento = IntentTest.objects.filter(
+            alumno=request.user,
+            test=test,
+            completado=True
+        ).order_by('-puntuacion').first()
+        
+        tests_data.append({
+            'test': test,
+            'disponible': disponible,
+            'completado': mejor_intento is not None,
+            'mejor_puntuacion': mejor_intento.puntuacion if mejor_intento else None,
+        })
+    
+    # Información del nivel
+    nivel_info = {
+        'facil': {'nombre': 'Fácil', 'emoji': '📗', 'color': '#27ae60'},
+        'intermedio': {'nombre': 'Intermedio', 'emoji': '📙', 'color': '#f39c12'},
+        'dificil': {'nombre': 'Difícil', 'emoji': '📕', 'color': '#e74c3c'},
+    }
+    
+    context = {
+        'tema': tema,
+        'nivel': nivel,
+        'nivel_nombre': nivel_info[nivel]['nombre'],
+        'nivel_emoji': nivel_info[nivel]['emoji'],
+        'nivel_color': nivel_info[nivel]['color'],
+        'tests': tests_data,
+    }
+    
+    return render(request, 'boards/alumno/tests_nivel.html', context)
 
 
 @login_required

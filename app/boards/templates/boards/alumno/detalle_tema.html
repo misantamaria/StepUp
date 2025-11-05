@@ -4,152 +4,183 @@
 
 {% block content %}
 <div class="card">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-        <div>
-            <a href="{% url 'boards:dashboard_alumno' %}" style="color: #667eea; text-decoration: none; font-size: 0.9rem;">
-                ← Volver al dashboard
-            </a>
-            <h2 style="color: #667eea; margin: 0.5rem 0;">{{ tema.tema_id }}</h2>
-        </div>
-        <div style="text-align: right;">
-            <div style="font-size: 2rem; font-weight: bold; color: #667eea;">{{ progreso.porcentaje_completado|floatformat:0 }}%</div>
-            <div style="font-size: 0.9rem; color: #666;">Progreso general</div>
-        </div>
-    </div>
-
-    <!-- NIVEL FÁCIL -->
-    <div style="margin-bottom: 2.5rem;">
-        <div style="background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%); color: white; padding: 1rem 1.5rem; border-radius: 8px 8px 0 0; display: flex; justify-content: space-between; align-items: center;">
-            <h3 style="margin: 0; font-size: 1.2rem;">📗 Nivel Fácil</h3>
-            <div style="font-size: 0.9rem; opacity: 0.9;">{{ progreso_facil|floatformat:0 }}% completado</div>
-        </div>
-        <div style="border: 2px solid #27ae60; border-top: none; border-radius: 0 0 8px 8px; padding: 1rem;">
-            {% if tests_facil %}
-                <div style="display: grid; gap: 0.75rem;">
-                    {% for item in tests_facil %}
-                    <div style="padding: 1rem; background: {% if item.disponible %}#f8f9fa{% else %}#e9ecef{% endif %}; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; {% if not item.disponible %}opacity: 0.7;{% endif %}">
-                        <div style="flex: 1;">
-                            <h5 style="margin: 0; color: {% if item.disponible %}#667eea{% else %}#999{% endif %};">
-                                {% if item.completado %}✓{% endif %} {{ item.test.nombre }}
-                            </h5>
-                            <small style="color: #999; margin-top: 0.25rem; display: block;">
-                                ⏱️ {{ item.test.tiempo_limite }} min | 📝 {{ item.test.total_preguntas }} preguntas
-                                {% if item.completado %}
-                                    | <span style="color: {% if item.mejor_puntuacion >= 70 %}#27ae60{% else %}#f39c12{% endif %}; font-weight: bold;">{{ item.mejor_puntuacion|floatformat:1 }}%</span>
-                                {% endif %}
-                            </small>
-                        </div>
-                        {% if item.disponible %}
-                            <a href="{% url 'boards:iniciar_test' item.test.id %}" 
-                               style="background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%); color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 6px; font-weight: 600; white-space: nowrap;">
-                                {% if item.completado %}Reintentar{% else %}Iniciar{% endif %}
-                            </a>
-                        {% else %}
-                            <span style="color: #999; padding: 0.75rem 1.5rem; border: 2px dashed #ddd; border-radius: 6px; font-size: 0.9rem;">
-                                🔒 Bloqueado
-                            </span>
-                        {% endif %}
-                    </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <p style="text-align: center; color: #999; margin: 1rem 0;">No hay tests de nivel fácil</p>
-            {% endif %}
-        </div>
-    </div>
-
-    <!-- NIVEL INTERMEDIO -->
-    <div style="margin-bottom: 2.5rem;">
-        <div style="background: linear-gradient(135deg, #f39c12 0%, #f1c40f 100%); color: white; padding: 1rem 1.5rem; border-radius: 8px 8px 0 0; display: flex; justify-content: space-between; align-items: center;">
-            <h3 style="margin: 0; font-size: 1.2rem;">📙 Nivel Intermedio</h3>
-            <div style="font-size: 0.9rem; opacity: 0.9;">{{ progreso_intermedio|floatformat:0 }}% completado</div>
-        </div>
-        <div style="border: 2px solid #f39c12; border-top: none; border-radius: 0 0 8px 8px; padding: 1rem;">
-            {% if tests_intermedio %}
-                <div style="display: grid; gap: 0.75rem;">
-                    {% for item in tests_intermedio %}
-                    <div style="padding: 1rem; background: {% if item.disponible %}#f8f9fa{% else %}#e9ecef{% endif %}; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; {% if not item.disponible %}opacity: 0.7;{% endif %}">
-                        <div style="flex: 1;">
-                            <h5 style="margin: 0; color: {% if item.disponible %}#667eea{% else %}#999{% endif %};">
-                                {% if item.completado %}✓{% endif %} {{ item.test.nombre }}
-                            </h5>
-                            <small style="color: #999; margin-top: 0.25rem; display: block;">
-                                ⏱️ {{ item.test.tiempo_limite }} min | 📝 {{ item.test.total_preguntas }} preguntas
-                                {% if item.completado %}
-                                    | <span style="color: {% if item.mejor_puntuacion >= 70 %}#27ae60{% else %}#f39c12{% endif %}; font-weight: bold;">{{ item.mejor_puntuacion|floatformat:1 }}%</span>
-                                {% endif %}
-                                {% if not item.disponible and not item.completado %}
-                                    | <span style="color: #e74c3c; font-size: 0.85rem;">⚠️ Completa todos los tests fáciles primero</span>
-                                {% endif %}
-                            </small>
-                        </div>
-                        {% if item.disponible %}
-                            <a href="{% url 'boards:iniciar_test' item.test.id %}" 
-                               style="background: linear-gradient(135deg, #f39c12 0%, #f1c40f 100%); color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 6px; font-weight: 600; white-space: nowrap;">
-                                {% if item.completado %}Reintentar{% else %}Iniciar{% endif %}
-                            </a>
-                        {% else %}
-                            <span style="color: #999; padding: 0.75rem 1.5rem; border: 2px dashed #ddd; border-radius: 6px; font-size: 0.9rem;">
-                                🔒 Bloqueado
-                            </span>
-                        {% endif %}
-                    </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <p style="text-align: center; color: #999; margin: 1rem 0;">No hay tests de nivel intermedio</p>
-            {% endif %}
-        </div>
-    </div>
-
-    <!-- NIVEL DIFÍCIL -->
     <div style="margin-bottom: 2rem;">
-        <div style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white; padding: 1rem 1.5rem; border-radius: 8px 8px 0 0; display: flex; justify-content: space-between; align-items: center;">
-            <h3 style="margin: 0; font-size: 1.2rem;">📕 Nivel Difícil</h3>
-            <div style="font-size: 0.9rem; opacity: 0.9;">{{ progreso_dificil|floatformat:0 }}% completado</div>
-        </div>
-        <div style="border: 2px solid #e74c3c; border-top: none; border-radius: 0 0 8px 8px; padding: 1rem;">
-            {% if tests_dificil %}
-                <div style="display: grid; gap: 0.75rem;">
-                    {% for item in tests_dificil %}
-                    <div style="padding: 1rem; background: {% if item.disponible %}#f8f9fa{% else %}#e9ecef{% endif %}; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; {% if not item.disponible %}opacity: 0.7;{% endif %}">
-                        <div style="flex: 1;">
-                            <h5 style="margin: 0; color: {% if item.disponible %}#667eea{% else %}#999{% endif %};">
-                                {% if item.completado %}✓{% endif %} {{ item.test.nombre }}
-                            </h5>
-                            <small style="color: #999; margin-top: 0.25rem; display: block;">
-                                ⏱️ {{ item.test.tiempo_limite }} min | 📝 {{ item.test.total_preguntas }} preguntas
-                                {% if item.completado %}
-                                    | <span style="color: {% if item.mejor_puntuacion >= 70 %}#27ae60{% else %}#f39c12{% endif %}; font-weight: bold;">{{ item.mejor_puntuacion|floatformat:1 }}%</span>
-                                {% endif %}
-                                {% if not item.disponible and not item.completado %}
-                                    | <span style="color: #e74c3c; font-size: 0.85rem;">⚠️ Completa todos los tests intermedios primero</span>
-                                {% endif %}
-                            </small>
-                        </div>
-                        {% if item.disponible %}
-                            <a href="{% url 'boards:iniciar_test' item.test.id %}" 
-                               style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 6px; font-weight: 600; white-space: nowrap;">
-                                {% if item.completado %}Reintentar{% else %}Iniciar{% endif %}
-                            </a>
-                        {% else %}
-                            <span style="color: #999; padding: 0.75rem 1.5rem; border: 2px dashed #ddd; border-radius: 6px; font-size: 0.9rem;">
-                                🔒 Bloqueado
-                            </span>
-                        {% endif %}
-                    </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <p style="text-align: center; color: #999; margin: 1rem 0;">No hay tests de nivel difícil</p>
-            {% endif %}
+        <a href="{% url 'boards:dashboard_alumno' %}" style="color: #667eea; text-decoration: none; font-size: 0.9rem; display: inline-block; margin-bottom: 1rem;">
+            ← Volver al dashboard
+        </a>
+        <h2 style="color: #667eea; margin: 0.5rem 0 1rem 0;">{{ tema.tema_id }}</h2>
+        <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; text-align: center;">
+            <div style="font-size: 2.5rem; font-weight: bold; color: #667eea; margin-bottom: 0.25rem;">{{ progreso.porcentaje_completado|floatformat:0 }}%</div>
+            <div style="font-size: 0.9rem; color: #666;">Progreso general del tema</div>
         </div>
     </div>
 
-    <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; text-align: center; margin-top: 2rem;">
-        <p style="color: #666; margin: 0;">
+    <h3 style="color: #667eea; margin-bottom: 1.5rem; font-size: 1.1rem;">Selecciona un nivel:</h3>
+
+    <!-- Botones de niveles -->
+    <div style="display: grid; gap: 1.5rem; margin-bottom: 2rem;">
+        
+        <!-- NIVEL FÁCIL -->
+        <a href="{% if niveles_info.facil.disponible %}{% url 'boards:tests_nivel' tema.tema_id 'facil' %}{% else %}#{% endif %}" 
+           class="nivel-card {% if not niveles_info.facil.disponible %}bloqueado{% endif %}">
+            <div class="nivel-content"
+                 style="background: {% if niveles_info.facil.disponible %}linear-gradient(135deg, #27ae60 0%, #2ecc71 100%){% else %}linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%){% endif %}; 
+                        color: white; 
+                        padding: 2rem 1.5rem; 
+                        border-radius: 12px; 
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; pointer-events: none;">
+                    <h3 style="margin: 0; font-size: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <span>📗</span>
+                        <span>Nivel Fácil</span>
+                    </h3>
+                    <span style="font-size: 1.5rem;">{% if niveles_info.facil.disponible %}→{% else %}🔒{% endif %}</span>
+                </div>
+                <div class="stats-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; opacity: 0.95; pointer-events: none;">
+                    <div class="stats-item">
+                        <div style="font-size: 1.8rem; font-weight: bold;">{{ niveles_info.facil.total }}</div>
+                        <div style="font-size: 0.85rem; opacity: 0.9;">Tests</div>
+                    </div>
+                    <div class="stats-item">
+                        <div style="font-size: 1.8rem; font-weight: bold;">{{ niveles_info.facil.completados }}</div>
+                        <div style="font-size: 0.85rem; opacity: 0.9;">Completados</div>
+                    </div>
+                    <div class="stats-item">
+                        <div style="font-size: 1.8rem; font-weight: bold;">{{ niveles_info.facil.progreso|floatformat:0 }}%</div>
+                        <div style="font-size: 0.85rem; opacity: 0.9;">Progreso</div>
+                    </div>
+                </div>
+            </div>
+        </a>
+
+        <!-- NIVEL INTERMEDIO -->
+        <a href="{% if niveles_info.intermedio.disponible %}{% url 'boards:tests_nivel' tema.tema_id 'intermedio' %}{% else %}#{% endif %}" 
+           class="nivel-card {% if not niveles_info.intermedio.disponible %}bloqueado{% endif %}">
+            <div class="nivel-content"
+                 style="background: {% if niveles_info.intermedio.disponible %}linear-gradient(135deg, #f39c12 0%, #f1c40f 100%){% else %}linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%){% endif %}; 
+                        color: white; 
+                        padding: 2rem 1.5rem; 
+                        border-radius: 12px; 
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; pointer-events: none;">
+                    <h3 style="margin: 0; font-size: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <span>📙</span>
+                        <span>Nivel Intermedio</span>
+                    </h3>
+                    <span style="font-size: 1.5rem;">{% if niveles_info.intermedio.disponible %}→{% else %}🔒{% endif %}</span>
+                </div>
+                <div class="stats-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; opacity: 0.95; pointer-events: none;">
+                    <div class="stats-item">
+                        <div style="font-size: 1.8rem; font-weight: bold;">{{ niveles_info.intermedio.total }}</div>
+                        <div style="font-size: 0.85rem; opacity: 0.9;">Tests</div>
+                    </div>
+                    <div class="stats-item">
+                        <div style="font-size: 1.8rem; font-weight: bold;">{{ niveles_info.intermedio.completados }}</div>
+                        <div style="font-size: 0.85rem; opacity: 0.9;">Completados</div>
+                    </div>
+                    <div class="stats-item">
+                        <div style="font-size: 1.8rem; font-weight: bold;">{{ niveles_info.intermedio.progreso|floatformat:0 }}%</div>
+                        <div style="font-size: 0.85rem; opacity: 0.9;">Progreso</div>
+                    </div>
+                </div>
+                {% if not niveles_info.intermedio.disponible and niveles_info.facil.total > 0 %}
+                    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.3); font-size: 0.85rem; opacity: 0.9; pointer-events: none;">
+                        ⚠️ Completa todos los tests fáciles primero
+                    </div>
+                {% endif %}
+            </div>
+        </a>
+
+        <!-- NIVEL DIFÍCIL -->
+        <a href="{% if niveles_info.dificil.disponible %}{% url 'boards:tests_nivel' tema.tema_id 'dificil' %}{% else %}#{% endif %}" 
+           class="nivel-card {% if not niveles_info.dificil.disponible %}bloqueado{% endif %}">
+            <div class="nivel-content"
+                 style="background: {% if niveles_info.dificil.disponible %}linear-gradient(135deg, #e74c3c 0%, #c0392b 100%){% else %}linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%){% endif %}; 
+                        color: white; 
+                        padding: 2rem 1.5rem; 
+                        border-radius: 12px; 
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; pointer-events: none;">
+                    <h3 style="margin: 0; font-size: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <span>📕</span>
+                        <span>Nivel Difícil</span>
+                    </h3>
+                    <span style="font-size: 1.5rem;">{% if niveles_info.dificil.disponible %}→{% else %}🔒{% endif %}</span>
+                </div>
+                <div class="stats-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; opacity: 0.95; pointer-events: none;">
+                    <div class="stats-item">
+                        <div style="font-size: 1.8rem; font-weight: bold;">{{ niveles_info.dificil.total }}</div>
+                        <div style="font-size: 0.85rem; opacity: 0.9;">Tests</div>
+                    </div>
+                    <div class="stats-item">
+                        <div style="font-size: 1.8rem; font-weight: bold;">{{ niveles_info.dificil.completados }}</div>
+                        <div style="font-size: 0.85rem; opacity: 0.9;">Completados</div>
+                    </div>
+                    <div class="stats-item">
+                        <div style="font-size: 1.8rem; font-weight: bold;">{{ niveles_info.dificil.progreso|floatformat:0 }}%</div>
+                        <div style="font-size: 0.85rem; opacity: 0.9;">Progreso</div>
+                    </div>
+                </div>
+                {% if not niveles_info.dificil.disponible and niveles_info.intermedio.total > 0 %}
+                    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.3); font-size: 0.85rem; opacity: 0.9; pointer-events: none;">
+                        ⚠️ Completa todos los tests intermedios primero
+                    </div>
+                {% endif %}
+            </div>
+        </a>
+    </div>
+
+    <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; text-align: center;">
+        <p style="color: #666; margin: 0; font-size: 0.9rem;">
             💡 <strong>Recuerda:</strong> Debes superar todos los tests de un nivel con al menos 70% antes de acceder al siguiente nivel.
         </p>
     </div>
 </div>
+
+<style>
+    .nivel-card {
+        text-decoration: none;
+        display: block;
+        cursor: pointer;
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+    }
+    
+    .nivel-card.bloqueado {
+        cursor: not-allowed !important;
+        opacity: 0.6;
+    }
+    
+    .nivel-card:not(.bloqueado):hover .nivel-content {
+        transform: translateY(-4px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    }
+    
+    .nivel-content {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    @media (max-width: 768px) {
+        .nivel-content {
+            padding: 1.5rem 1rem !important;
+        }
+        
+        .nivel-content h3 {
+            font-size: 1.2rem !important;
+        }
+        
+        .stats-grid {
+            grid-template-columns: 1fr !important;
+            gap: 0.5rem !important;
+        }
+        
+        .stats-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    }
+</style>
 {% endblock %}

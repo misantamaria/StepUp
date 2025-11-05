@@ -44,3 +44,62 @@ def toggle_test_visibility(request, test_id):
         'success': True,
         'visible': test.visible_alumnos
     })
+
+
+@login_required
+@user_passes_test(es_profesor, login_url='/')
+def get_test_details(request, test_id):
+    """Obtiene los detalles de un test para mostrar en el modal de confirmación"""
+    test = get_object_or_404(Test, id=test_id)
+    
+    # Obtener preguntas del test con sus respuestas
+    preguntas_data = []
+    for pregunta in test.preguntas.all():
+        respuestas_data = [
+            {
+                'texto': respuesta.texto,
+                'correcta': respuesta.correcta
+            }
+            for respuesta in pregunta.respuestas.all()
+        ]
+        
+        preguntas_data.append({
+            'enunciado': pregunta.enunciado,
+            'respuestas': respuestas_data
+        })
+    
+    # Contar intentos
+    from boards.models import IntentTest
+    num_intentos = IntentTest.objects.filter(test=test).count()
+    
+    return JsonResponse({
+        'success': True,
+        'total_preguntas': test.preguntas.count(),
+        'tiempo_limite': test.tiempo_limite,
+        'descripcion': test.descripcion or '',
+        'num_intentos': num_intentos,
+        'preguntas': preguntas_data
+    })
+
+
+@login_required
+@user_passes_test(es_profesor, login_url='/')
+@require_POST
+def delete_test(request, test_id):
+    """Elimina un test y todos sus intentos asociados"""
+    try:
+        test = get_object_or_404(Test, id=test_id)
+        test_nombre = test.nombre
+        
+        # Django eliminará automáticamente los intentos relacionados si está configurado CASCADE
+        test.delete()
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Test "{test_nombre}" eliminado correctamente'
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=400)

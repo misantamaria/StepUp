@@ -23,6 +23,8 @@ urlpatterns = [
     path('profesor/', views.dashboard_profesor, name='dashboard_profesor'),
     path('profesor/alumno/<int:alumno_id>/estadisticas/', views.estadisticas_alumno, name='estadisticas_alumno'),
     path('profesor/test/<int:test_id>/toggle-visibility/', views.toggle_test_visibility, name='toggle_test_visibility'),
+    path('profesor/test/<int:test_id>/detalles/', views.get_test_details, name='get_test_details'),
+    path('profesor/test/<int:test_id>/eliminar/', views.delete_test, name='delete_test'),
     
     # Rutas para gestión de preguntas desde BDD
     path('profesor/preguntas/', views_bdd.listar_preguntas, name='listar_preguntas_bdd'),

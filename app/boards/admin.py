@@ -280,6 +280,7 @@ class ProgresoTemaAdmin(admin.ModelAdmin):
     def barra_progreso(self, obj):
         """Muestra una barra de progreso visual"""
         porcentaje = int(obj.porcentaje_completado)
+        porcentaje_texto = f"{obj.porcentaje_completado:.0f}"
         color = '#28a745' if obj.completado else '#007bff'
         if porcentaje < 30:
             color = '#dc3545'
@@ -288,10 +289,10 @@ class ProgresoTemaAdmin(admin.ModelAdmin):
         
         return format_html(
             '<div style="width:100px; height:20px; border:1px solid #ccc; border-radius:3px; background:#f8f9fa;">'
-            '<div style="width:{}%; height:100%; background:{}; border-radius:2px;"></div>'
+            '<div style="width:{0}%; height:100%; background:{1}; border-radius:2px;"></div>'
             '</div>'
-            '<span style="margin-left:5px;">{:.0f}%</span>',
-            porcentaje, color, obj.porcentaje_completado
+            '<span style="margin-left:5px;">{2}%</span>',
+            porcentaje, color, porcentaje_texto
         )
     barra_progreso.short_description = 'Progreso'
     

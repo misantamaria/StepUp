@@ -99,8 +99,16 @@
                             <td style="text-align: center;">{{ test.tiempo_limite }} min</td>
                             <td style="text-align: center;">{{ test.num_intentos|default:0 }}</td>
                             <td style="text-align: center;">
-                                <a href="/admin/boards/test/{{ test.id }}/change/" style="color: {{ THEME_COLORS.primary }}; text-decoration: none; font-weight: 500; font-size: 0.9rem;">
-                                    ✏️ Editar
+                                <a href="/admin/boards/test/{{ test.id }}/change/" 
+                                   style="color: {{ THEME_COLORS.primary }}; text-decoration: none; font-size: 1.2rem; margin-right: 0.5rem;" 
+                                   title="Editar">
+                                    ✏️
+                                </a>
+                                <a href="#" 
+                                   onclick="mostrarModalEliminar({{ test.id }}, '{{ test.nombre|escapejs }}'); return false;"
+                                   style="color: #dc3545; text-decoration: none; font-size: 1.2rem;" 
+                                   title="Eliminar">
+                                    🗑️
                                 </a>
                             </td>
                         </tr>
@@ -125,51 +133,209 @@
     {% endfor %}
 </div>
 
+<!-- Modal de confirmación de eliminación -->
+<div id="modalEliminar" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+    <div style="background: white; border-radius: 12px; padding: 2rem; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+        <h3 style="color: #dc3545; margin-bottom: 1.5rem; font-size: 1.3rem;">⚠️ Confirmar Eliminación de Test</h3>
+        
+        <div style="margin-bottom: 1.5rem; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+            <p style="margin-bottom: 0.5rem;"><strong>Nombre del test:</strong></p>
+            <p id="modalTestNombre" style="color: {{ THEME_COLORS.primary }}; font-size: 1.1rem; margin: 0;"></p>
+        </div>
+
+        <div id="modalTestDetalles" style="margin-bottom: 1.5rem; padding: 1rem; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">
+            <p style="margin: 0; color: #856404;">Cargando detalles del test...</p>
+        </div>
+
+        <div style="background: #fff3cd; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border-left: 4px solid #ffc107;">
+            <p style="margin: 0; color: #856404; font-size: 0.95rem;">
+                <strong>⚠️ Advertencia:</strong> Esta acción eliminará permanentemente el test y todos los intentos asociados. Esta acción no se puede deshacer.
+            </p>
+        </div>
+
+        <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+            <button onclick="cerrarModalEliminar()" style="background: #6c757d; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 1rem;">
+                ❌ No, cancelar
+            </button>
+            <button id="btnConfirmarEliminar" onclick="confirmarEliminarTest()" style="background: #dc3545; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 1rem;">
+                ✅ Sí, eliminar
+            </button>
+        </div>
+    </div>
+</div>
+
 <!-- Sección de estadísticas detalladas (colapsable) -->
 <div id="estadisticas" class="card" style="display: none;">
-    <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem;"> Estadísticas Detalladas</h3>
+    <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem;">Estadísticas Detalladas</h3>
 
-    <h4 style="color: {{ THEME_COLORS.primary }}; margin-top: 2rem; margin-bottom: 1rem;">📋 Últimos Intentos</h4>
-    <table>
-        <thead>
-            <tr>
-                <th>Alumno</th>
-                <th>Test</th>
-                <th>Tema</th>
-                <th>Fecha</th>
-                <th>Puntuación</th>
-                <th>Correctas</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for intento in ultimos_intentos %}
-            <tr>
-                <td><strong>{{ intento.alumno.username }}</strong></td>
-                <td>{{ intento.test.nombre }}</td>
-                <td>{{ intento.test.tema.tema_id|default:"-" }}</td>
-                <td>{{ intento.fecha_fin|date:"d/m/Y H:i" }}</td>
-                <td>
-                    <span style="font-weight: bold; color: {% if intento.puntuacion >= 70 %}{{ THEME_COLORS.success }}{% elif intento.puntuacion >= 50 %}{{ THEME_COLORS.warning }}{% else %}{{ THEME_COLORS.danger }}{% endif %};">
-                        {{ intento.puntuacion|floatformat:1 }}%
-                    </span>
-                </td>
-                <td>{{ intento.respuestas_correctas }}/{{ intento.total_preguntas }}</td>
-                <td>
-                    <a href="{% url 'boards:estadisticas_alumno' intento.alumno.id %}" style="color: {{ THEME_COLORS.primary }}; text-decoration: none; font-weight: 500;">
-                        Ver detalles
-                    </a>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="7" style="text-align: center; color: {{ THEME_COLORS.text_inactive }}; padding: 2rem;">
-                    No hay intentos registrados aún.
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <!-- Resumen de estadísticas agregadas en tabla compacta -->
+    <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
+        <h4 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1rem; font-size: 1.1rem;">Resumen Global</h4>
+        <table style="margin: 0;">
+            <thead>
+                <tr>
+                    <th>Promedio</th>
+                    <th>Máxima</th>
+                    <th>Mínima</th>
+                    <th>Tasa Acierto</th>
+                    <th>Correctas</th>
+                    <th>Total Preguntas</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="text-align: center; font-weight: bold; color: {{ THEME_COLORS.success }};">
+                        {{ estadisticas_intentos.promedio|floatformat:1 }}%
+                    </td>
+                    <td style="text-align: center; font-weight: bold; color: #28a745;">
+                        {{ estadisticas_intentos.puntuacion_maxima|floatformat:1 }}%
+                    </td>
+                    <td style="text-align: center; font-weight: bold; color: #ffc107;">
+                        {{ estadisticas_intentos.puntuacion_minima|floatformat:1 }}%
+                    </td>
+                    <td style="text-align: center; font-weight: bold; color: {{ THEME_COLORS.primary }};">
+                        {{ tasa_acierto_global|floatformat:1 }}%
+                    </td>
+                    <td style="text-align: center;">
+                        {{ estadisticas_intentos.total_respuestas_correctas|default:0 }}
+                    </td>
+                    <td style="text-align: center;">
+                        {{ estadisticas_intentos.total_preguntas_respondidas|default:0 }}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Filtros con selectores -->
+        <!-- Filtros con selectores -->
+    <div style="background: #f8f9fa; padding: 1.25rem; border-radius: 8px; margin-bottom: 1.5rem;">
+        <h4 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1rem; font-size: 1rem;"> Filtros</h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+            <div>
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 0.9rem;">Alumno:</label>
+                <select id="filtroAlumno" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem;">
+                    <option value="">Todos los alumnos</option>
+                    {% for alumno in alumnos_unicos %}
+                        <option value="{{ alumno|lower }}">{{ alumno }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 0.9rem;">Test:</label>
+                <select id="filtroTest" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem;">
+                    <option value="">Todos los tests</option>
+                    {% for test in tests_unicos %}
+                        <option value="{{ test|lower }}">{{ test }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 0.9rem;">Tema:</label>
+                <select id="filtroTema" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem;">
+                    <option value="">Todos los temas</option>
+                    {% for tema in temas_unicos %}
+                        <option value="{{ tema.tema_id|lower }}">{{ tema.tema_id }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 0.9rem;">Puntuación mínima:</label>
+                <select id="filtroPuntuacion" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem;">
+                    <option value="0">Todas</option>
+                    <option value="50">≥ 50%</option>
+                    <option value="60">≥ 60%</option>
+                    <option value="70">≥ 70%</option>
+                    <option value="80">≥ 80%</option>
+                    <option value="90">≥ 90%</option>
+                </select>
+            </div>
+        </div>
+        <div style="margin-top: 1rem; text-align: right;">
+            <button onclick="limpiarFiltros()" style="background: #6c757d; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">
+                Limpiar Filtros
+            </button>
+        </div>
+    </div>
+
+    <!-- Contador de resultados filtrados -->
+    <div id="contadorResultados" style="margin-bottom: 1rem; padding: 0.75rem; background: #e7f3ff; border-left: 4px solid {{ THEME_COLORS.primary }}; border-radius: 4px;">
+        <span style="font-weight: 500;">Mostrando <span id="numResultados">{{ todos_intentos.count }}</span> de {{ todos_intentos.count }} intentos</span>
+    </div>
+
+    <!-- Estadísticas acumuladas de resultados filtrados -->
+    <div id="estadisticasFiltradas" style="background: #f8f9fa; padding: 1.25rem; border-radius: 8px; margin-bottom: 1.5rem;">
+        <h4 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1rem; font-size: 1rem;">Estadísticas de Resultados Actuales</h4>
+        <table style="margin: 0;">
+            <thead>
+                <tr>
+                    <th>Última Fecha</th>
+                    <th>Promedio</th>
+                    <th>Correctas</th>
+                    <th>Total Preguntas</th>
+                    <th>Tasa Acierto</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td id="filtro-ultima-fecha" style="text-align: center; font-weight: 500;">-</td>
+                    <td id="filtro-promedio" style="text-align: center; font-weight: bold; color: {{ THEME_COLORS.success }};">-</td>
+                    <td id="filtro-correctas" style="text-align: center;">-</td>
+                    <td id="filtro-total" style="text-align: center;">-</td>
+                    <td id="filtro-tasa" style="text-align: center; font-weight: bold; color: {{ THEME_COLORS.primary }};">-</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h4 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1rem;">Todos los Intentos</h4>
+    <div style="overflow-x: auto;">
+        <table id="tablaIntentos">
+            <thead>
+                <tr>
+                    <th style="cursor: pointer;" onclick="ordenarTabla('alumno')">Alumno ↕</th>
+                    <th style="cursor: pointer;" onclick="ordenarTabla('test')">Test ↕</th>
+                    <th style="cursor: pointer;" onclick="ordenarTabla('tema')">Tema ↕</th>
+                    <th style="cursor: pointer;" onclick="ordenarTabla('fecha')">Fecha ↕</th>
+                    <th style="cursor: pointer;" onclick="ordenarTabla('puntuacion')">Puntuación ↕</th>
+                    <th>Correctas</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tbodyIntentos">
+                {% for intento in todos_intentos %}
+                <tr class="fila-intento" 
+                    data-alumno="{{ intento.alumno.username|lower }}"
+                    data-test="{{ intento.test.nombre|lower }}"
+                    data-tema="{% if intento.test.tema %}{{ intento.test.tema.tema_id|lower }}{% endif %}"
+                    data-fecha="{{ intento.fecha_fin|date:'Y-m-d H:i' }}"
+                    data-puntuacion="{{ intento.puntuacion }}">
+                    <td><strong>{{ intento.alumno.username }}</strong></td>
+                    <td>{{ intento.test.nombre }}</td>
+                    <td>{% if intento.test.tema %}{{ intento.test.tema.tema_id }}{% else %}-{% endif %}</td>
+                    <td>{{ intento.fecha_fin|date:"d/m/Y H:i" }}</td>
+                    <td>
+                        <span style="font-weight: bold; color: {% if intento.puntuacion >= 70 %}{{ THEME_COLORS.success }}{% elif intento.puntuacion >= 50 %}{{ THEME_COLORS.warning }}{% else %}{{ THEME_COLORS.danger }}{% endif %};">
+                            {{ intento.puntuacion|floatformat:1 }}%
+                        </span>
+                    </td>
+                    <td>{{ intento.respuestas_correctas }}/{{ intento.total_preguntas }}</td>
+                    <td>
+                        <a href="{% url 'boards:estadisticas_alumno' intento.alumno.id %}" style="color: {{ THEME_COLORS.primary }}; text-decoration: none; font-weight: 500; font-size: 0.9rem;">
+                            Ver detalles
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" style="text-align: center; color: {{ THEME_COLORS.text_inactive }}; padding: 2rem;">
+                        No hay intentos registrados aún.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
     <div style="text-align: center; margin-top: 2rem;">
         <button onclick="toggleEstadisticas()" class="btn-secondary" style="width: auto; padding: 0.6rem 1.5rem;">
@@ -251,6 +417,314 @@ function getCookie(name) {
     }
     return cookieValue;
 }
+
+// Variables globales para el modal de eliminación
+let testIdAEliminar = null;
+
+// Función para mostrar el modal de eliminación
+async function mostrarModalEliminar(testId, testNombre) {
+    testIdAEliminar = testId;
+    const modal = document.getElementById('modalEliminar');
+    const modalNombre = document.getElementById('modalTestNombre');
+    const modalDetalles = document.getElementById('modalTestDetalles');
+    
+    modalNombre.textContent = testNombre;
+    modalDetalles.innerHTML = '<p style="margin: 0; color: #856404;">Cargando detalles del test...</p>';
+    
+    modal.style.display = 'flex';
+    
+    // Cargar detalles del test
+    try {
+        const response = await fetch(`/profesor/test/${testId}/detalles/`, {
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+            },
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            let html = '<div style="margin-bottom: 1rem;">';
+            html += `<p style="margin-bottom: 0.5rem;"><strong>Total de preguntas:</strong> ${data.total_preguntas}</p>`;
+            html += `<p style="margin-bottom: 0.5rem;"><strong>Tiempo límite:</strong> ${data.tiempo_limite} minutos</p>`;
+            html += `<p style="margin-bottom: 0.5rem;"><strong>Intentos realizados:</strong> ${data.num_intentos}</p>`;
+            
+            if (data.descripcion) {
+                html += `<p style="margin-bottom: 0.5rem;"><strong>Descripción:</strong></p>`;
+                html += `<p style="margin: 0; padding: 0.5rem; background: white; border-radius: 4px;">${data.descripcion}</p>`;
+            }
+            
+            if (data.preguntas && data.preguntas.length > 0) {
+                html += '<div style="margin-top: 1rem;"><strong>Preguntas del test:</strong></div>';
+                html += '<div style="max-height: 300px; overflow-y: auto; margin-top: 0.5rem;">';
+                
+                data.preguntas.forEach((pregunta, index) => {
+                    html += `<div style="background: white; padding: 0.75rem; margin-bottom: 0.5rem; border-radius: 4px; border-left: 3px solid {{ THEME_COLORS.primary }};">`;
+                    html += `<p style="margin: 0 0 0.5rem 0; font-weight: 500;">${index + 1}. ${pregunta.enunciado}</p>`;
+                    
+                    if (pregunta.respuestas && pregunta.respuestas.length > 0) {
+                        html += '<ul style="margin: 0; padding-left: 1.5rem; font-size: 0.9rem;">';
+                        pregunta.respuestas.forEach(respuesta => {
+                            const color = respuesta.correcta ? '#28a745' : '#6c757d';
+                            const icon = respuesta.correcta ? '✓' : '○';
+                            html += `<li style="color: ${color}; margin-bottom: 0.25rem;">${icon} ${respuesta.texto}</li>`;
+                        });
+                        html += '</ul>';
+                    }
+                    
+                    html += '</div>';
+                });
+                
+                html += '</div>';
+            }
+            
+            html += '</div>';
+            modalDetalles.innerHTML = html;
+        } else {
+            modalDetalles.innerHTML = '<p style="margin: 0; color: #dc3545;">Error al cargar los detalles del test.</p>';
+        }
+    } catch (error) {
+        console.error('Error al cargar detalles:', error);
+        modalDetalles.innerHTML = '<p style="margin: 0; color: #dc3545;">Error al cargar los detalles del test.</p>';
+    }
+}
+
+// Función para cerrar el modal
+function cerrarModalEliminar() {
+    const modal = document.getElementById('modalEliminar');
+    modal.style.display = 'none';
+    testIdAEliminar = null;
+}
+
+// Función para confirmar la eliminación
+async function confirmarEliminarTest() {
+    if (!testIdAEliminar) return;
+    
+    const btnConfirmar = document.getElementById('btnConfirmarEliminar');
+    btnConfirmar.disabled = true;
+    btnConfirmar.textContent = 'Eliminando...';
+    
+    try {
+        const response = await fetch(`/profesor/test/${testIdAEliminar}/eliminar/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json',
+            },
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Eliminar la fila del test de la tabla
+            const row = document.getElementById(`test-row-${testIdAEliminar}`);
+            if (row) {
+                row.style.backgroundColor = '#d4edda';
+                setTimeout(() => {
+                    row.remove();
+                }, 500);
+            }
+            
+            cerrarModalEliminar();
+            
+            // Mostrar mensaje de éxito
+            alert('✅ Test eliminado correctamente');
+            
+            // Recargar la página para actualizar estadísticas
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        } else {
+            alert('❌ Error al eliminar el test: ' + (data.error || 'Error desconocido'));
+            btnConfirmar.disabled = false;
+            btnConfirmar.textContent = '✅ Sí, eliminar';
+        }
+    } catch (error) {
+        console.error('Error al eliminar test:', error);
+        alert('❌ Error al eliminar el test. Por favor, intenta de nuevo.');
+        btnConfirmar.disabled = false;
+        btnConfirmar.textContent = '✅ Sí, eliminar';
+    }
+}
+
+// Cerrar modal al hacer clic fuera de él
+document.addEventListener('click', function(event) {
+    const modal = document.getElementById('modalEliminar');
+    if (event.target === modal) {
+        cerrarModalEliminar();
+    }
+});
+
+// Funciones para filtrado de la tabla de intentos
+function aplicarFiltros() {
+    const filtroAlumno = document.getElementById('filtroAlumno').value.toLowerCase();
+    const filtroTest = document.getElementById('filtroTest').value.toLowerCase();
+    const filtroTema = document.getElementById('filtroTema').value.toLowerCase();
+    const filtroPuntuacion = parseFloat(document.getElementById('filtroPuntuacion').value) || 0;
+    
+    const filas = document.querySelectorAll('.fila-intento');
+    let contador = 0;
+    
+    // Variables para estadísticas acumuladas
+    let sumaPuntuaciones = 0;
+    let sumaCorrectas = 0;
+    let sumaTotal = 0;
+    let ultimaFecha = null;
+    let fechaMasReciente = null;
+    
+    filas.forEach(fila => {
+        const alumno = fila.dataset.alumno;
+        const test = fila.dataset.test;
+        const tema = fila.dataset.tema;
+        const puntuacion = parseFloat(fila.dataset.puntuacion);
+        const fecha = fila.dataset.fecha;
+        
+        const cumpleAlumno = !filtroAlumno || alumno === filtroAlumno;
+        const cumpleTest = !filtroTest || test === filtroTest;
+        const cumpleTema = !filtroTema || tema === filtroTema;
+        const cumplePuntuacion = puntuacion >= filtroPuntuacion;
+        
+        if (cumpleAlumno && cumpleTest && cumpleTema && cumplePuntuacion) {
+            fila.style.display = '';
+            contador++;
+            
+            // Acumular estadísticas
+            sumaPuntuaciones += puntuacion;
+            
+            // Obtener correctas y total de las celdas de la fila
+            const celdas = fila.querySelectorAll('td');
+            const textCorrectas = celdas[5].textContent.trim(); // "X/Y"
+            const [correctas, total] = textCorrectas.split('/').map(n => parseInt(n));
+            
+            sumaCorrectas += correctas;
+            sumaTotal += total;
+            
+            // Verificar si es la fecha más reciente
+            if (!fechaMasReciente || fecha > fechaMasReciente) {
+                fechaMasReciente = fecha;
+                ultimaFecha = fecha;
+            }
+        } else {
+            fila.style.display = 'none';
+        }
+    });
+    
+    // Actualizar contador
+    document.getElementById('numResultados').textContent = contador;
+    
+    // Actualizar estadísticas acumuladas
+    if (contador > 0) {
+        const promedio = sumaPuntuaciones / contador;
+        const tasaAcierto = sumaTotal > 0 ? (sumaCorrectas / sumaTotal * 100) : 0;
+        
+        // Formatear la fecha
+        const fechaObj = new Date(ultimaFecha);
+        const fechaFormateada = fechaObj.toLocaleDateString('es-ES', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        
+        document.getElementById('filtro-ultima-fecha').textContent = fechaFormateada;
+        document.getElementById('filtro-promedio').textContent = promedio.toFixed(1) + '%';
+        document.getElementById('filtro-correctas').textContent = sumaCorrectas;
+        document.getElementById('filtro-total').textContent = sumaTotal;
+        document.getElementById('filtro-tasa').textContent = tasaAcierto.toFixed(1) + '%';
+    } else {
+        // Si no hay resultados, mostrar guiones
+        document.getElementById('filtro-ultima-fecha').textContent = '-';
+        document.getElementById('filtro-promedio').textContent = '-';
+        document.getElementById('filtro-correctas').textContent = '-';
+        document.getElementById('filtro-total').textContent = '-';
+        document.getElementById('filtro-tasa').textContent = '-';
+    }
+}
+
+function limpiarFiltros() {
+    document.getElementById('filtroAlumno').value = '';
+    document.getElementById('filtroTest').value = '';
+    document.getElementById('filtroTema').value = '';
+    document.getElementById('filtroPuntuacion').value = '0';
+    aplicarFiltros();
+}
+
+// Variables para ordenamiento
+let ordenActual = {
+    columna: null,
+    ascendente: true
+};
+
+function ordenarTabla(columna) {
+    const tbody = document.getElementById('tbodyIntentos');
+    const filas = Array.from(tbody.querySelectorAll('.fila-intento'));
+    
+    // Cambiar dirección si es la misma columna
+    if (ordenActual.columna === columna) {
+        ordenActual.ascendente = !ordenActual.ascendente;
+    } else {
+        ordenActual.columna = columna;
+        ordenActual.ascendente = true;
+    }
+    
+    // Ordenar las filas
+    filas.sort((a, b) => {
+        let valorA, valorB;
+        
+        switch(columna) {
+            case 'alumno':
+                valorA = a.dataset.alumno;
+                valorB = b.dataset.alumno;
+                break;
+            case 'test':
+                valorA = a.dataset.test;
+                valorB = b.dataset.test;
+                break;
+            case 'tema':
+                valorA = a.dataset.tema;
+                valorB = b.dataset.tema;
+                break;
+            case 'fecha':
+                valorA = a.dataset.fecha;
+                valorB = b.dataset.fecha;
+                break;
+            case 'puntuacion':
+                valorA = parseFloat(a.dataset.puntuacion);
+                valorB = parseFloat(b.dataset.puntuacion);
+                break;
+            default:
+                return 0;
+        }
+        
+        if (valorA < valorB) return ordenActual.ascendente ? -1 : 1;
+        if (valorA > valorB) return ordenActual.ascendente ? 1 : -1;
+        return 0;
+    });
+    
+    // Reorganizar el DOM
+    filas.forEach(fila => tbody.appendChild(fila));
+    
+    // Recalcular estadísticas después de ordenar
+    aplicarFiltros();
+}
+
+// Event listeners para filtros
+document.addEventListener('DOMContentLoaded', function() {
+    const filtros = ['filtroAlumno', 'filtroTest', 'filtroTema', 'filtroPuntuacion'];
+    filtros.forEach(id => {
+        const elemento = document.getElementById(id);
+        if (elemento) {
+            elemento.addEventListener('change', aplicarFiltros);
+        }
+    });
+    
+    // Calcular estadísticas iniciales al cargar la página
+    if (document.getElementById('estadisticasFiltradas')) {
+        aplicarFiltros();
+    }
+});
+
 </script>
 
 {% endblock %}

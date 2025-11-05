@@ -29,6 +29,8 @@ from .profesor import (
     dashboard_profesor,
     estadisticas_alumno,
     toggle_test_visibility,
+    get_test_details,
+    delete_test,
 )
 
 # Importar decoradores
@@ -56,6 +58,8 @@ __all__ = [
     'dashboard_profesor',
     'estadisticas_alumno',
     'toggle_test_visibility',
+    'get_test_details',
+    'delete_test',
     
     # Decoradores
     'es_alumno',

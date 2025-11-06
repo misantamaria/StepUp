@@ -23,7 +23,7 @@
                 <div style="margin-bottom: 1.5rem;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
                         <h3 style="margin: 0; font-size: 1.5rem; color: {% if stats.bloqueado %}#7f8c8d{% else %}#2c5282{% endif %};">{{ stats.tema.tema_id }}</h3>
-                        <span style="font-size: 1.5rem;">{% if stats.bloqueado %}🔒{% else %}→{% endif %}</span>
+                        <span style="font-size: 1.5rem;">{% if stats.bloqueado %}🔒{% else %}{% endif %}</span>
                     </div>
                     <div style="font-size: 0.95rem; color: #666;">
                         {{ stats.tests_completados }}/{{ stats.total_tests_tema }} tests disponibles

@@ -851,6 +851,11 @@ def resultado_test(request, intento_id):
                         test_disponible = primer_test_nivel.disponible_alumno
                         cumple_requisitos = primer_test_nivel.alumno_cumple_requisitos(request.user)
                         
+                        print(f"[DEBUG] Verificando nivel {nivel}:")
+                        print(f"  - Test: {primer_test_nivel.nombre}")
+                        print(f"  - Test disponible: {test_disponible}")
+                        print(f"  - Cumple requisitos: {cumple_requisitos}")
+                        
                         siguiente_nivel = {
                             'nombre': 'Intermedio' if nivel == 'Media' else nivel,
                             'nivel': nivel,

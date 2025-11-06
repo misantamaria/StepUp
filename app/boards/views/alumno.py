@@ -35,12 +35,21 @@ def seleccionar_modo_alumno(request):
             # Si no viene en URL, usar el de la sesión
             modo_test = request.session.get('modo_test', False)
     
+    # Contar preguntas según el modo
     if es_profesor:
-        tests_disponibles = Test.objects.filter(
-            activo=True, 
-            visible_profesor=True, 
-            disponible_profesor=True
-        )
+        if modo_test:
+            # Modo Test: solo disponible, incluye los no visibles
+            tests_disponibles = Test.objects.filter(
+                activo=True, 
+                disponible_profesor=True
+            )
+        else:
+            # Modo Normal: visible Y disponible
+            tests_disponibles = Test.objects.filter(
+                activo=True, 
+                visible_profesor=True, 
+                disponible_profesor=True
+            )
     else:
         tests_disponibles = Test.objects.filter(
             activo=True, 
@@ -61,7 +70,6 @@ def seleccionar_modo_alumno(request):
     context = {
         'total_preguntas_disponibles': total_preguntas_disponibles,
         'examen_disponible': examen_disponible,
-        'es_profesor': es_profesor,
         'modo_test': modo_test,
     }
     
@@ -74,13 +82,27 @@ def iniciar_examen(request):
     # Si es staff en modo alumno, permitir
     es_profesor = request.user.is_staff
     
-    # Obtener todos los tests visibles y disponibles
+    # Respetar el modo_test de la sesión si es profesor
+    modo_test = False
     if es_profesor:
-        tests_disponibles = Test.objects.filter(
-            activo=True, 
-            visible_profesor=True, 
-            disponible_profesor=True
-        )
+        modo_test = request.session.get('modo_test', False)
+    
+    # Obtener todos los tests visibles y disponibles
+    # En modo_test, solo verificar disponible_profesor (no visible_profesor)
+    if es_profesor:
+        if modo_test:
+            # Modo Test: solo disponible, incluye los no visibles
+            tests_disponibles = Test.objects.filter(
+                activo=True, 
+                disponible_profesor=True
+            )
+        else:
+            # Modo Normal: visible Y disponible
+            tests_disponibles = Test.objects.filter(
+                activo=True, 
+                visible_profesor=True, 
+                disponible_profesor=True
+            )
     else:
         tests_disponibles = Test.objects.filter(
             activo=True, 
@@ -98,11 +120,36 @@ def iniciar_examen(request):
     
     # Verificar que haya al menos 30 preguntas
     if len(preguntas_ids) < 30:
-        messages.error(request, f'No hay suficientes preguntas disponibles. Se necesitan 30 y solo hay {len(preguntas_ids)}.')
-        return redirect('boards:seleccionar_modo_alumno')
-    
-    # Seleccionar 30 preguntas aleatorias
-    preguntas_seleccionadas = random.sample(preguntas_ids, 30)
+        if not es_profesor:
+            # Los alumnos no pueden continuar
+            messages.error(request, f'No hay suficientes preguntas disponibles. Se necesitan 30 y solo hay {len(preguntas_ids)}.')
+            return redirect('boards:seleccionar_modo_alumno')
+        else:
+            # Los profesores pueden continuar pero con advertencia
+            if not modo_test:
+                messages.warning(
+                    request, 
+                    f'⚠️ Este examen está bloqueado para alumnos. Solo hay {len(preguntas_ids)} preguntas disponibles (se necesitan 30). '
+                    f'Activa el "Modo Test" para incluir preguntas no visibles o añade más preguntas visibles.'
+                )
+            else:
+                messages.warning(
+                    request, 
+                    f'⚠️ Este examen está bloqueado para alumnos. Solo hay {len(preguntas_ids)} preguntas disponibles (se necesitan 30). '
+                    f'Añade más preguntas disponibles o hazlas visibles.'
+                )
+            
+            # Si hay menos de 30, usar todas las disponibles
+            if len(preguntas_ids) < 30:
+                num_preguntas = len(preguntas_ids)
+                preguntas_seleccionadas = preguntas_ids
+            else:
+                num_preguntas = 30
+                preguntas_seleccionadas = random.sample(preguntas_ids, 30)
+    else:
+        # Hay suficientes preguntas, seleccionar 30 aleatorias
+        num_preguntas = 30
+        preguntas_seleccionadas = random.sample(preguntas_ids, 30)
     
     # Crear un intento de examen (usaremos un IntentTest especial)
     # Primero, necesitamos crear o obtener un Test especial para exámenes
@@ -134,6 +181,23 @@ def iniciar_examen(request):
     request.session[f'examen_{intento.id}_tiempo_inicio'] = timezone.now().isoformat()
     
     return redirect('boards:realizar_examen', intento_id=intento.id)
+
+
+@login_required
+def cambiar_modo_examen(request):
+    """Cambia el modo test y reinicia el examen"""
+    # Solo profesores pueden cambiar el modo
+    if not request.user.is_staff:
+        messages.error(request, 'No tienes permisos para cambiar el modo.')
+        return redirect('boards:seleccionar_modo_alumno')
+    
+    # Cambiar el modo en la sesión
+    modo_actual = request.session.get('modo_test', False)
+    nuevo_modo = not modo_actual
+    request.session['modo_test'] = nuevo_modo
+    
+    # Redirigir a iniciar un nuevo examen
+    return redirect('boards:iniciar_examen')
 
 
 @login_required
@@ -277,6 +341,7 @@ def realizar_examen(request, intento_id):
         'contestadas': len(respuestas_guardadas),
         'tiempo_restante_segundos': int(tiempo_restante.total_seconds()),
         'es_examen': True,
+        'modo_test': request.session.get('modo_test', False) if request.user.is_staff else False,
     }
     
     return render(request, 'boards/alumno/realizar_test.html', context)

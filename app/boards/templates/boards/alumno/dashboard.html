@@ -17,7 +17,7 @@
                     Estás en modo alumno (sólo tests disponibles)
                 {% endif %}
             </span>
-            <a href="?modo_test={% if modo_test %}false{% else %}true{% endif %}" 
+            <a href="?desde_seleccion=1&modo_test={% if modo_test %}false{% else %}true{% endif %}" 
                style="background: {% if modo_test %}#f39c12{% else %}#667eea{% endif %}; 
                       color: white; 
                       padding: 0.5rem 1rem; 

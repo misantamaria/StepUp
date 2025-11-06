@@ -25,15 +25,9 @@ def get_dashboard_data(user, modo_test=False) -> Dict[str, Any]:
             activo=True,
             disponible_profesor=True
         ).prefetch_related('tests').order_by('tema_id')
-    elif es_profesor:
-        # MODO ALUMNO NORMAL: Solo temas visibles Y disponibles
-        temas_disponibles = Tema.objects.filter(
-            activo=True, 
-            visible_profesor=True, 
-            disponible_profesor=True
-        ).prefetch_related('tests').order_by('tema_id')
     else:
-        # ALUMNO REAL: Solo temas visibles Y disponibles
+        # MODO ALUMNO NORMAL: Solo temas visibles Y disponibles
+        # Esto aplica tanto a alumnos reales como a profesores en modo normal
         temas_disponibles = Tema.objects.filter(
             activo=True, 
             visible_alumnos=True, 
@@ -60,10 +54,10 @@ def get_dashboard_data(user, modo_test=False) -> Dict[str, Any]:
             progreso.save()
         
         # Obtener tests del tema que están activos
-        # Si es profesor, mostrar tests con visible_profesor=True AND disponible_profesor=True
-        # Si es alumno, mostrar tests con visible_alumnos=True AND disponible_alumno=True
-        if es_profesor:
-            tests_del_tema = tema.tests.filter(activo=True, visible_profesor=True, disponible_profesor=True)
+        # En modo test, mostrar tests con disponible_profesor=True
+        # En modo normal (profesor o alumno), mostrar tests con visible_alumnos=True AND disponible_alumno=True
+        if es_profesor and modo_test:
+            tests_del_tema = tema.tests.filter(activo=True, disponible_profesor=True)
         else:
             tests_del_tema = tema.tests.filter(activo=True, visible_alumnos=True, disponible_alumno=True)
         

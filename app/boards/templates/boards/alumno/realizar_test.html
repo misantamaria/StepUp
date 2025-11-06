@@ -11,13 +11,47 @@
                 <h2 style="margin: 0; color: white;">{% if es_examen %}EXAMEN{% else %}{{ intento.test.nombre }}{% endif %}</h2>
                 <div style="margin-top: 0.5rem; opacity: 0.9;">
                     {% if es_examen %}
-                        30 preguntas aleatorias - 20 minutos
+                        {{ total_preguntas }} preguntas aleatorias - 20 minutos
                     {% else %}
                         Tiempo límite: {{ intento.test.tiempo_limite }} minutos
                     {% endif %}
                 </div>
             </div>
-            {% if es_examen %}
+            
+            {% if es_examen and user.is_staff %}
+            <!-- Toggle Modo Test para profesores en examen -->
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <a href="{% url 'boards:cambiar_modo_examen' %}" 
+                   style="background: rgba(255, 255, 255, {% if modo_test %}0.25{% else %}0.15{% endif %}); 
+                          padding: 0.75rem 1rem; 
+                          border-radius: 8px; 
+                          border: 2px solid rgba(255, 255, 255, 0.4);
+                          text-decoration: none;
+                          color: white;
+                          transition: all 0.2s;
+                          cursor: pointer;"
+                   onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'"
+                   onmouseout="this.style.background='rgba(255, 255, 255, {% if modo_test %}0.25{% else %}0.15{% endif %})'"
+                   title="{% if modo_test %}Cambiar a modo normal (solo preguntas visibles){% else %}Activar modo test (incluir preguntas no visibles){% endif %}">
+                    <div style="font-size: 0.75rem; opacity: 0.9; margin-bottom: 0.3rem;">MODO</div>
+                    <div style="font-size: 0.9rem; font-weight: bold;">
+                        {% if modo_test %}Modo Test{% else %}Normal{% endif %}
+                    </div>
+                </a>
+                <div id="temporizador" style="
+                    background: rgba(255, 255, 255, 0.2); 
+                    padding: 1rem 2rem; 
+                    border-radius: 8px; 
+                    text-align: center;
+                    border: 2px solid rgba(255, 255, 255, 0.3);
+                ">
+                    <div style="font-size: 0.8rem; opacity: 0.9; margin-bottom: 0.3rem;">TIEMPO RESTANTE</div>
+                    <div id="tiempo" style="font-size: 2rem; font-weight: bold; font-family: 'Courier New', monospace;">
+                        --:--
+                    </div>
+                </div>
+            </div>
+            {% elif es_examen %}
             <div id="temporizador" style="
                 background: rgba(255, 255, 255, 0.2); 
                 padding: 1rem 2rem; 
@@ -81,28 +115,34 @@
         </div>
         
         <!-- Botones de navegación -->
-        <div style="display:flex; gap:1rem; justify-content:space-between; align-items:center; flex-wrap:wrap; margin-bottom:2rem;">
+        <div style="display:flex; gap:1rem; justify-content:space-between; align-items:center; max-width:50%; margin:0 auto 2rem auto;">
         
           {% if not es_primera %}
           <button type="submit"
                   onclick="document.getElementById('action').value='anterior'"
-                  class="btn-nav btn-anterior">
+                  class="btn-nav btn-anterior"
+                  style="flex:1;">
             ← Anterior
           </button>
+          {% else %}
+          <!-- Espacio vacío para mantener la posición -->
+          <div style="flex:1;"></div>
           {% endif %}
       
           {% if not es_ultima %}
           <!-- Mostrar SOLO si hay siguiente -->
           <button type="submit"
                   onclick="document.getElementById('action').value='siguiente'"
-                  class="btn-nav btn-siguiente">
+                  class="btn-nav btn-siguiente"
+                  style="flex:1;">
             Siguiente →
           </button>
           {% else %}
           <!-- Mostrar SOLO cuando ya no quedan preguntas -->
           <button type="button"
                   onclick="mostrarConfirmacion()"
-                  class="btn-nav btn-finalizar">
+                  class="btn-nav btn-finalizar"
+                  style="flex:1;">
             ✓ Finalizar Test
           </button>
           {% endif %}
@@ -264,32 +304,33 @@
     cursor: pointer;
     transition: all 0.3s;
     min-width: 150px;
+    width: auto !important; /* Sobrescribir el width: 100% global */
 }
 
 .btn-anterior, .btn-siguiente {
-    background: linear-gradient(135deg, #2c5282 0%, #1a4d7a 100%);
-    color: white;
+    background: linear-gradient(135deg, #2c5282 0%, #1a4d7a 100%) !important;
+    color: white !important;
 }
 
 .btn-anterior:hover:not(:disabled), .btn-siguiente:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(44, 82, 130, 0.3);
+    background: linear-gradient(135deg, #2c5282 0%, #1a4d7a 100%) !important;
+    transform: none !important;
 }
 
 .btn-anterior:disabled, .btn-siguiente:disabled {
-    background: #ccc;
+    background: #ccc !important;
     cursor: not-allowed;
     opacity: 0.5;
 }
 
 .btn-finalizar {
-    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-    color: white;
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+    color: white !important;
 }
 
 .btn-finalizar:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+    transform: none !important
 }
 
 /* Grid de preguntas */

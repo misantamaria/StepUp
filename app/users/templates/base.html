@@ -209,6 +209,33 @@
     .footer a:hover {
       text-decoration: underline;
     }
+    /* Botones de navegación - sin bordes, solo texto */
+    nav button.nav-btn-header {
+      background: transparent;
+      color: {{ THEME_COLORS.bg_dark }};
+      border: none; /* Sin borde */
+      border-radius: 6px;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: inherit;
+      transition: all 0.3s;
+      display: inline-block;
+      text-decoration: none;
+      font-family: inherit;
+    }
+    nav button.nav-btn-header:hover {
+      background: rgba(0, 0, 0, 0.05); /* Fondo muy sutil al pasar el ratón */
+      color: {{ THEME_COLORS.primary }};
+    }
+    /* Enlaces en el nav de navegación - mismo estilo que los botones */
+    .content-wrapper nav a {
+      color: {{ THEME_COLORS.bg_dark }} !important;
+    }
+    .content-wrapper nav a:hover {
+      background: rgba(0, 0, 0, 0.05);
+      color: {{ THEME_COLORS.primary }} !important;
+    }
   </style>
   {% block extra_css %}{% endblock %}
 </head>
@@ -246,6 +273,27 @@
     </header>
 
     <div class="content-wrapper">
+      <!-- Botones de navegación -->
+      {% if request.user.is_authenticated %}
+      <nav style="padding: 0; background: transparent; box-shadow: none; margin-bottom: 1rem; max-width: 12.5%; display: flex; align-items: center; gap: 0.5rem;">
+        <button class="nav-btn-header" onclick="window.history.back()" title="Volver atrás">
+          Atrás
+        </button>
+        <button class="nav-btn-header" onclick="window.history.forward()" title="Avanzar">
+          Adelante
+        </button>
+        {% if request.user.is_staff %}
+          {% if request.session.modo_actual == 'profesor' %}
+            <a href="{% url 'boards:dashboard_profesor' %}" title="Dashboard Profesor">Inicio</a>
+          {% else %}
+            <a href="{% url 'boards:seleccionar_modo_alumno' %}" title="Selección de modo">Inicio</a>
+          {% endif %}
+        {% else %}
+          <a href="{% url 'boards:seleccionar_modo_alumno' %}" title="Menú principal">Inicio</a>
+        {% endif %}
+      </nav>
+      {% endif %}
+      
       {% if messages %}
       <div class="messages">
         {% for message in messages %}
@@ -263,6 +311,7 @@
       <p>StepUp - Proyecto de Innovación Educativa | Estructuras de Datos | <a href="https://www.etsisi.upm.es/" target="_blank">ETSISI - UPM</a></p>
     </div>
   </div>
+
   {% block extra_js %}{% endblock %}
 </body>
 </html>

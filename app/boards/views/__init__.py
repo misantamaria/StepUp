@@ -24,6 +24,7 @@ from .alumno import (
     iniciar_test,
     realizar_test,
     resultado_test,
+    mi_progreso,
 )
 
 # Importar vistas de profesor
@@ -57,6 +58,7 @@ __all__ = [
     'iniciar_test',
     'realizar_test',
     'resultado_test',
+    'mi_progreso',
     
     # Profesor
     'dashboard_profesor',

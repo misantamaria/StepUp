@@ -326,3 +326,104 @@ def resultado_test(request, intento_id):
         'total_correctas': len(respuestas_correctas),
     }
     return render(request, 'boards/alumno/resultado.html', context)
+
+
+@login_required
+def mi_progreso(request):
+    """Muestra estadísticas detalladas del progreso del alumno"""
+    from django.db.models import Avg, Count, Sum, Max
+    
+    # Estadísticas generales
+    total_intentos = IntentTest.objects.filter(alumno=request.user, completado=True).count()
+    
+    if total_intentos > 0:
+        promedio_general = IntentTest.objects.filter(
+            alumno=request.user, 
+            completado=True
+        ).aggregate(Avg('puntuacion'))['puntuacion__avg']
+        
+        nota_general = promedio_general / 10 if promedio_general else 0
+        
+        # Total de preguntas respondidas
+        total_respuestas = RespuestaAlumno.objects.filter(
+            intento__alumno=request.user,
+            intento__completado=True
+        ).count()
+        
+        total_correctas = RespuestaAlumno.objects.filter(
+            intento__alumno=request.user,
+            intento__completado=True,
+            es_correcta=True
+        ).count()
+        
+        total_fallidas = total_respuestas - total_correctas
+        
+        porcentaje_acierto = (total_correctas / total_respuestas * 100) if total_respuestas > 0 else 0
+    else:
+        promedio_general = 0
+        nota_general = 0
+        total_respuestas = 0
+        total_correctas = 0
+        total_fallidas = 0
+        porcentaje_acierto = 0
+    
+    # Estadísticas por tema
+    estadisticas_temas = []
+    temas = Tema.objects.all()
+    
+    for tema in temas:
+        intentos_tema = IntentTest.objects.filter(
+            alumno=request.user,
+            test__tema=tema,
+            completado=True
+        )
+        
+        if intentos_tema.exists():
+            promedio_tema = intentos_tema.aggregate(Avg('puntuacion'))['puntuacion__avg']
+            total_tests_tema = intentos_tema.count()
+            mejor_intento = intentos_tema.order_by('-puntuacion').first()
+            
+            # Preguntas por tema
+            respuestas_tema = RespuestaAlumno.objects.filter(
+                intento__in=intentos_tema,
+                pregunta__tema=tema.tema_id
+            )
+            
+            total_preg_tema = respuestas_tema.count()
+            correctas_tema = respuestas_tema.filter(es_correcta=True).count()
+            fallidas_tema = total_preg_tema - correctas_tema
+            
+            estadisticas_temas.append({
+                'tema': tema,
+                'promedio': promedio_tema,
+                'nota': promedio_tema / 10,
+                'total_tests': total_tests_tema,
+                'mejor_puntuacion': mejor_intento.puntuacion,
+                'total_preguntas': total_preg_tema,
+                'correctas': correctas_tema,
+                'fallidas': fallidas_tema,
+                'porcentaje_acierto': (correctas_tema / total_preg_tema * 100) if total_preg_tema > 0 else 0
+            })
+    
+    # Ordenar por promedio descendente
+    estadisticas_temas.sort(key=lambda x: x['promedio'], reverse=True)
+    
+    # Últimos 10 intentos
+    ultimos_intentos = IntentTest.objects.filter(
+        alumno=request.user,
+        completado=True
+    ).select_related('test', 'test__tema').order_by('-fecha_fin')[:10]
+    
+    context = {
+        'total_intentos': total_intentos,
+        'nota_general': nota_general,
+        'promedio_general': promedio_general,
+        'total_respuestas': total_respuestas,
+        'total_correctas': total_correctas,
+        'total_fallidas': total_fallidas,
+        'porcentaje_acierto': porcentaje_acierto,
+        'estadisticas_temas': estadisticas_temas,
+        'ultimos_intentos': ultimos_intentos,
+    }
+    
+    return render(request, 'boards/alumno/mi_progreso.html', context)

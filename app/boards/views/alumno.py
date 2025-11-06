@@ -18,8 +18,14 @@ def dashboard_alumno(request):
     # Permitir a staff ver el modo alumno cuando está en sesión
     if request.user.is_staff:
         request.session['modo_actual'] = 'alumno'
+        # Verificar si está en modo test (parámetro GET)
+        modo_test = request.GET.get('modo_test', 'false').lower() == 'true'
+        request.session['modo_test'] = modo_test
+    else:
+        modo_test = False
     
-    context = alumno_dashboard_data(request.user)
+    context = alumno_dashboard_data(request.user, modo_test=modo_test)
+    context['modo_test'] = modo_test  # Pasar al template
     return render(request, 'boards/alumno/dashboard.html', context)
 
 

@@ -4,26 +4,55 @@
 
 {% block content %}
 <div class="card">
-    <h2 style="color: #667eea; margin-bottom: 2rem;">Tests de Estructuras de Datos</h2>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h2 style="color: #667eea; margin: 0;">Tests de Estructuras de Datos</h2>
+        
+        {% if user.is_staff %}
+        <!-- Toggle Modo Test (solo para profesores) -->
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <span style="font-size: 0.9rem; color: #666;">
+                {% if modo_test %}
+                    Estás en modo Test (incluye tests de pruebas)
+                {% else %}
+                    Estás en modo alumno (sólo tests disponibles)
+                {% endif %}
+            </span>
+            <a href="?modo_test={% if modo_test %}false{% else %}true{% endif %}" 
+               style="background: {% if modo_test %}#f39c12{% else %}#667eea{% endif %}; 
+                      color: white; 
+                      padding: 0.5rem 1rem; 
+                      border-radius: 6px; 
+                      text-decoration: none; 
+                      font-size: 0.9rem;
+                      font-weight: 500;">
+                {% if modo_test %}Sólo tests disponibles{% else %}Incluir tests de prueba{% endif %}
+            </a>
+        </div>
+        {% endif %}
+    </div>
 
     {% if tests_por_tema %}
         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; margin-top: 1.5rem;">
             {% for item in tests_por_tema %}
-            <a href="{% if item.tiene_tests_visibles %}{% url 'boards:detalle_tema' item.tema.tema_id %}{% else %}#{% endif %}" 
-               style="text-decoration: none; display: block; {% if not item.tiene_tests_visibles %}cursor: not-allowed; opacity: 0.6;{% endif %}">
-                <div style="background: {% if item.bloqueado %}linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%){% else %}linear-gradient(135deg, {{ THEME_COLORS.primary }} 0%, {{ THEME_COLORS.bg_medium }} 100%){% endif %}; 
+            <a href="{% if item.tiene_tests_visibles and item.tema_visible %}{% url 'boards:detalle_tema' item.tema.tema_id %}{% else %}#{% endif %}" 
+               style="text-decoration: none; display: block; {% if not item.tiene_tests_visibles or not item.tema_visible %}cursor: not-allowed; opacity: 0.6;{% endif %}">
+                <div style="background: {% if item.bloqueado or not item.tema_visible %}linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%){% else %}linear-gradient(135deg, {{ THEME_COLORS.primary }} 0%, {{ THEME_COLORS.bg_medium }} 100%){% endif %}; 
                             color: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); 
                             transition: transform 0.2s, box-shadow 0.2s; 
-                            {% if item.tiene_tests_visibles %}cursor: pointer;{% endif %}
+                            {% if item.tiene_tests_visibles and item.tema_visible %}cursor: pointer;{% endif %}
                             position: relative;">
                     
-                    {% if item.bloqueado %}
+                    {% if item.bloqueado or not item.tema_visible %}
                         <div style="position: absolute; top: 1rem; right: 1rem; font-size: 2rem;">🔒</div>
                     {% endif %}
                     
                     <h4 style="margin: 0 0 0.5rem 0; font-size: 1.3rem;">{{ item.tema.tema_id }}</h4>
                     
-                    {% if item.tiene_tests_visibles %}
+                    {% if modo_test and not item.tema_visible %}
+                        <p style="margin: 0.5rem 0; opacity: 0.9; font-size: 0.85rem; background: rgba(255,255,255,0.2); padding: 0.25rem 0.5rem; border-radius: 4px; display: inline-block;">
+                            📝 Borrador - No visible para alumnos
+                        </p>
+                    {% elif item.tiene_tests_visibles %}
                         <p style="margin: 0.5rem 0; opacity: 0.9; font-size: 0.9rem;">
                             {{ item.tests|length }} test{{ item.tests|length|pluralize:"s" }} disponible{{ item.tests|length|pluralize:"s" }}
                         </p>

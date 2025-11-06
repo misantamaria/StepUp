@@ -6,22 +6,35 @@ from collections import defaultdict
 from boards.models import Test, IntentTest, RespuestaAlumno, Tema, ProgresoTema, Pregunta, Respuesta
 
 
-def get_dashboard_data(user) -> Dict[str, Any]:
-    """Datos para el dashboard del alumno - organizado por temas."""
+def get_dashboard_data(user, modo_test=False) -> Dict[str, Any]:
+    """Datos para el dashboard del alumno - organizado por temas.
+    
+    Args:
+        user: Usuario actual
+        modo_test: Si True, el profesor ve TODOS los temas disponibles para él (visibles o no)
+                   para poder testear. Los no visibles aparecen bloqueados/grises.
+    """
     # Determinar si el usuario es staff (profesor en modo alumno)
     es_profesor = user.is_staff
     
-    # Obtener temas según visibilidad y disponibilidad
-    # Si es profesor, mostrar temas con visible_profesor=True AND disponible_profesor=True AND activo=True
-    # Si es alumno, mostrar temas con visible_alumnos=True AND disponible_alumno=True AND activo=True
-    if es_profesor:
-        temas_visibles = Tema.objects.filter(
+    # Obtener temas según el modo
+    if es_profesor and modo_test:
+        # MODO TEST: Mostrar TODOS los temas disponibles para profesor (visibles o no)
+        # Esto permite ver qué hay en borrador vs qué está publicado
+        temas_disponibles = Tema.objects.filter(
+            activo=True,
+            disponible_profesor=True
+        ).prefetch_related('tests').order_by('tema_id')
+    elif es_profesor:
+        # MODO ALUMNO NORMAL: Solo temas visibles Y disponibles
+        temas_disponibles = Tema.objects.filter(
             activo=True, 
             visible_profesor=True, 
             disponible_profesor=True
         ).prefetch_related('tests').order_by('tema_id')
     else:
-        temas_visibles = Tema.objects.filter(
+        # ALUMNO REAL: Solo temas visibles Y disponibles
+        temas_disponibles = Tema.objects.filter(
             activo=True, 
             visible_alumnos=True, 
             disponible_alumno=True
@@ -29,7 +42,12 @@ def get_dashboard_data(user) -> Dict[str, Any]:
     
     # Organizar tests por tema
     tests_por_tema = []
-    for tema in temas_visibles:
+    for tema in temas_disponibles:
+        # En modo test, verificar si el tema está visible o solo disponible
+        tema_visible = True
+        if es_profesor and modo_test:
+            tema_visible = tema.visible_profesor
+        
         # Obtener o crear el progreso del tema para este alumno
         progreso, created = ProgresoTema.objects.get_or_create(
             alumno=user,
@@ -73,13 +91,19 @@ def get_dashboard_data(user) -> Dict[str, Any]:
         
         tiene_tests_visibles = len(tests_disponibles) > 0
         
+        # En modo test, marcar como bloqueado si el tema NO es visible (aunque sea disponible)
+        bloqueado = not tiene_tests_visibles
+        if es_profesor and modo_test and not tema_visible:
+            bloqueado = True
+        
         tests_por_tema.append({
             'tema': tema,
             'progreso': progreso,
             'tests': tests_disponibles,
             'tests_por_nivel': tests_por_nivel,
             'tiene_tests_visibles': tiene_tests_visibles,
-            'bloqueado': not tiene_tests_visibles,
+            'bloqueado': bloqueado,
+            'tema_visible': tema_visible,  # Nuevo: indica si el tema está visible o solo disponible
         })
     
     # Últimos intentos del alumno

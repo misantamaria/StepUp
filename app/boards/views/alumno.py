@@ -795,20 +795,130 @@ def resultado_test(request, intento_id):
     if session_key_pregunta in request.session:
         del request.session[session_key_pregunta]
     
-    # Obtener el siguiente test disponible (visible, disponible y con requisitos cumplidos)
+    # Determinar el siguiente elemento de forma lineal según el orden de los tests
     siguiente_test = None
-    tests_candidatos = Test.objects.filter(
-        visible_alumnos=True,
-        disponible_alumno=True
-    ).exclude(
-        id=intento.test.id
-    ).order_by('id')
+    siguiente_nivel = None
+    siguiente_tema = None
+    tipo_siguiente = None  # 'test', 'nivel', 'tema'
+    siguiente_bloqueado = False
     
-    # Filtrar por requisitos cumplidos
-    for test in tests_candidatos:
-        if test.alumno_cumple_requisitos(request.user):
-            siguiente_test = test
-            break
+    test_actual = intento.test
+    
+    # Si el test tiene tema y nivel, buscar siguiente de forma estructurada
+    if test_actual.tema and test_actual.nivel:
+        # 1. Buscar SIGUIENTE test en la LISTA del MISMO nivel y tema (por orden de ID)
+        siguiente_test_mismo_nivel = Test.objects.filter(
+            tema=test_actual.tema,
+            nivel=test_actual.nivel,
+            visible_alumnos=True,
+            disponible_alumno=True,
+            activo=True,
+            id__gt=test_actual.id  # Tests con ID mayor (siguientes en la lista)
+        ).order_by('id').first()
+        
+        if siguiente_test_mismo_nivel:
+            # Hay más tests en este nivel
+            siguiente_test = siguiente_test_mismo_nivel
+            tipo_siguiente = 'test'
+            siguiente_bloqueado = not siguiente_test_mismo_nivel.alumno_cumple_requisitos(request.user)
+        else:
+            # No hay más tests en este nivel, buscar siguiente nivel
+            nivel_orden = {'Facil': 1, 'Media': 2, 'Dificil': 3}
+            nivel_actual_orden = nivel_orden.get(test_actual.nivel, 1)
+            
+            # Buscar el siguiente nivel en orden
+            for nivel, orden in sorted(nivel_orden.items(), key=lambda x: x[1]):
+                if orden > nivel_actual_orden:
+                    # Buscar primer test de este nivel (sin filtrar por disponible_alumno)
+                    primer_test_nivel = Test.objects.filter(
+                        tema=test_actual.tema,
+                        nivel=nivel,
+                        visible_alumnos=True,
+                        activo=True
+                    ).order_by('id').first()
+                    
+                    if primer_test_nivel:
+                        # Verificar disponibilidad para mostrar bloqueado o no
+                        test_disponible = primer_test_nivel.disponible_alumno
+                        cumple_requisitos = primer_test_nivel.alumno_cumple_requisitos(request.user)
+                        
+                        siguiente_nivel = {
+                            'nombre': 'Intermedio' if nivel == 'Media' else nivel,
+                            'nivel': nivel,
+                            'tema': test_actual.tema,
+                            'test': primer_test_nivel
+                        }
+                        tipo_siguiente = 'nivel'
+                        siguiente_bloqueado = not test_disponible or not cumple_requisitos
+                        break
+            
+            # 3. Si no hay más niveles en este tema, buscar siguiente tema
+            if not siguiente_nivel:
+                temas_disponibles = Tema.objects.filter(
+                    visible_alumnos=True,
+                    activo=True
+                ).order_by('tema_id')
+                
+                tema_encontrado = False
+                for tema in temas_disponibles:
+                    # Buscar temas después del actual
+                    if tema_encontrado:
+                        # Verificar si el tema está disponible
+                        tema_disponible = tema.disponible_alumno
+                        
+                        # Buscar primer test del nivel Fácil del siguiente tema (sin filtrar por disponible)
+                        primer_test = Test.objects.filter(
+                            tema=tema,
+                            nivel='Facil',
+                            visible_alumnos=True,
+                            activo=True
+                        ).order_by('id').first()
+                        
+                        # Si no hay tests de nivel fácil, buscar cualquier test
+                        if not primer_test:
+                            primer_test = Test.objects.filter(
+                                tema=tema,
+                                visible_alumnos=True,
+                                activo=True
+                            ).order_by('id').first()
+                        
+                        if primer_test:
+                            test_disponible = primer_test.disponible_alumno
+                            cumple_requisitos = primer_test.alumno_cumple_requisitos(request.user)
+                            
+                            siguiente_tema = {
+                                'tema': tema,
+                                'test': primer_test
+                            }
+                            tipo_siguiente = 'tema'
+                            # Bloqueado si el tema no está disponible O el test no está disponible O no cumple requisitos
+                            siguiente_bloqueado = not tema_disponible or not test_disponible or not cumple_requisitos
+                            break
+                    
+                    # Marcar cuando encontremos el tema actual
+                    if tema.tema_id == test_actual.tema.tema_id:
+                        tema_encontrado = True
+    else:
+        # Fallback: buscar siguiente test sin estructura de tema/nivel
+        tests_candidatos = Test.objects.filter(
+            visible_alumnos=True,
+            disponible_alumno=True,
+            activo=True
+        ).exclude(id=test_actual.id).order_by('id')
+        
+        for test in tests_candidatos:
+            if test.alumno_cumple_requisitos(request.user):
+                siguiente_test = test
+                tipo_siguiente = 'test'
+                break
+    
+    # DEBUG: Imprimir valores para verificar
+    print(f"[DEBUG RESULTADO] Test actual: {test_actual.nombre} (Tema: {test_actual.tema.tema_id if test_actual.tema else 'Sin tema'}, Nivel: {test_actual.nivel})")
+    print(f"[DEBUG RESULTADO] tipo_siguiente: {tipo_siguiente}")
+    print(f"[DEBUG RESULTADO] siguiente_test: {siguiente_test}")
+    print(f"[DEBUG RESULTADO] siguiente_nivel: {siguiente_nivel}")
+    print(f"[DEBUG RESULTADO] siguiente_tema: {siguiente_tema}")
+    print(f"[DEBUG RESULTADO] siguiente_bloqueado: {siguiente_bloqueado}")
     
     context = {
         'intento': intento,
@@ -819,6 +929,11 @@ def resultado_test(request, intento_id):
         'total_correctas': len(respuestas_correctas),
         'total_sin_contestar': total_sin_contestar,
         'siguiente_test': siguiente_test,
+        'siguiente_nivel': siguiente_nivel,
+        'siguiente_tema': siguiente_tema,
+        'tipo_siguiente': tipo_siguiente,
+        'siguiente_bloqueado': siguiente_bloqueado,
+        'debug': True,  # DEBUG temporal
     }
     return render(request, 'boards/alumno/resultado.html', context)
 

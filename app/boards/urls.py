@@ -16,6 +16,8 @@ urlpatterns = [
     # Rutas para alumnos
     path('alumno/', views.dashboard_alumno, name='dashboard_alumno'),
     path('alumno/progreso/', views.mi_progreso, name='mi_progreso'),
+    path('alumno/progreso/temas/', views.estadisticas_temas, name='estadisticas_temas'),
+    path('alumno/progreso/historial/', views.historial_intentos, name='historial_intentos'),
     path('alumno/tema/<str:tema_id>/', views.detalle_tema, name='detalle_tema'),
     path('alumno/tema/<str:tema_id>/<str:nivel>/', views.tests_nivel, name='tests_nivel'),
     path('alumno/test/<int:test_id>/iniciar/', views.iniciar_test, name='iniciar_test'),
@@ -25,7 +27,8 @@ urlpatterns = [
     # Rutas para profesores
     path('profesor/', views.dashboard_profesor, name='dashboard_profesor'),
     path('profesor/alumno/<int:alumno_id>/estadisticas/', views.estadisticas_alumno, name='estadisticas_alumno'),
-    path('profesor/test/<int:test_id>/toggle-visibility/', views.toggle_test_visibility, name='toggle_test_visibility'),
+    path('profesor/test/<int:test_id>/toggle-field/', views.toggle_test_field, name='toggle_test_field'),
+    path('profesor/tema/<str:tema_id>/toggle-field/', views.toggle_tema_field, name='toggle_tema_field'),
     path('profesor/test/<int:test_id>/detalles/', views.get_test_details, name='get_test_details'),
     path('profesor/test/<int:test_id>/eliminar/', views.delete_test, name='delete_test'),
     

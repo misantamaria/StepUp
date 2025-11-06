@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% load custom_filters %}
+
+{% block title %}Estadísticas por Tema - StepUp{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 1400px; margin: 0 auto;">
+    <a href="{% url 'boards:mi_progreso' %}" style="color: #667eea; text-decoration: none; font-size: 0.9rem; display: inline-block; margin-bottom: 1rem;">
+        ← Volver a Mi Progreso
+    </a>
+    
+    <h2 style="color: #2c5282; margin-bottom: 2rem;">Estadísticas por Tema</h2>
+    
+    {% if estadisticas_temas %}
+        <div style="display: grid; gap: 1.5rem;">
+            {% for stats in estadisticas_temas %}
+            <div style="background: {% if stats.bloqueado %}#e8e8e8{% else %}white{% endif %}; 
+                        border: 2px solid {% if stats.bloqueado %}#bdc3c7{% else %}#2c5282{% endif %}; 
+                        border-radius: 12px; 
+                        padding: 2rem 1.5rem; 
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <!-- Encabezado del Tema -->
+                <div style="margin-bottom: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <h3 style="margin: 0; font-size: 1.5rem; color: {% if stats.bloqueado %}#7f8c8d{% else %}#2c5282{% endif %};">{{ stats.tema.tema_id }}</h3>
+                        <span style="font-size: 1.5rem;">{% if stats.bloqueado %}🔒{% else %}→{% endif %}</span>
+                    </div>
+                    <div style="font-size: 0.95rem; color: #666;">
+                        {{ stats.tests_completados }}/{{ stats.total_tests_tema }} tests disponibles
+                    </div>
+                </div>
+                
+                {% if not stats.bloqueado %}
+                <!-- Métricas principales -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+                    <div style="text-align: center; padding: 1.25rem; background: #f8f9fa; border-radius: 8px; border: 2px solid #e0e0e0;">
+                        <div style="font-size: 1.8rem; font-weight: bold; color: {% if stats.tests_completados == stats.total_tests_tema %}#27ae60{% elif stats.tests_completados > 0 %}#f39c12{% else %}#95a5a6{% endif %};">
+                            {{ stats.tests_completados }}/{{ stats.total_tests_tema }}
+                        </div>
+                        <div style="color: #555; font-size: 0.9rem; margin-top: 0.5rem; font-weight: 500;">Tests realizados</div>
+                    </div>
+                    
+                    <div style="text-align: center; padding: 1.25rem; background: #f8f9fa; border-radius: 8px; border: 2px solid #e0e0e0;">
+                        <div style="font-size: 1.8rem; font-weight: bold; color: {% if stats.nota >= 7 %}#27ae60{% elif stats.nota >= 5 %}#f39c12{% elif stats.nota > 0 %}#e74c3c{% else %}#95a5a6{% endif %};">
+                            {{ stats.nota|floatformat:1 }}/10
+                        </div>
+                        <div style="color: #555; font-size: 0.9rem; margin-top: 0.5rem; font-weight: 500;">Nota Media</div>
+                    </div>
+                    
+                    <div style="text-align: center; padding: 1.25rem; background: #f8f9fa; border-radius: 8px; border: 2px solid #e0e0e0;">
+                        <div style="font-size: 1.8rem; font-weight: bold; color: {% if stats.porcentaje_correctas >= 70 %}#27ae60{% elif stats.porcentaje_correctas >= 50 %}#f39c12{% elif stats.porcentaje_correctas > 0 %}#e74c3c{% else %}#95a5a6{% endif %};">
+                            {{ stats.correctas }}
+                        </div>
+                        <div style="color: #555; font-size: 0.9rem; margin-top: 0.5rem; font-weight: 500;">
+                            Correctas <span style="color: #999; font-size: 0.85rem;">({{ stats.porcentaje_correctas|floatformat:0 }}%)</span>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; padding: 1.25rem; background: #f8f9fa; border-radius: 8px; border: 2px solid #e0e0e0;">
+                        <div style="font-size: 1.8rem; font-weight: bold; color: {% if stats.porcentaje_falladas >= 50 %}#e74c3c{% elif stats.porcentaje_falladas >= 30 %}#f39c12{% elif stats.porcentaje_falladas > 0 %}#27ae60{% else %}#95a5a6{% endif %};">
+                            {{ stats.fallidas }}
+                        </div>
+                        <div style="color: #555; font-size: 0.9rem; margin-top: 0.5rem; font-weight: 500;">
+                            Falladas <span style="color: #999; font-size: 0.85rem;">({{ stats.porcentaje_falladas|floatformat:0 }}%)</span>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; padding: 1.25rem; background: #f8f9fa; border-radius: 8px; border: 2px solid #e0e0e0;">
+                        <div style="font-size: 1.8rem; font-weight: bold; color: {% if stats.porcentaje_no_respondidas >= 50 %}#e74c3c{% elif stats.porcentaje_no_respondidas >= 30 %}#f39c12{% elif stats.porcentaje_no_respondidas > 0 %}#95a5a6{% else %}#27ae60{% endif %};">
+                            {{ stats.no_respondidas }}
+                        </div>
+                        <div style="color: #555; font-size: 0.9rem; margin-top: 0.5rem; font-weight: 500;">
+                            Sin responder <span style="color: #999; font-size: 0.85rem;">({{ stats.porcentaje_no_respondidas|floatformat:0 }}%)</span>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <!-- Mensaje de tema bloqueado -->
+                <div style="text-align: center; padding: 2.5rem; background: #f8f9fa; border-radius: 8px; border: 2px solid #e0e0e0;">
+                    <div style="font-size: 1.3rem; margin-bottom: 0.5rem; color: #7f8c8d; font-weight: 600;">Tema bloqueado</div>
+                    <div style="font-size: 0.95rem; color: #95a5a6;">Completa los requisitos previos para acceder a este tema</div>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div style="background: #f8f9fa; padding: 3rem; text-align: center; border-radius: 8px; color: #666;">
+            <div style="font-size: 1.1rem; margin-bottom: 0.5rem;">No hay estadísticas disponibles</div>
+            <div style="font-size: 0.9rem;">Comienza a realizar tests para ver tu progreso por tema</div>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+@media (max-width: 768px) {
+    .card {
+        padding: 1rem;
+    }
+    
+    div[style*="grid-template-columns: repeat(auto-fit"] {
+        grid-template-columns: 1fr !important;
+    }
+}
+</style>
+
+{% endblock %}

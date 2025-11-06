@@ -27,9 +27,6 @@
                         <p style="margin: 0.5rem 0; opacity: 0.9; font-size: 0.9rem;">
                             {{ item.tests|length }} test{{ item.tests|length|pluralize:"s" }} disponible{{ item.tests|length|pluralize:"s" }}
                         </p>
-                        <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.3);">
-                            <small style="opacity: 0.8;">Click para ver tests →</small>
-                        </div>
                     {% else %}
                         <p style="margin: 0.5rem 0; opacity: 0.8; font-size: 0.9rem;">
                             Próximamente disponible
@@ -47,21 +44,21 @@
 
     <!-- Tarjetas de progreso (movidas abajo) -->
     
-    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem;">
-        <div style="background: #f8f9fa; border: 2px solid #e0e0e0; padding: 1.25rem; border-radius: 8px;">
-            <div style="font-size: 2rem; font-weight: bold; margin-bottom: 0.25rem; color: #2c5282;">{{ progreso_tests|floatformat:0 }}%</div>
-            <div style="font-size: 0.95rem; color: #666;">Tests Completados</div>
-            <div style="font-size: 0.85rem; color: #999; margin-top: 0.25rem;">{{ tests_completados }} de {{ tests_disponibles_total }}</div>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; margin-top: 3rem;">
+        <div style="background: linear-gradient(135deg, {{ THEME_COLORS.card_bg_light }} 0%, {{ THEME_COLORS.card_bg_medium }} 100%); border: 2px solid {{ THEME_COLORS.card_border }}; padding: 1.25rem; border-radius: 8px;">
+            <div style="font-size: 2rem; font-weight: bold; margin-bottom: 0.25rem; color: {{ THEME_COLORS.card_text_primary }};">{{ progreso_tests|floatformat:0 }}%</div>
+            <div style="font-size: 0.95rem; color: {{ THEME_COLORS.card_text_primary }};">Tests Completados</div>
+            <div style="font-size: 0.85rem; color: {{ THEME_COLORS.card_text_secondary }}; margin-top: 0.25rem;">{{ tests_completados }} de {{ tests_disponibles_total }}</div>
         </div>
-        <div style="background: #f8f9fa; border: 2px solid #e0e0e0; padding: 1.25rem; border-radius: 8px;">
-            <div style="font-size: 2rem; font-weight: bold; margin-bottom: 0.25rem; color: {% if promedio_nota >= 7 %}#27ae60{% elif promedio_nota >= 5 %}#f39c12{% else %}#e74c3c{% endif %};">{{ promedio_nota|floatformat:1 }}/10</div>
-            <div style="font-size: 0.95rem; color: #666;">Nota Media</div>
-            <div style="font-size: 0.85rem; color: #999; margin-top: 0.25rem;">Sobre 10</div>
+        <div style="background: linear-gradient(135deg, {{ THEME_COLORS.card_bg_light }} 0%, {{ THEME_COLORS.card_bg_medium }} 100%); border: 2px solid {{ THEME_COLORS.card_border }}; padding: 1.25rem; border-radius: 8px;">
+            <div style="font-size: 2rem; font-weight: bold; margin-bottom: 0.25rem; color: {% if promedio_nota >= 7 %}{{ THEME_COLORS.success }}{% elif promedio_nota >= 5 %}{{ THEME_COLORS.warning }}{% else %}{{ THEME_COLORS.danger }}{% endif %};">{{ promedio_nota|floatformat:1 }}/10</div>
+            <div style="font-size: 0.95rem; color: {{ THEME_COLORS.card_text_primary }};">Nota Media</div>
+            <div style="font-size: 0.85rem; color: {{ THEME_COLORS.card_text_secondary }}; margin-top: 0.25rem;">Sobre 10</div>
         </div>
-        <div style="background: #f8f9fa; border: 2px solid #2c5282; padding: 1.25rem; border-radius: 8px;">
+        <div style="background: linear-gradient(135deg, {{ THEME_COLORS.card_bg_light }} 0%, {{ THEME_COLORS.card_bg_medium }} 100%); border: 2px solid {{ THEME_COLORS.card_text_secondary }}; padding: 1.25rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(25,118,210,0.15);">
             <a href="{% url 'boards:mi_progreso' %}" style="text-decoration: none; display: block; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-                <div style="font-size: 1.1rem; font-weight: bold; color: #2c5282; text-align: center;">Ver mi Progreso</div>
-                <div style="font-size: 0.85rem; color: #666; margin-top: 0.5rem; text-align: center;">Estadísticas detalladas</div>
+                <div style="font-size: 1.1rem; font-weight: bold; color: {{ THEME_COLORS.card_text_primary }}; text-align: center;">Ver mi Progreso</div>
+                <div style="font-size: 0.85rem; color: {{ THEME_COLORS.card_text_secondary }}; margin-top: 0.5rem; text-align: center;">Estadísticas detalladas</div>
             </a>
         </div>
     </div>

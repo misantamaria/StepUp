@@ -4,7 +4,7 @@ Vistas para el modo alumno: dashboard, tests, resultados.
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from ..models import Test, IntentTest, Tema, Pregunta, ProgresoTema
+from ..models import Test, IntentTest, Tema, Pregunta, ProgresoTema, RespuestaAlumno
 from core.alumno.services import (
     get_dashboard_data as alumno_dashboard_data,
     start_test as alumno_start_test,
@@ -26,7 +26,14 @@ def dashboard_alumno(request):
 @login_required
 def detalle_tema(request, tema_id):
     """Vista detallada de un tema con sus tests organizados por nivel"""
-    tema = get_object_or_404(Tema, tema_id=tema_id)
+    # Determinar si es profesor en modo alumno
+    es_profesor = request.user.is_staff
+    
+    # Obtener tema verificando que esté visible y disponible
+    if es_profesor:
+        tema = get_object_or_404(Tema, tema_id=tema_id, activo=True, visible_profesor=True, disponible_profesor=True)
+    else:
+        tema = get_object_or_404(Tema, tema_id=tema_id, activo=True, visible_alumnos=True, disponible_alumno=True)
     
     # Obtener progreso del tema
     progreso, _ = ProgresoTema.objects.get_or_create(
@@ -43,11 +50,15 @@ def detalle_tema(request, tema_id):
         'Dificil': [],
     }
     
-    tests_tema = tema.tests.filter(activo=True).order_by('nombre')
+    # Filtrar tests según si es profesor o alumno
+    if es_profesor:
+        tests_tema = tema.tests.filter(activo=True, visible_profesor=True, disponible_profesor=True).order_by('nombre')
+    else:
+        tests_tema = tema.tests.filter(activo=True, visible_alumnos=True, disponible_alumno=True).order_by('nombre')
     
     for test in tests_tema:
         # Verificar si está visible y cumple requisitos
-        disponible = test.visible_alumnos and test.alumno_cumple_requisitos(request.user)
+        disponible = test.alumno_cumple_requisitos(request.user)
         
         # Obtener mejor intento
         mejor_intento = IntentTest.objects.filter(
@@ -99,6 +110,9 @@ def tests_nivel(request, tema_id, nivel):
     """Muestra los tests de un nivel específico de un tema"""
     tema = get_object_or_404(Tema, tema_id=tema_id)
     
+    # Determinar si es profesor en modo alumno
+    es_profesor = request.user.is_staff
+    
     # Mapear nivel URL a nivel en BD
     nivel_map = {
         'facil': 'Facil',
@@ -110,13 +124,16 @@ def tests_nivel(request, tema_id, nivel):
     if not nivel_bd:
         return redirect('boards:detalle_tema', tema_id=tema_id)
     
-    # Obtener tests del nivel
-    tests_tema = tema.tests.filter(activo=True, nivel=nivel_bd).order_by('nombre')
+    # Obtener tests del nivel según si es profesor o alumno
+    if es_profesor:
+        tests_tema = tema.tests.filter(activo=True, nivel=nivel_bd, visible_profesor=True, disponible_profesor=True).order_by('nombre')
+    else:
+        tests_tema = tema.tests.filter(activo=True, nivel=nivel_bd, visible_alumnos=True, disponible_alumno=True).order_by('nombre')
     
     tests_data = []
     for test in tests_tema:
-        # Verificar si está visible y cumple requisitos
-        disponible = test.visible_alumnos and test.alumno_cumple_requisitos(request.user)
+        # Verificar si cumple requisitos
+        disponible = test.alumno_cumple_requisitos(request.user)
         
         # Obtener mejor intento
         mejor_intento = IntentTest.objects.filter(
@@ -142,16 +159,15 @@ def tests_nivel(request, tema_id, nivel):
     
     # Información del nivel
     nivel_info = {
-        'facil': {'nombre': 'Fácil', 'emoji': '📗', 'color': '#2c5282', 'color_light': '#3b69b0'},
-        'intermedio': {'nombre': 'Intermedio', 'emoji': '📙', 'color': '#1a4d7a', 'color_light': '#2563a8'},
-        'dificil': {'nombre': 'Difícil', 'emoji': '📕', 'color': '#0f3057', 'color_light': '#1a4d7a'},
+        'facil': {'nombre': 'Fácil', 'color': '#2c5282', 'color_light': '#3b69b0'},
+        'intermedio': {'nombre': 'Intermedio', 'color': '#1a4d7a', 'color_light': '#2563a8'},
+        'dificil': {'nombre': 'Difícil', 'color': '#0f3057', 'color_light': '#1a4d7a'},
     }
     
     context = {
         'tema': tema,
         'nivel': nivel,
         'nivel_nombre': nivel_info[nivel]['nombre'],
-        'nivel_emoji': nivel_info[nivel]['emoji'],
         'nivel_color': nivel_info[nivel]['color'],
         'nivel_color_light': nivel_info[nivel]['color_light'],
         'tests': tests_data,
@@ -333,8 +349,17 @@ def mi_progreso(request):
     """Muestra estadísticas detalladas del progreso del alumno"""
     from django.db.models import Avg, Count, Sum, Max
     
+    # Total de tests disponibles para el alumno
+    total_tests_disponibles = Test.objects.filter(activo=True, visible_alumnos=True).count()
+    
     # Estadísticas generales
     total_intentos = IntentTest.objects.filter(alumno=request.user, completado=True).count()
+    
+    # Tests únicos completados (distintos)
+    tests_completados = IntentTest.objects.filter(
+        alumno=request.user,
+        completado=True
+    ).values('test').distinct().count()
     
     if total_intentos > 0:
         promedio_general = IntentTest.objects.filter(
@@ -356,7 +381,26 @@ def mi_progreso(request):
             es_correcta=True
         ).count()
         
-        total_fallidas = total_respuestas - total_correctas
+        total_fallidas = RespuestaAlumno.objects.filter(
+            intento__alumno=request.user,
+            intento__completado=True,
+            es_correcta=False
+        ).count()
+        
+        # Calcular preguntas esperadas y no respondidas
+        total_preguntas_esperadas = IntentTest.objects.filter(
+            alumno=request.user,
+            completado=True
+        ).aggregate(Sum('total_preguntas'))['total_preguntas__sum'] or 0
+        
+        total_sin_responder = max(0, total_preguntas_esperadas - total_respuestas)
+        
+        # Calcular tests superados (nota >= 5 = puntuación >= 50)
+        tests_superados = IntentTest.objects.filter(
+            alumno=request.user,
+            completado=True,
+            puntuacion__gte=50
+        ).values('test').distinct().count()
         
         porcentaje_acierto = (total_correctas / total_respuestas * 100) if total_respuestas > 0 else 0
     else:
@@ -365,6 +409,9 @@ def mi_progreso(request):
         total_respuestas = 0
         total_correctas = 0
         total_fallidas = 0
+        total_sin_responder = 0
+        tests_completados = 0
+        tests_superados = 0
         porcentaje_acierto = 0
     
     # Estadísticas por tema
@@ -416,14 +463,187 @@ def mi_progreso(request):
     
     context = {
         'total_intentos': total_intentos,
+        'tests_completados': tests_completados,
+        'total_tests_disponibles': total_tests_disponibles,
+        'tests_superados': tests_superados,
         'nota_general': nota_general,
         'promedio_general': promedio_general,
         'total_respuestas': total_respuestas,
         'total_correctas': total_correctas,
         'total_fallidas': total_fallidas,
+        'total_sin_responder': total_sin_responder,
         'porcentaje_acierto': porcentaje_acierto,
         'estadisticas_temas': estadisticas_temas,
         'ultimos_intentos': ultimos_intentos,
     }
     
     return render(request, 'boards/alumno/mi_progreso.html', context)
+
+
+@login_required
+def estadisticas_temas(request):
+    """Muestra estadísticas detalladas por tema"""
+    from django.db.models import Avg, Count, Q
+    
+    estadisticas_temas = []
+    
+    # Determinar si es profesor en modo alumno
+    es_profesor = request.user.is_staff
+    
+    # Obtener solo los temas que están activos, visibles Y disponibles, y que tienen al menos un test activo, visible Y disponible
+    if es_profesor:
+        temas_con_tests_visibles = Tema.objects.filter(
+            activo=True,
+            visible_profesor=True,
+            disponible_profesor=True,
+            tests__activo=True,
+            tests__visible_profesor=True,
+            tests__disponible_profesor=True
+        ).distinct().order_by('tema_id')
+    else:
+        temas_con_tests_visibles = Tema.objects.filter(
+            activo=True,
+            visible_alumnos=True,
+            disponible_alumno=True,
+            tests__activo=True,
+            tests__visible_alumnos=True,
+            tests__disponible_alumno=True
+        ).distinct().order_by('tema_id')
+    
+    for tema in temas_con_tests_visibles:
+        # Tests del tema que están activos, visibles Y disponibles
+        if es_profesor:
+            tests_tema = Test.objects.filter(tema=tema, visible_profesor=True, disponible_profesor=True, activo=True)
+        else:
+            tests_tema = Test.objects.filter(tema=tema, visible_alumnos=True, disponible_alumno=True, activo=True)
+        
+        # Filtrar tests según requisitos del alumno
+        tests_disponibles = []
+        for test in tests_tema:
+            if test.alumno_cumple_requisitos(request.user):
+                tests_disponibles.append(test)
+        
+        total_tests_tema = len(tests_disponibles)
+        total_tests_tema_completo = tests_tema.count()  # Total de tests del tema (incluso no disponibles por requisitos)
+        bloqueado = total_tests_tema == 0 and total_tests_tema_completo > 0
+        
+        # Intentos completados
+        intentos_tema = IntentTest.objects.filter(
+            alumno=request.user,
+            test__tema=tema,
+            completado=True
+        )
+        
+        # Mostrar tema bloqueado si tiene tests pero ninguno está disponible
+        if bloqueado:
+            estadisticas_temas.append({
+                'tema': tema,
+                'bloqueado': True,
+                'nota': 0,
+                'tests_resueltos': 0,
+                'tests_completados': 0,
+                'total_tests_tema': total_tests_tema_completo,
+                'tests_pendientes': total_tests_tema_completo,
+                'porcentaje_superados': 0,
+                'correctas': 0,
+                'fallidas': 0,
+                'no_respondidas': 0,
+                'porcentaje_correctas': 0,
+                'porcentaje_falladas': 0,
+                'porcentaje_no_respondidas': 0,
+            })
+            continue
+        
+        if intentos_tema.exists():
+            promedio_tema = intentos_tema.aggregate(Avg('puntuacion'))['puntuacion__avg']
+            tests_resueltos = intentos_tema.values('test').distinct().count()
+            tests_pendientes = total_tests_tema - tests_resueltos
+            
+            # Tests superados (nota >= 5)
+            tests_superados = intentos_tema.filter(puntuacion__gte=50).values('test').distinct().count()
+            porcentaje_superados = (tests_superados / tests_resueltos * 100) if tests_resueltos > 0 else 0
+            
+            # Todas las preguntas del tema
+            total_preguntas_tema = Pregunta.objects.filter(tema=tema.tema_id).count()
+            
+            # Respuestas del alumno a preguntas de este tema
+            respuestas_tema = RespuestaAlumno.objects.filter(
+                intento__in=intentos_tema,
+                pregunta__tema=tema.tema_id
+            )
+            
+            total_respondidas = respuestas_tema.count()
+            correctas = respuestas_tema.filter(es_correcta=True).count()
+            fallidas = respuestas_tema.filter(es_correcta=False).count()
+            
+            # Calcular preguntas no respondidas (aproximado basado en tests realizados)
+            preguntas_esperadas = tests_resueltos * 10  # Asumiendo ~10 preguntas por test
+            no_respondidas = max(0, preguntas_esperadas - total_respondidas)
+            
+            # Porcentajes
+            total_calculado = correctas + fallidas + no_respondidas
+            if total_calculado > 0:
+                porcentaje_correctas = (correctas / total_calculado * 100)
+                porcentaje_falladas = (fallidas / total_calculado * 100)
+                porcentaje_no_respondidas = (no_respondidas / total_calculado * 100)
+            else:
+                porcentaje_correctas = porcentaje_falladas = porcentaje_no_respondidas = 0
+            
+            estadisticas_temas.append({
+                'tema': tema,
+                'bloqueado': False,
+                'nota': promedio_tema / 10,
+                'tests_resueltos': tests_resueltos,
+                'tests_completados': tests_resueltos,  # Tests únicos completados
+                'total_tests_tema': total_tests_tema,  # Total tests disponibles en el tema
+                'tests_pendientes': tests_pendientes,
+                'porcentaje_superados': porcentaje_superados,
+                'correctas': correctas,
+                'fallidas': fallidas,
+                'no_respondidas': no_respondidas,
+                'porcentaje_correctas': porcentaje_correctas,
+                'porcentaje_falladas': porcentaje_falladas,
+                'porcentaje_no_respondidas': porcentaje_no_respondidas,
+            })
+        else:
+            # Tema sin intentos: mostrar con valores en 0
+            estadisticas_temas.append({
+                'tema': tema,
+                'bloqueado': False,
+                'nota': 0,
+                'tests_resueltos': 0,
+                'tests_completados': 0,
+                'total_tests_tema': total_tests_tema,
+                'tests_pendientes': total_tests_tema,
+                'porcentaje_superados': 0,
+                'correctas': 0,
+                'fallidas': 0,
+                'no_respondidas': 0,
+                'porcentaje_correctas': 0,
+                'porcentaje_falladas': 0,
+                'porcentaje_no_respondidas': 0,
+            })
+    
+    # NO ordenar - mantener orden original de los temas
+    # estadisticas_temas.sort(key=lambda x: x['nota'], reverse=True)
+    
+    context = {
+        'estadisticas_temas': estadisticas_temas,
+    }
+    
+    return render(request, 'boards/alumno/estadisticas_temas.html', context)
+
+
+@login_required
+def historial_intentos(request):
+    """Muestra el historial completo de intentos"""
+    ultimos_intentos = IntentTest.objects.filter(
+        alumno=request.user,
+        completado=True
+    ).select_related('test', 'test__tema').order_by('-fecha_fin')[:50]
+    
+    context = {
+        'ultimos_intentos': ultimos_intentos,
+    }
+    
+    return render(request, 'boards/alumno/historial_intentos.html', context)

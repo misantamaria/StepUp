@@ -6,10 +6,9 @@
 {% block content %}
 <div class="card" style="max-width: 1200px; margin: 0 auto;">
     <!-- Header de resultados -->
-    <div style="text-align: center; margin-bottom: 2rem;">
-        <h2 style="color: #2c5282;">📊 Resultados del Test</h2>
-        <h3 style="color: #666;">{{ intento.test.nombre }}</h3>
-    </div>
+        <div style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <h2 style="color: #2c5282;">Resultados del Test</h2>
+        <h3 style="color: #666; font-weight: normal; margin-top: 0.5rem;">{{ intento.test.nombre }}</h3>
     
     <!-- Panel de puntuación -->
     <div style="background: {% if intento.puntuacion >= 70 %}linear-gradient(135deg, #28a745 0%, #20c997 100%){% elif intento.puntuacion >= 50 %}linear-gradient(135deg, #ffc107 0%, #ff8c00 100%){% else %}linear-gradient(135deg, #dc3545 0%, #c82333 100%){% endif %}; 
@@ -22,11 +21,11 @@
         </div>
         <div style="font-size: 1.2rem; padding: 0.75rem 1.5rem; background: rgba(255,255,255,0.2); border-radius: 8px; display: inline-block;">
             {% if intento.puntuacion >= 70 %}
-                🎉 ¡Excelente trabajo! Has superado el test
+                Has superado el test.
             {% elif intento.puntuacion >= 50 %}
-                👍 Buen intento, estás cerca de superarlo
+                Buen intento.
             {% else %}
-                💪 Sigue practicando, ¡puedes mejorar!
+                Sigue practicando.
             {% endif %}
         </div>
     </div>
@@ -46,23 +45,22 @@
     <!-- Tabs para cambiar entre vistas -->
     <div style="margin-bottom: 2rem;">
         <div style="display: flex; gap: 1rem; border-bottom: 2px solid #e0e0e0; margin-bottom: 2rem;">
-            <button onclick="mostrarSeccion('fallidas')" id="tab-fallidas" class="tab-btn active">
-                ❌ Revisar Fallidas ({{ total_fallidas }})
+                        <button onclick="mostrarTab('fallidas')" id="btn-fallidas" class="tab-btn active" 
+                    style="flex: 1; padding: 1rem; background: #dc3545; color: white; border: none; border-radius: 8px 0 0 8px; cursor: pointer; font-size: 1rem; font-weight: 600; transition: opacity 0.2s;">
+                Revisar Fallidas ({{ total_fallidas }})
             </button>
-            <button onclick="mostrarSeccion('todas')" id="tab-todas" class="tab-btn">
-                📝 Ver Todas ({{ intento.total_preguntas }})
+            <button onclick="mostrarTab('todas')" id="btn-todas" class="tab-btn"
+                    style="flex: 1; padding: 1rem; background: #6c757d; color: white; border: none; border-radius: 0 8px 8px 0; cursor: pointer; font-size: 1rem; font-weight: 600; transition: opacity 0.2s;">
+                Ver Todas ({{ intento.total_preguntas }})
             </button>
         </div>
         
         <!-- Sección de preguntas fallidas -->
         <div id="seccion-fallidas" class="seccion-respuestas">
             {% if total_fallidas > 0 %}
-                <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 1rem; margin-bottom: 2rem; border-radius: 4px;">
-                    <p style="margin: 0; color: #856404;">
-                        <strong>💡 Repasa estas preguntas:</strong> Aquí están las preguntas que respondiste incorrectamente. 
-                        Lee atentamente la explicación de por qué cada respuesta es correcta o incorrecta.
-                    </p>
-                </div>
+                                <div style="background: #fff3cd; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border-left: 4px solid #ffc107;">
+                    <p style="margin: 0; color: #856404; font-size: 0.95rem;">
+                        <strong>Repasa estas preguntas:</strong> Aquí están las preguntas que respondiste incorrectamente.
                 
                 {% for detalle in respuestas_fallidas %}
                 <div style="border: 3px solid #dc3545; border-radius: 12px; padding: 2rem; margin-bottom: 2rem; background: white; box-shadow: 0 2px 8px rgba(220,53,69,0.1);">
@@ -93,7 +91,7 @@
                     <!-- Mostrar todas las opciones con explicación -->
                     <details style="margin-top: 1.5rem; cursor: pointer;">
                         <summary style="color: #2c5282; font-weight: 600; padding: 0.75rem; background: #f8f9fa; border-radius: 6px; user-select: none;">
-                            💡 Ver todas las opciones y explicación
+                            Ver todas las opciones y explicación
                         </summary>
                         <div style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 6px;">
                             {% for opcion in detalle.todas_opciones %}
@@ -119,11 +117,9 @@
         
         <!-- Sección de todas las preguntas -->
         <div id="seccion-todas" class="seccion-respuestas" style="display: none;">
-            <div style="background: #e3f2fd; border-left: 4px solid #2c5282; padding: 1rem; margin-bottom: 2rem; border-radius: 4px;">
-                <p style="margin: 0; color: #0d47a1;">
-                    <strong>📚 Revisión completa:</strong> Aquí puedes revisar todas tus respuestas, tanto correctas como incorrectas.
-                </p>
-            </div>
+                            <div style="background: #e3f2fd; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border-left: 4px solid #2196f3;">
+                    <p style="margin: 0; color: #1565c0; font-size: 0.95rem;">
+                    <strong>Revisión completa:</strong> Aquí puedes revisar todas tus respuestas, tanto correctas como incorrectas.
             
             {% for detalle in respuestas_detalle %}
             <div style="border: 3px solid {% if detalle.es_correcta %}#28a745{% else %}#dc3545{% endif %}; border-radius: 12px; padding: 2rem; margin-bottom: 2rem; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
@@ -169,7 +165,7 @@
                 <!-- Todas las opciones -->
                 <details style="margin-top: 1.5rem; cursor: pointer;">
                     <summary style="color: #2c5282; font-weight: 600; padding: 0.75rem; background: #f8f9fa; border-radius: 6px; user-select: none;">
-                        💡 Ver todas las opciones
+                        Ver todas las opciones
                     </summary>
                     <div style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 6px;">
                         {% for opcion in detalle.todas_opciones %}
@@ -191,7 +187,7 @@
     <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 3rem; flex-wrap: wrap;">
         <a href="{% url 'boards:iniciar_test' intento.test.id %}" 
            style="background: linear-gradient(135deg, #2c5282 0%, #1a4d7a 100%); color: white; padding: 1rem 2rem; text-decoration: none; border-radius: 8px; font-weight: 600; display: inline-block; box-shadow: 0 2px 8px rgba(44,82,130,0.3);">
-            🔄 Repetir Test
+            Repetir Test
         </a>
         <a href="{% url 'boards:dashboard_alumno' %}" 
            style="background: linear-gradient(135deg, #6c757d 0%, #495057 100%); color: white; padding: 1rem 2rem; text-decoration: none; border-radius: 8px; font-weight: 600; display: inline-block; box-shadow: 0 2px 8px rgba(108,117,125,0.3);">

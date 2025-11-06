@@ -7,7 +7,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from .decorators import es_profesor
 from core.profesor.services import get_dashboard_data as profesor_dashboard_data, get_student_stats
-from boards.models import Test
+from boards.models import Test, Tema
 
 
 @login_required
@@ -34,16 +34,31 @@ def estadisticas_alumno(request, alumno_id):
 @login_required
 @user_passes_test(es_profesor, login_url='/')
 @require_POST
-def toggle_test_visibility(request, test_id):
-    """Cambia la visibilidad de un test (AJAX)"""
+def toggle_test_field(request, test_id):
+    """Cambia el estado de un campo booleano de un test (AJAX)"""
+    import json
     test = get_object_or_404(Test, id=test_id)
-    test.visible_alumnos = not test.visible_alumnos
-    test.save()
     
-    return JsonResponse({
-        'success': True,
-        'visible': test.visible_alumnos
-    })
+    try:
+        data = json.loads(request.body)
+        field = data.get('field')
+        
+        # Validar que el campo sea uno de los permitidos
+        allowed_fields = ['visible_alumnos', 'disponible_alumno', 'visible_profesor', 'disponible_profesor']
+        if field not in allowed_fields:
+            return JsonResponse({'success': False, 'error': 'Campo no válido'}, status=400)
+        
+        # Toggle del campo
+        current_value = getattr(test, field)
+        setattr(test, field, not current_value)
+        test.save()
+        
+        return JsonResponse({
+            'success': True,
+            field: getattr(test, field)
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 
 @login_required
@@ -103,3 +118,33 @@ def delete_test(request, test_id):
             'success': False,
             'error': str(e)
         }, status=400)
+
+
+@login_required
+@user_passes_test(es_profesor, login_url='/')
+@require_POST
+def toggle_tema_field(request, tema_id):
+    """Cambia el estado de un campo booleano de un tema (AJAX)"""
+    import json
+    tema = get_object_or_404(Tema, tema_id=tema_id)
+    
+    try:
+        data = json.loads(request.body)
+        field = data.get('field')
+        
+        # Validar que el campo sea uno de los permitidos
+        allowed_fields = ['visible_alumnos', 'disponible_alumno', 'visible_profesor', 'disponible_profesor', 'activo']
+        if field not in allowed_fields:
+            return JsonResponse({'success': False, 'error': 'Campo no válido'}, status=400)
+        
+        # Toggle del campo
+        current_value = getattr(tema, field)
+        setattr(tema, field, not current_value)
+        tema.save()
+        
+        return JsonResponse({
+            'success': True,
+            field: getattr(tema, field)
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)

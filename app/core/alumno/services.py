@@ -8,12 +8,28 @@ from boards.models import Test, IntentTest, RespuestaAlumno, Tema, ProgresoTema,
 
 def get_dashboard_data(user) -> Dict[str, Any]:
     """Datos para el dashboard del alumno - organizado por temas."""
-    # Obtener TODOS los temas (con o sin tests visibles)
-    todos_los_temas = Tema.objects.all().prefetch_related('tests').order_by('tema_id')
+    # Determinar si el usuario es staff (profesor en modo alumno)
+    es_profesor = user.is_staff
+    
+    # Obtener temas según visibilidad y disponibilidad
+    # Si es profesor, mostrar temas con visible_profesor=True AND disponible_profesor=True AND activo=True
+    # Si es alumno, mostrar temas con visible_alumnos=True AND disponible_alumno=True AND activo=True
+    if es_profesor:
+        temas_visibles = Tema.objects.filter(
+            activo=True, 
+            visible_profesor=True, 
+            disponible_profesor=True
+        ).prefetch_related('tests').order_by('tema_id')
+    else:
+        temas_visibles = Tema.objects.filter(
+            activo=True, 
+            visible_alumnos=True, 
+            disponible_alumno=True
+        ).prefetch_related('tests').order_by('tema_id')
     
     # Organizar tests por tema
     tests_por_tema = []
-    for tema in todos_los_temas:
+    for tema in temas_visibles:
         # Obtener o crear el progreso del tema para este alumno
         progreso, created = ProgresoTema.objects.get_or_create(
             alumno=user,
@@ -25,8 +41,13 @@ def get_dashboard_data(user) -> Dict[str, Any]:
             progreso.total_preguntas = Pregunta.objects.filter(tema=tema.tema_id).count()
             progreso.save()
         
-        # Obtener tests del tema que están activos y visibles
-        tests_del_tema = tema.tests.filter(activo=True, visible_alumnos=True)
+        # Obtener tests del tema que están activos
+        # Si es profesor, mostrar tests con visible_profesor=True AND disponible_profesor=True
+        # Si es alumno, mostrar tests con visible_alumnos=True AND disponible_alumno=True
+        if es_profesor:
+            tests_del_tema = tema.tests.filter(activo=True, visible_profesor=True, disponible_profesor=True)
+        else:
+            tests_del_tema = tema.tests.filter(activo=True, visible_alumnos=True, disponible_alumno=True)
         
         # Filtrar tests según requisitos del alumno y organizar por nivel
         tests_por_nivel = {

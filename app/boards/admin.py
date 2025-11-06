@@ -6,9 +6,19 @@ from .models import Pregunta, Respuesta, Tema, IntentTest, RespuestaAlumno, Test
 # Modelos de la BDD (editables desde admin)
 @admin.register(Tema)
 class TemaAdmin(admin.ModelAdmin):
-    list_display = ['tema_id', 'total_preguntas', 'total_tests']
+    list_display = ['tema_id', 'total_preguntas', 'total_tests', 
+                    'visible_alumnos', 'disponible_alumno', 'visible_profesor', 'disponible_profesor', 'activo']
+    list_filter = ['visible_alumnos', 'disponible_alumno', 'visible_profesor', 'disponible_profesor', 'activo']
     search_fields = ['tema_id']
-    fields = ['tema_id']
+    fieldsets = (
+        ('Información Básica', {
+            'fields': ('tema_id',)
+        }),
+        ('Visibilidad y Disponibilidad', {
+            'fields': (('visible_alumnos', 'disponible_alumno'), ('visible_profesor', 'disponible_profesor'), 'activo'),
+            'description': 'Un tema se muestra solo si está VISIBLE Y DISPONIBLE Y ACTIVO'
+        }),
+    )
     
     def total_preguntas(self, obj):
         return Pregunta.objects.filter(tema=obj.tema_id).count()
@@ -118,8 +128,10 @@ class RespuestaAdmin(admin.ModelAdmin):
 # Modelo Test (temporal - usa Question antiguo)
 @admin.register(Test)
 class TestAdmin(admin.ModelAdmin):
-    list_display = ['nombre', 'tema', 'total_preguntas_count', 'requisito_display', 'visible_alumnos', 'tiempo_limite', 'activo', 'fecha_creacion']
-    list_filter = ['tema', 'visible_alumnos', 'activo', 'fecha_creacion']
+    list_display = ['nombre', 'tema', 'total_preguntas_count', 'requisito_display', 
+                    'visible_alumnos', 'disponible_alumno', 'visible_profesor', 'disponible_profesor', 
+                    'tiempo_limite', 'activo', 'fecha_creacion']
+    list_filter = ['tema', 'visible_alumnos', 'disponible_alumno', 'visible_profesor', 'disponible_profesor', 'activo', 'fecha_creacion']
     search_fields = ['nombre', 'descripcion', 'tema__tema_id']
     filter_horizontal = ['preguntas']
     readonly_fields = ['creado_por', 'fecha_creacion']
@@ -128,7 +140,11 @@ class TestAdmin(admin.ModelAdmin):
             'fields': ('nombre', 'descripcion', 'tema')
         }),
         ('Configuración', {
-            'fields': ('tiempo_limite', 'visible_alumnos', 'activo')
+            'fields': ('tiempo_limite', 'activo')
+        }),
+        ('Visibilidad y Disponibilidad', {
+            'fields': (('visible_alumnos', 'disponible_alumno'), ('visible_profesor', 'disponible_profesor')),
+            'description': 'Un test se muestra solo si está VISIBLE Y DISPONIBLE'
         }),
         ('Requisitos Previos', {
             'fields': ('test_requisito', 'porcentaje_minimo'),

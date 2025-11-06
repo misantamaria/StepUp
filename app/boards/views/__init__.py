@@ -25,13 +25,16 @@ from .alumno import (
     realizar_test,
     resultado_test,
     mi_progreso,
+    estadisticas_temas,
+    historial_intentos,
 )
 
 # Importar vistas de profesor
 from .profesor import (
     dashboard_profesor,
     estadisticas_alumno,
-    toggle_test_visibility,
+    toggle_test_field,
+    toggle_tema_field,
     get_test_details,
     delete_test,
 )
@@ -59,11 +62,14 @@ __all__ = [
     'realizar_test',
     'resultado_test',
     'mi_progreso',
+    'estadisticas_temas',
+    'historial_intentos',
     
     # Profesor
     'dashboard_profesor',
     'estadisticas_alumno',
-    'toggle_test_visibility',
+    'toggle_test_field',
+    'toggle_tema_field',
     'get_test_details',
     'delete_test',
     

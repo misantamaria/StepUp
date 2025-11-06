@@ -198,6 +198,16 @@ THEME_COLORS = {
     'danger': '#dc3545',            # Rojo para peligro/error
     'info': '#17a2b8',              # Cyan para información
     
+    # Colores para tarjetas de progreso (azules suaves)
+    'card_bg_light': '#e3f2fd',     # Fondo azul muy claro (inicio gradiente)
+    'card_bg_medium': '#bbdefb',    # Fondo azul claro (fin gradiente)
+    'card_border': '#64b5f6',       # Borde azul medio suave
+    'card_text_primary': '#1565c0', # Texto principal azul oscuro
+    'card_text_secondary': '#1976d2', # Texto secundario azul medio
+    'card_text_muted': '#42a5f5',   # Texto terciario azul claro
+    'card_accent_bg': '#1976d2',    # Fondo para botón destacado
+    'card_accent_text': '#e3f2fd',  # Texto sobre fondo destacado
+    
     # Colores de botones
     'btn_inactive_text': '#626262', # Texto botón inactivo
     'btn_inactive_bg': '#678CA6',   # Fondo botón inactivo

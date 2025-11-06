@@ -7,6 +7,16 @@ class Tema(models.Model):
     """Mapea a la tabla Tema de PIE_ED"""
     tema_id = models.CharField(max_length=100, primary_key=True, db_column='Tema_ID')
     
+    # Control de visibilidad y disponibilidad
+    # VISIBLE = Aparece en la interfaz
+    # DISPONIBLE = Se puede acceder (hacer tests)
+    # Un tema se muestra solo si está VISIBLE Y DISPONIBLE
+    visible_alumnos = models.BooleanField(default=True, help_text="¿Visible para los alumnos?")
+    visible_profesor = models.BooleanField(default=True, help_text="¿Visible para el profesor en modo alumno?")
+    disponible_alumno = models.BooleanField(default=True, help_text="¿Disponible para alumnos?")
+    disponible_profesor = models.BooleanField(default=True, help_text="¿Disponible para profesor?")
+    activo = models.BooleanField(default=True, help_text="¿Tema activo en el sistema?")
+    
     class Meta:
         db_table = 'Tema'
         managed = True  # Django SÍ gestiona esta tabla
@@ -95,7 +105,14 @@ class Test(models.Model):
     preguntas = models.ManyToManyField(Pregunta, related_name='tests', blank=True)
     tiempo_limite = models.IntegerField(help_text="Tiempo en minutos", default=30)
     
+    # Visibilidad: controla si el test aparece en la interfaz
     visible_alumnos = models.BooleanField(default=False, help_text="¿Visible para los alumnos?")
+    visible_profesor = models.BooleanField(default=True, help_text="¿Visible para el profesor en modo alumno? (para pruebas)")
+    
+    # Disponibilidad: controla si el test está activo/disponible
+    disponible_alumno = models.BooleanField(default=True, help_text="¿Disponible para alumnos? (debe estar visible también)")
+    disponible_profesor = models.BooleanField(default=True, help_text="¿Disponible para profesor? (debe estar visible también)")
+    
     activo = models.BooleanField(default=True)
     test_requisito = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, 
                                        related_name='tests_desbloqueados',

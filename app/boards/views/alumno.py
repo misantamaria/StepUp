@@ -645,7 +645,11 @@ def realizar_test(request, intento_id):
             return redirect('boards:resultado_test', intento_id=intento.id)
         
         # Navegar entre preguntas
-        if action == 'siguiente' and pregunta_actual < total_preguntas - 1:
+        mostrar_modal = False
+        if action == 'mostrar_confirmacion':
+            # Solo guardar la respuesta y marcar para mostrar el modal
+            mostrar_modal = True
+        elif action == 'siguiente' and pregunta_actual < total_preguntas - 1:
             pregunta_actual += 1
         elif action == 'anterior' and pregunta_actual > 0:
             pregunta_actual -= 1
@@ -684,6 +688,12 @@ def realizar_test(request, intento_id):
     preguntas_contestadas = len(respuestas_guardadas)
     preguntas_sin_contestar = total_preguntas - preguntas_contestadas
     
+    # Contar preguntas sin confirmar (solo en modo no-examen)
+    if not intento.es_examen:
+        preguntas_sin_confirmar = preguntas_contestadas - len(respuestas_confirmadas)
+    else:
+        preguntas_sin_confirmar = 0
+    
     # Obtener respuesta guardada para pregunta actual
     respuesta_seleccionada = respuestas_guardadas.get(str(pregunta_actual_idx))
     pregunta_confirmada = str(pregunta_actual_idx) in respuestas_confirmadas
@@ -694,6 +704,12 @@ def realizar_test(request, intento_id):
     
     print(f"[DEBUG] Pregunta {pregunta_actual_idx}: confirmada={pregunta_confirmada}, es_correcta={respuesta_es_correcta}")
     print(f"[DEBUG] Datos confirmación actual: {confirmacion_actual}")
+    
+    # Verificar si debemos mostrar el modal (si viene de mostrar_confirmacion)
+    if request.method == 'POST':
+        mostrar_modal = request.POST.get('action') == 'mostrar_confirmacion'
+    else:
+        mostrar_modal = False
     
     context = {
         'intento': intento,
@@ -707,9 +723,11 @@ def realizar_test(request, intento_id):
         'estado_preguntas': estado_preguntas,
         'preguntas_contestadas': preguntas_contestadas,
         'preguntas_sin_contestar': preguntas_sin_contestar,
+        'preguntas_sin_confirmar': preguntas_sin_confirmar,
         'respuesta_seleccionada': respuesta_seleccionada,
         'pregunta_confirmada': pregunta_confirmada,
         'respuesta_es_correcta': respuesta_es_correcta,
+        'mostrar_modal': mostrar_modal,
     }
     
     return render(request, 'boards/alumno/realizar_test.html', context)

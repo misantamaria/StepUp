@@ -214,12 +214,21 @@
     <div style="background: white; padding: 2rem; border-radius: 12px; max-width: 500px; margin: 1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.3);">
         <h3 style="color: #2c5282; margin-bottom: 1rem;">⚠️ ¿Finalizar Test?</h3>
         
-        <div id="avisoSinContestar" style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 1rem; margin-bottom: 1rem; border-radius: 4px;">
+        {% if preguntas_sin_contestar > 0 %}
+        <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 1rem; margin-bottom: 1rem; border-radius: 4px;">
             <p style="margin: 0; color: #856404;">
-                <strong>Atención:</strong> Tienes <strong id="numSinContestar">{{ preguntas_sin_contestar }}</strong> 
+                <strong>Atención:</strong> Tienes <strong>{{ preguntas_sin_contestar }}</strong> 
                 pregunta(s) sin contestar.
             </p>
         </div>
+        {% elif preguntas_sin_confirmar > 0 and not es_examen %}
+        <div style="background: #d1ecf1; border-left: 4px solid #17a2b8; padding: 1rem; margin-bottom: 1rem; border-radius: 4px;">
+            <p style="margin: 0; color: #0c5460;">
+                <strong>Información:</strong> Tienes <strong>{{ preguntas_sin_confirmar }}</strong> 
+                pregunta(s) sin confirmar.
+            </p>
+        </div>
+        {% endif %}
         
         <p style="margin-bottom: 1.5rem; color: #666;">
             Has contestado <strong>{{ preguntas_contestadas }}</strong> de <strong>{{ total_preguntas }}</strong> preguntas.
@@ -234,7 +243,7 @@
                 <button type="button" 
                         onclick="cerrarModal(); irAPregunta({{ estado.numero|add:-1 }})"
                         style="background: #dc3545; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-weight: bold;">
-                    #{{ estado.numero }}
+                    {{ estado.numero }}
                 </button>
                 {% endif %}
                 {% endfor %}
@@ -450,8 +459,14 @@
 let respuestaConfirmada = false;
 
 function mostrarConfirmacion() {
-    const modal = document.getElementById('modalConfirmacion');
-    modal.style.display = 'flex';
+    // Primero, enviar el formulario para guardar la respuesta actual
+    // Esto actualizará el servidor con la respuesta de la última pregunta
+    const formTest = document.getElementById('formTest');
+    const action = document.getElementById('action');
+    
+    // Marcar que queremos mostrar el modal después del submit
+    action.value = 'mostrar_confirmacion';
+    formTest.submit();
 }
 
 function cerrarModal() {
@@ -681,6 +696,14 @@ window.addEventListener('load', function() {
     } else {
         console.log('No se encontró respuesta seleccionada');
     }
+});
+{% endif %}
+
+// Mostrar modal automáticamente si se solicitó
+{% if mostrar_modal %}
+window.addEventListener('load', function() {
+    const modal = document.getElementById('modalConfirmacion');
+    modal.style.display = 'flex';
 });
 {% endif %}
 

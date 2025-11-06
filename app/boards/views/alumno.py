@@ -684,6 +684,9 @@ def resultado_test(request, intento_id):
     respuestas_fallidas = [r for r in respuestas_detalle if not r['es_correcta']]
     respuestas_correctas = [r for r in respuestas_detalle if r['es_correcta']]
     
+    # Calcular sin contestar
+    total_sin_contestar = intento.total_preguntas - len(respuestas_correctas) - len(respuestas_fallidas)
+    
     # Limpiar la sesión del test
     session_key = f'test_{intento_id}_respuestas'
     session_key_pregunta = f'test_{intento_id}_pregunta_actual'
@@ -699,6 +702,7 @@ def resultado_test(request, intento_id):
         'respuestas_correctas': respuestas_correctas,
         'total_fallidas': len(respuestas_fallidas),
         'total_correctas': len(respuestas_correctas),
+        'total_sin_contestar': total_sin_contestar,
     }
     return render(request, 'boards/alumno/resultado.html', context)
 

@@ -36,15 +36,76 @@
         </div>
     </div>
     
-    <!-- Tabs para cambiar entre vistas -->
-    <div style="margin-bottom: 2rem;">
-        <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
-            <button onclick="mostrarTab('fallidas')" id="btn-fallidas" class="tab-btn active" 
-                    style="flex: 1; padding: 1rem; background: #dc3545; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: 600; transition: opacity 0.2s;">
+    <!-- Menú de resumen (estilo DGT) -->
+    <div id="menu-resumen" style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+        <h3 style="color: #2c5282; margin-bottom: 1.5rem; text-align: center; font-size: 1.5rem;">Resumen de Respuestas</h3>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem; max-width: 800px; margin: 0 auto 2rem;">
+            {% for detalle in respuestas_detalle %}
+            <div class="pregunta-resultado-item"
+                 style="
+                    display: flex;
+                    align-items: center;
+                    gap: 0.75rem;
+                    padding: 0.5rem;
+                    border-radius: 8px;
+                    background: {% if detalle.es_correcta %}#e8f5e9{% elif not detalle.fue_contestada %}#f5f5f5{% else %}#ffebee{% endif %};
+                ">
+                <div style="
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 6px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-weight: bold;
+                    font-size: 1.1rem;
+                    color: white;
+                    background: {% if detalle.es_correcta %}#28a745{% elif not detalle.fue_contestada %}#6c757d{% else %}#dc3545{% endif %};
+                    flex-shrink: 0;
+                ">
+                    {{ forloop.counter }}
+                </div>
+                <span style="
+                    font-size: 0.9rem;
+                    color: {% if detalle.es_correcta %}#155724{% elif not detalle.fue_contestada %}#666{% else %}#721c24{% endif %};
+                    font-weight: 500;
+                ">
+                    {% if detalle.es_correcta %}Respuesta correcta{% elif not detalle.fue_contestada %}No respondida{% else %}Respuesta incorrecta{% endif %}
+                </span>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            {% if total_fallidas > 0 %}
+            <button onclick="mostrarTab('fallidas')" 
+                    style="padding: 1rem 2rem; background: #dc3545; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: 600; box-shadow: 0 2px 8px rgba(220,53,69,0.3); transition: transform 0.2s;">
                 Revisar Fallidas
             </button>
+            {% endif %}
+            <button onclick="mostrarTab('todas')" 
+                    style="padding: 1rem 2rem; background: #2c5282; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: 600; box-shadow: 0 2px 8px rgba(44,82,130,0.3); transition: transform 0.2s;">
+                Ver Todas las Preguntas
+            </button>
+        </div>
+    </div>
+    
+    <!-- Tabs para cambiar entre vistas (inicialmente oculto) -->
+    <div id="seccion-tabs" style="margin-bottom: 2rem; display: none;">
+        <div style="display: flex; gap: 1rem; margin-bottom: 2rem; background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            <button onclick="volverAlResumen()" 
+                    style="padding: 0.75rem 1.5rem; background: #6c757d; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.95rem; font-weight: 600; transition: opacity 0.2s;">
+                ← Volver al Resumen
+            </button>
+            {% if total_fallidas > 0 %}
+            <button onclick="mostrarTab('fallidas')" id="btn-fallidas" class="tab-btn" 
+                    style="flex: 1; padding: 0.75rem 1.5rem; background: #dc3545; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.95rem; font-weight: 600; transition: opacity 0.2s;">
+                Revisar Fallidas
+            </button>
+            {% endif %}
             <button onclick="mostrarTab('todas')" id="btn-todas" class="tab-btn"
-                    style="flex: 1; padding: 1rem; background: #6c757d; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: 600; transition: opacity 0.2s;">
+                    style="flex: 1; padding: 0.75rem 1.5rem; background: #2c5282; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.95rem; font-weight: 600; transition: opacity 0.2s;">
                 Ver Todas
             </button>
         </div>
@@ -215,28 +276,25 @@
 
 <style>
 .tab-btn {
-    background: transparent;
-    border: none;
-    border-bottom: 3px solid transparent;
-    padding: 1rem 1.5rem;
-    font-size: 1.1rem;
-    font-weight: 600;
-    cursor: pointer;
-    color: #6c757d;
     transition: all 0.3s;
 }
 
 .tab-btn:hover {
-    color: #2c5282;
-}
-
-.tab-btn.active {
-    color: #2c5282;
-    border-bottom-color: #2c5282;
+    opacity: 1 !important;
+    transform: translateY(-2px);
 }
 
 .seccion-respuestas {
     animation: fadeIn 0.3s ease-in;
+}
+
+.pregunta-resultado-item {
+    transition: all 0.2s;
+}
+
+.pregunta-resultado-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 
 @keyframes fadeIn {
@@ -250,38 +308,89 @@
     }
 }
 
-details summary {
-    transition: all 0.3s;
+button {
+    transition: all 0.2s !important;
 }
 
-details summary:hover {
-    background: #e9ecef !important;
+button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
 }
 
-details[open] summary {
-    margin-bottom: 0.5rem;
+button:active {
+    transform: translateY(0) !important;
 }
 
 @media (max-width: 768px) {
-    .tab-btn {
-        font-size: 0.95rem;
-        padding: 0.75rem 1rem;
+    #menu-resumen h3 {
+        font-size: 1.2rem !important;
+    }
+    
+    .pregunta-resultado-item {
+        min-width: 180px;
+    }
+}
+
+@media (max-width: 480px) {
+    .pregunta-resultado-item span {
+        font-size: 0.85rem !important;
+    }
+    
+    .pregunta-resultado-item div {
+        width: 35px !important;
+        height: 35px !important;
+        font-size: 1rem !important;
     }
 }
 </style>
 
 <script>
 function mostrarTab(seccion) {
+    // Ocultar el menú de resumen
+    document.getElementById('menu-resumen').style.display = 'none';
+    
+    // Mostrar la sección de tabs
+    document.getElementById('seccion-tabs').style.display = 'block';
+    
     // Ocultar todas las secciones
     document.querySelectorAll('.seccion-respuestas').forEach(s => s.style.display = 'none');
     
     // Quitar clase active de todos los tabs
-    document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(t => {
+        t.style.opacity = '0.7';
+    });
     
     // Mostrar la sección seleccionada
     document.getElementById('seccion-' + seccion).style.display = 'block';
-    document.getElementById('btn-' + seccion).classList.add('active');
+    const btnActivo = document.getElementById('btn-' + seccion);
+    if (btnActivo) {
+        btnActivo.style.opacity = '1';
+    }
 }
+
+function volverAlResumen() {
+    // Mostrar el menú de resumen
+    document.getElementById('menu-resumen').style.display = 'block';
+    
+    // Ocultar la sección de tabs
+    document.getElementById('seccion-tabs').style.display = 'none';
+    
+    // Ocultar todas las secciones de respuestas
+    document.querySelectorAll('.seccion-respuestas').forEach(s => s.style.display = 'none');
+}
+
+// Agregar efectos hover a los botones
+document.addEventListener('DOMContentLoaded', function() {
+    const botones = document.querySelectorAll('button');
+    botones.forEach(btn => {
+        btn.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px)';
+        });
+        btn.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+});
 </script>
 
 {% endblock %}

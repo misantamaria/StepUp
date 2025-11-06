@@ -67,34 +67,74 @@ def get_test_details(request, test_id):
     """Obtiene los detalles de un test para mostrar en el modal de confirmación"""
     test = get_object_or_404(Test, id=test_id)
     
-    # Obtener preguntas del test con sus respuestas
-    preguntas_data = []
-    for pregunta in test.preguntas.all():
-        respuestas_data = [
-            {
-                'texto': respuesta.texto,
-                'correcta': respuesta.correcta
-            }
-            for respuesta in pregunta.respuestas.all()
-        ]
+    try:
+        # Obtener preguntas del test con sus respuestas
+        preguntas_data = []
+        for pregunta in test.preguntas.all():
+            # Usar el método get_respuestas() que consulta la tabla Respuesta
+            respuestas = pregunta.get_respuestas()
+            respuestas_data = [
+                {
+                    'texto': r['contenido'],
+                    'correcta': r['es_correcta']
+                }
+                for r in respuestas
+            ]
+            
+            preguntas_data.append({
+                'enunciado': pregunta.enunciado,
+                'respuestas': respuestas_data
+            })
         
-        preguntas_data.append({
-            'enunciado': pregunta.enunciado,
-            'respuestas': respuestas_data
+        # Contar intentos
+        from boards.models import IntentTest
+        num_intentos = IntentTest.objects.filter(test=test).count()
+        
+        return JsonResponse({
+            'success': True,
+            'total_preguntas': test.preguntas.count(),
+            'tiempo_limite': test.tiempo_limite,
+            'descripcion': test.descripcion or '',
+            'num_intentos': num_intentos,
+            'preguntas': preguntas_data
         })
-    
-    # Contar intentos
-    from boards.models import IntentTest
-    num_intentos = IntentTest.objects.filter(test=test).count()
-    
-    return JsonResponse({
-        'success': True,
-        'total_preguntas': test.preguntas.count(),
-        'tiempo_limite': test.tiempo_limite,
-        'descripcion': test.descripcion or '',
-        'num_intentos': num_intentos,
-        'preguntas': preguntas_data
-    })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': f'Error al cargar detalles: {str(e)}'
+        }, status=500)
+
+
+@login_required
+@user_passes_test(es_profesor, login_url='/')
+@require_POST
+def delete_tema(request, tema_id):
+    """Elimina un tema y todos sus tests e intentos asociados"""
+    try:
+        tema = get_object_or_404(Tema, tema_id=tema_id)
+        tema_nombre = tema.tema_id
+        
+        # Contar tests y preguntas antes de eliminar
+        num_tests = tema.tests.count()
+        from boards.models import Pregunta
+        num_preguntas = Pregunta.objects.filter(tema=tema_id).count()
+        
+        # Eliminar el tema (CASCADE eliminará tests relacionados)
+        tema.delete()
+        
+        # También eliminar las preguntas asociadas al tema
+        Pregunta.objects.filter(tema=tema_id).delete()
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Tema "{tema_nombre}" eliminado correctamente',
+            'info': f'Se eliminaron {num_tests} test(s) y {num_preguntas} pregunta(s)'
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=400)
 
 
 @login_required

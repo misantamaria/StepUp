@@ -26,17 +26,8 @@
 
     <!-- Botones de Gestión Rápida -->
     <div style="margin-bottom: 2rem; padding: 1.5rem; background: #f8f9fa; border-radius: 8px;">
-        <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1rem; font-size: 1.1rem;">Gestión Rápida</h3>
+        <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1rem; font-size: 1.1rem;">Gestión de progreso</h3>
         <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-            <a href="/admin/boards/tema/" style="background: {{ THEME_COLORS.primary }}; color: white; padding: 0.6rem 1.2rem; text-decoration: none; border-radius: 6px; font-weight: 500; font-size: 0.9rem;">
-                 Gestionar Temas
-            </a>
-            <a href="/admin/boards/pregunta/" style="background: {{ THEME_COLORS.bg_medium }}; color: white; padding: 0.6rem 1.2rem; text-decoration: none; border-radius: 6px; font-weight: 500; font-size: 0.9rem;">
-                 Gestionar Preguntas
-            </a>
-            <a href="/admin/boards/test/" style="background: {{ THEME_COLORS.primary_light }}; color: white; padding: 0.6rem 1.2rem; text-decoration: none; border-radius: 6px; font-weight: 500; font-size: 0.9rem;">
-                 Gestionar Tests
-            </a>
             <a href="/admin/boards/progresotema/" style="background: {{ THEME_COLORS.success }}; color: white; padding: 0.6rem 1.2rem; text-decoration: none; border-radius: 6px; font-weight: 500; font-size: 0.9rem;">
                  Ver Progreso Alumnos
             </a>
@@ -142,9 +133,15 @@
                         <td style="text-align: center;">{{ item.tests.count }}</td>
                         <td style="text-align: center;">
                             <a href="/admin/boards/tema/{{ item.tema.tema_id }}/change/" 
-                               style="color: {{ THEME_COLORS.primary }}; text-decoration: none; font-size: 1.2rem;" 
+                               style="color: {{ THEME_COLORS.primary }}; text-decoration: none; font-size: 1.2rem; margin-right: 0.5rem;" 
                                title="Editar">
                                 ✏️
+                            </a>
+                            <a href="#" 
+                               onclick="mostrarModalEliminarTema('{{ item.tema.tema_id|escapejs }}', {{ item.tests.count }}, {{ item.total_preguntas }}); return false;"
+                               style="color: #dc3545; text-decoration: none; font-size: 1.2rem;" 
+                               title="Eliminar">
+                                🗑️
                             </a>
                         </td>
                     </tr>
@@ -155,6 +152,18 @@
                         </td>
                     </tr>
                     {% endfor %}
+                    <!-- Fila para añadir nuevo tema -->
+                    <tr style="background: #f8f9fa; border-top: 2px solid #dee2e6;">
+                        <td colspan="9" style="text-align: center; padding: 1rem;">
+                            <a href="/admin/boards/tema/add/" 
+                               style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: {{ THEME_COLORS.primary }}; color: white; border-radius: 50%; text-decoration: none; font-size: 1.5rem; font-weight: bold; transition: all 0.2s;"
+                               onmouseover="this.style.background='{{ THEME_COLORS.bg_medium }}'; this.style.transform='scale(1.1)'"
+                               onmouseout="this.style.background='{{ THEME_COLORS.primary }}'; this.style.transform='scale(1)'"
+                               title="Añadir tema">
+                                +
+                            </a>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -263,12 +272,30 @@
                             </td>
                         </tr>
                         {% endfor %}
+                        <!-- Fila para añadir nuevo test -->
+                        <tr style="background: #f8f9fa; border-top: 2px solid #dee2e6;">
+                            <td colspan="9" style="text-align: center; padding: 1rem;">
+                                <a href="/admin/boards/test/add/?tema={{ item.tema.tema_id }}" 
+                                   style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: {{ THEME_COLORS.primary_light }}; color: white; border-radius: 50%; text-decoration: none; font-size: 1.5rem; font-weight: bold; transition: all 0.2s;"
+                                   onmouseover="this.style.background='#00a8e8'; this.style.transform='scale(1.1)'"
+                                   onmouseout="this.style.background='{{ THEME_COLORS.primary_light }}'; this.style.transform='scale(1)'"
+                                   title="Añadir test a {{ item.tema.tema_id }}">
+                                    +
+                                </a>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             {% else %}
-                <div style="text-align: center; color: {{ THEME_COLORS.text_inactive }}; padding: 2rem;">
-                    No hay tests creados para este tema. 
-                    <a href="/admin/boards/test/add/" style="color: {{ THEME_COLORS.primary }};">Crear uno nuevo</a>
+                <div style="text-align: center; padding: 2rem;">
+                    <p style="color: {{ THEME_COLORS.text_inactive }}; margin-bottom: 1rem;">No hay tests creados para este tema.</p>
+                    <a href="/admin/boards/test/add/?tema={{ item.tema.tema_id }}" 
+                       style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: {{ THEME_COLORS.primary_light }}; color: white; border-radius: 50%; text-decoration: none; font-size: 1.5rem; font-weight: bold; transition: all 0.2s;"
+                       onmouseover="this.style.background='#00a8e8'; this.style.transform='scale(1.1)'"
+                       onmouseout="this.style.background='{{ THEME_COLORS.primary_light }}'; this.style.transform='scale(1)'"
+                       title="Añadir test a {{ item.tema.tema_id }}">
+                        +
+                    </a>
                 </div>
             {% endif %}
         </div>
@@ -310,6 +337,46 @@
             </button>
             <button id="btnConfirmarEliminar" onclick="confirmarEliminarTest()" style="background: #dc3545; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 1rem;">
                 ✅ Sí, eliminar
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmación de eliminación de TEMA -->
+<div id="modalEliminarTema" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+    <div style="background: white; border-radius: 12px; padding: 2rem; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+        <h3 style="color: #dc3545; margin-bottom: 1.5rem; font-size: 1.3rem;">⚠️ Confirmar Eliminación de Tema</h3>
+        
+        <div style="margin-bottom: 1.5rem; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+            <p style="margin-bottom: 0.5rem;"><strong>Nombre del tema:</strong></p>
+            <p id="modalTemaNombre" style="color: {{ THEME_COLORS.primary }}; font-size: 1.1rem; margin: 0;"></p>
+        </div>
+
+        <div id="modalTemaDetalles" style="margin-bottom: 1.5rem; padding: 1rem; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">
+            <p style="margin: 0; color: #856404;">
+                Este tema contiene:
+                <br><strong id="modalTemaNumTests"></strong> test(s)
+                <br><strong id="modalTemaNumPreguntas"></strong> pregunta(s)
+            </p>
+        </div>
+
+        <div style="background: #f8d7da; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border-left: 4px solid #dc3545;">
+            <p style="margin: 0; color: #721c24; font-size: 0.95rem;">
+                <strong>🔴 ADVERTENCIA CRÍTICA:</strong> Esta acción eliminará permanentemente:
+                <br>• El tema completo
+                <br>• Todos los tests asociados
+                <br>• Todas las preguntas del tema
+                <br>• Todos los intentos de los alumnos
+                <br><br>Esta acción <strong>NO SE PUEDE DESHACER</strong>.
+            </p>
+        </div>
+
+        <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+            <button onclick="cerrarModalEliminarTema()" style="background: #6c757d; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 1rem;">
+                ❌ No, cancelar
+            </button>
+            <button id="btnConfirmarEliminarTema" onclick="confirmarEliminarTema()" style="background: #dc3545; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 1rem;">
+                ✅ Sí, eliminar todo
             </button>
         </div>
     </div>
@@ -807,7 +874,88 @@ document.addEventListener('click', function(event) {
     if (event.target === modal) {
         cerrarModalEliminar();
     }
+    
+    const modalTema = document.getElementById('modalEliminarTema');
+    if (event.target === modalTema) {
+        cerrarModalEliminarTema();
+    }
 });
+
+// Variables globales para el modal de eliminación de TEMAS
+let temaIdAEliminar = null;
+
+// Función para mostrar el modal de eliminación de temas
+function mostrarModalEliminarTema(temaId, numTests, numPreguntas) {
+    temaIdAEliminar = temaId;
+    const modal = document.getElementById('modalEliminarTema');
+    const modalNombre = document.getElementById('modalTemaNombre');
+    const modalNumTests = document.getElementById('modalTemaNumTests');
+    const modalNumPreguntas = document.getElementById('modalTemaNumPreguntas');
+    
+    modalNombre.textContent = temaId;
+    modalNumTests.textContent = numTests;
+    modalNumPreguntas.textContent = numPreguntas;
+    
+    modal.style.display = 'flex';
+}
+
+// Función para cerrar el modal de temas
+function cerrarModalEliminarTema() {
+    const modal = document.getElementById('modalEliminarTema');
+    modal.style.display = 'none';
+    temaIdAEliminar = null;
+}
+
+// Función para confirmar la eliminación de tema
+async function confirmarEliminarTema() {
+    if (!temaIdAEliminar) return;
+    
+    const btnConfirmar = document.getElementById('btnConfirmarEliminarTema');
+    btnConfirmar.disabled = true;
+    btnConfirmar.textContent = 'Eliminando...';
+    
+    try {
+        const response = await fetch(`/profesor/tema/${encodeURIComponent(temaIdAEliminar)}/eliminar/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json',
+            },
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Eliminar la fila del tema de la tabla
+            const row = document.getElementById(`tema-row-${temaIdAEliminar}`);
+            if (row) {
+                row.style.backgroundColor = '#d4edda';
+                setTimeout(() => {
+                    row.remove();
+                }, 500);
+            }
+            
+            cerrarModalEliminarTema();
+            
+            // Mostrar mensaje de éxito con información
+            alert(`✅ Tema eliminado correctamente\n\n${data.info || ''}`);
+            
+            // Recargar la página para actualizar estadísticas
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        } else {
+            alert('❌ Error al eliminar el tema: ' + (data.error || 'Error desconocido'));
+            btnConfirmar.disabled = false;
+            btnConfirmar.textContent = '✅ Sí, eliminar todo';
+        }
+    } catch (error) {
+        console.error('Error al eliminar tema:', error);
+        alert('❌ Error al eliminar el tema. Por favor, intenta de nuevo.');
+        btnConfirmar.disabled = false;
+        btnConfirmar.textContent = '✅ Sí, eliminar todo';
+    }
+}
 
 // Funciones para filtrado de la tabla de intentos
 function aplicarFiltros() {

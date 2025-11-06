@@ -31,6 +31,7 @@ urlpatterns = [
     path('profesor/tema/<str:tema_id>/toggle-field/', views.toggle_tema_field, name='toggle_tema_field'),
     path('profesor/test/<int:test_id>/detalles/', views.get_test_details, name='get_test_details'),
     path('profesor/test/<int:test_id>/eliminar/', views.delete_test, name='delete_test'),
+    path('profesor/tema/<str:tema_id>/eliminar/', views.delete_tema, name='delete_tema'),
     
     # Rutas para gestión de preguntas desde BDD
     path('profesor/preguntas/', views_bdd.listar_preguntas, name='listar_preguntas_bdd'),

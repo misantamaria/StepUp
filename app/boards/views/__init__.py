@@ -37,6 +37,7 @@ from .profesor import (
     toggle_tema_field,
     get_test_details,
     delete_test,
+    delete_tema,
 )
 
 # Importar decoradores
@@ -72,6 +73,7 @@ __all__ = [
     'toggle_tema_field',
     'get_test_details',
     'delete_test',
+    'delete_tema',
     
     # Decoradores
     'es_alumno',

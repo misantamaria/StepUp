@@ -238,6 +238,7 @@ class RespuestaAlumno(models.Model):
     pregunta = models.ForeignKey(Pregunta, on_delete=models.CASCADE, db_column='pregunta_id')
     respuesta = models.CharField(max_length=300)
     es_correcta = models.BooleanField(default=False)
+    confirmada = models.BooleanField(default=False)  # Si el alumno confirmó la respuesta en tests por tema
     fecha_respuesta = models.DateTimeField(auto_now_add=True)
     
     class Meta:

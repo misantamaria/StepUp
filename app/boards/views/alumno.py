@@ -543,10 +543,15 @@ def realizar_test(request, intento_id):
     
     # Inicializar sesión de respuestas si no existe
     session_key = f'test_{intento_id}_respuestas'
+    confirmadas_key = f'test_{intento_id}_confirmadas'
+    
     if session_key not in request.session:
         request.session[session_key] = {}
+    if confirmadas_key not in request.session:
+        request.session[confirmadas_key] = {}
     
     respuestas_guardadas = request.session[session_key]
+    respuestas_confirmadas = request.session[confirmadas_key]
     
     # Manejar POST - guardar respuesta y navegar
     if request.method == 'POST':
@@ -557,7 +562,51 @@ def realizar_test(request, intento_id):
         respuesta_id = request.POST.get(f'pregunta_{preguntas[pregunta_actual].pregunta_id}')
         if respuesta_id:
             respuestas_guardadas[str(pregunta_actual)] = respuesta_id
+            # Guardar explícitamente en sesión
+            request.session[session_key] = respuestas_guardadas
             request.session.modified = True
+        
+        # Confirmar respuesta (solo en modo no-examen)
+        if action == 'confirmar':
+            idx_str = str(pregunta_actual)
+            # Asegurarse de que la respuesta esté guardada
+            if not respuesta_id:
+                respuesta_id = respuestas_guardadas.get(idx_str)
+            
+            print(f"[DEBUG] Confirmando pregunta {idx_str}, respuesta_id: {respuesta_id}")
+            print(f"[DEBUG] Es examen: {intento.es_examen}")
+            
+            if respuesta_id:
+                # Verificar si es correcta
+                from boards.models import Respuesta
+                try:
+                    respuesta = Respuesta.objects.get(respuesta_id=respuesta_id)
+                    es_correcta = respuesta.solucion == 'Correcta'
+                    
+                    respuestas_confirmadas[idx_str] = {
+                        'respuesta_id': respuesta_id,
+                        'es_correcta': es_correcta
+                    }
+                    # Guardar explícitamente en sesión
+                    request.session[confirmadas_key] = respuestas_confirmadas
+                    request.session.modified = True
+                    
+                    print(f"[DEBUG] Respuesta confirmada. Es correcta: {es_correcta}")
+                    print(f"[DEBUG] Estado confirmadas: {respuestas_confirmadas}")
+                    
+                    # Retornar JSON para AJAX
+                    from django.http import JsonResponse
+                    return JsonResponse({
+                        'success': True,
+                        'es_correcta': es_correcta
+                    })
+                except Respuesta.DoesNotExist:
+                    print(f"[DEBUG ERROR] Respuesta no encontrada: {respuesta_id}")
+                    from django.http import JsonResponse
+                    return JsonResponse({
+                        'success': False,
+                        'error': 'Respuesta no encontrada'
+                    }, status=400)
         
         # Finalizar test
         if action == 'finalizar':
@@ -575,8 +624,22 @@ def realizar_test(request, intento_id):
             # Calificar el intento
             intento = alumno_grade_attempt(intento, query_dict)
             
+            # Marcar respuestas como confirmadas si no es examen
+            if not intento.es_examen:
+                from boards.models import RespuestaAlumno
+                for idx_str, confirmada_data in respuestas_confirmadas.items():
+                    idx = int(idx_str)
+                    pregunta = preguntas[idx]
+                    # Actualizar la respuesta en BD
+                    RespuestaAlumno.objects.filter(
+                        intento=intento,
+                        pregunta=pregunta
+                    ).update(confirmada=True)
+            
             # Limpiar sesión
             del request.session[session_key]
+            if confirmadas_key in request.session:
+                del request.session[confirmadas_key]
             
             messages.success(request, f'Test completado! Puntuación: {intento.puntuacion:.1f}%')
             return redirect('boards:resultado_test', intento_id=intento.id)
@@ -600,12 +663,20 @@ def realizar_test(request, intento_id):
     
     pregunta = preguntas[pregunta_actual_idx]
     
+    print(f"[DEBUG] Pregunta actual: {pregunta_actual_idx}")
+    print(f"[DEBUG] Respuestas confirmadas en sesión: {respuestas_confirmadas}")
+    
     # Preparar estado de preguntas para el grid
     estado_preguntas = []
     for idx, p in enumerate(preguntas):
+        idx_str = str(idx)
+        confirmada_data = respuestas_confirmadas.get(idx_str, {})
+        
         estado_preguntas.append({
             'numero': idx + 1,
-            'contestada': str(idx) in respuestas_guardadas,
+            'contestada': idx_str in respuestas_guardadas,
+            'confirmada': idx_str in respuestas_confirmadas,
+            'es_correcta': confirmada_data.get('es_correcta', None),
             'actual': idx == pregunta_actual_idx
         })
     
@@ -615,6 +686,14 @@ def realizar_test(request, intento_id):
     
     # Obtener respuesta guardada para pregunta actual
     respuesta_seleccionada = respuestas_guardadas.get(str(pregunta_actual_idx))
+    pregunta_confirmada = str(pregunta_actual_idx) in respuestas_confirmadas
+    
+    # Obtener información de la confirmación si existe
+    confirmacion_actual = respuestas_confirmadas.get(str(pregunta_actual_idx), {})
+    respuesta_es_correcta = confirmacion_actual.get('es_correcta', None)
+    
+    print(f"[DEBUG] Pregunta {pregunta_actual_idx}: confirmada={pregunta_confirmada}, es_correcta={respuesta_es_correcta}")
+    print(f"[DEBUG] Datos confirmación actual: {confirmacion_actual}")
     
     context = {
         'intento': intento,
@@ -624,10 +703,13 @@ def realizar_test(request, intento_id):
         'total_preguntas': total_preguntas,
         'es_primera': pregunta_actual_idx == 0,
         'es_ultima': pregunta_actual_idx == total_preguntas - 1,
+        'es_examen': intento.es_examen,
         'estado_preguntas': estado_preguntas,
         'preguntas_contestadas': preguntas_contestadas,
         'preguntas_sin_contestar': preguntas_sin_contestar,
         'respuesta_seleccionada': respuesta_seleccionada,
+        'pregunta_confirmada': pregunta_confirmada,
+        'respuesta_es_correcta': respuesta_es_correcta,
     }
     
     return render(request, 'boards/alumno/realizar_test.html', context)

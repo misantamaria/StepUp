@@ -71,13 +71,18 @@
     <!-- Grid de preguntas (estilo DGT) -->
     <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
         <div style="display: flex; gap: 2rem; align-items: center; justify-content: center; flex-wrap: wrap;">
-            <!-- Grid de números -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(45px, 1fr)); gap: 0.5rem; max-width: 900px; flex: 1;">
+            <!-- Grid de números con columnas fijas -->
+            <div style="display: grid; grid-template-columns: repeat({% if total_preguntas <= 10 %}10{% elif total_preguntas <= 20 %}10{% else %}12{% endif %}, 45px); gap: 0.5rem; width: fit-content;">
                 {% for estado in estado_preguntas %}
                 <button type="submit" 
                         onclick="irAPregunta({{ estado.numero|add:-1 }}); return false;"
-                        class="pregunta-grid {% if estado.actual %}actual{% elif estado.contestada %}contestada{% else %}pendiente{% endif %}"
-                        title="Pregunta {{ estado.numero }}{% if estado.contestada %} - Contestada{% else %} - Pendiente{% endif %}">
+                        class="pregunta-grid 
+                               {% if estado.actual %}actual
+                               {% elif estado.confirmada and estado.es_correcta %}confirmada-correcta
+                               {% elif estado.confirmada and not estado.es_correcta %}confirmada-incorrecta
+                               {% elif estado.contestada %}contestada
+                               {% else %}pendiente{% endif %}"
+                        title="Pregunta {{ estado.numero }}{% if estado.confirmada %}{% if estado.es_correcta %} - Correcta{% else %} - Incorrecta{% endif %}{% elif estado.contestada %} - Contestada{% else %} - Pendiente{% endif %}">
                     {{ estado.numero }}
                 </button>
                 {% endfor %}
@@ -88,6 +93,14 @@
                 <div style="display: flex; align-items: center; gap: 0.5rem;">
                     <span style="width: 30px; height: 30px; background: #2c5282; border-radius: 4px; display: inline-block;"></span>
                     <span style="font-size: 0.9rem;">Actual</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="width: 30px; height: 30px; background: #28a745; border-radius: 4px; display: inline-block;"></span>
+                    <span style="font-size: 0.9rem;">Correcta</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="width: 30px; height: 30px; background: #dc3545; border-radius: 4px; display: inline-block;"></span>
+                    <span style="font-size: 0.9rem;">Incorrecta</span>
                 </div>
                 <div style="display: flex; align-items: center; gap: 0.5rem;">
                     <span style="width: 30px; height: 30px; background: #4a90e2; border-radius: 4px; display: inline-block;"></span>
@@ -108,22 +121,29 @@
         <input type="hidden" name="ir_a_pregunta" id="ir_a_pregunta" value="">
         
         <!-- Pregunta actual -->
-        <div style="border: 2px solid #2c5282; padding: 2rem; border-radius: 12px; margin-bottom: 2rem; background: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <div id="contenedor-pregunta" style="border: 2px solid #2c5282; padding: 2rem; border-radius: 12px; margin-bottom: 2rem; background: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
             <h3 style="color: #2c5282; margin-bottom: 1.5rem; font-size: 1.3rem; line-height: 1.6;">
                 {{ pregunta.enunciado }}
             </h3>
             
-            <div style="margin-top: 1.5rem;">
+            <!-- Feedback de respuesta (inicialmente oculto) -->
+            <div id="feedback-respuesta" style="display: none; margin-bottom: 1.5rem; padding: 1rem; border-radius: 8px;">
+                <div id="feedback-contenido"></div>
+            </div>
+            
+            <div id="opciones-respuesta" style="margin-top: 1.5rem;">
                 {% for respuesta in pregunta.get_respuestas %}
-                <label class="respuesta-opcion" data-respuesta-id="{{ respuesta.id }}">
+                <label class="respuesta-opcion" data-respuesta-id="{{ respuesta.id }}" data-es-correcta="{{ respuesta.es_correcta|yesno:'true,false' }}">
                     <input type="radio" 
                            name="pregunta_{{ pregunta.pregunta_id }}" 
                            value="{{ respuesta.id }}" 
                            {% if respuesta_seleccionada and respuesta_seleccionada|stringformat:"s" == respuesta.id|stringformat:"s" %}checked{% endif %}
+                           onchange="habilitarConfirmar()"
                            style="display: none;">
                     <div class="respuesta-contenido">
                         <span class="respuesta-numero">{{ forloop.counter }}</span>
                         <span class="respuesta-texto">{{ respuesta.contenido }}</span>
+                        <span class="icono-feedback" style="display: none; margin-left: auto; font-size: 1.5rem;"></span>
                     </div>
                 </label>
                 {% endfor %}
@@ -139,7 +159,7 @@
         </div>
         
         <!-- Botones de navegación -->
-        <div style="display:flex; gap:1rem; justify-content:space-between; align-items:center; max-width:50%; margin:0 auto 2rem auto;">
+        <div style="display:flex; gap:1rem; justify-content:space-between; align-items:center; max-width:60%; margin:0 auto 2rem auto;">
         
           {% if not es_primera %}
           <button type="submit"
@@ -152,10 +172,23 @@
           <!-- Espacio vacío para mantener la posición -->
           <div style="flex:1;"></div>
           {% endif %}
+          
+          <!-- Botón Confirmar (solo en modo test normal, no en examen) -->
+          {% if not es_examen %}
+          <button type="button"
+                  id="btn-confirmar"
+                  onclick="confirmarRespuesta()"
+                  class="btn-nav btn-confirmar"
+                  style="flex:1;"
+                  disabled>
+            Confirmar Respuesta
+          </button>
+          {% endif %}
       
           {% if not es_ultima %}
           <!-- Mostrar SOLO si hay siguiente -->
           <button type="submit"
+                  id="btn-siguiente"
                   onclick="document.getElementById('action').value='siguiente'"
                   class="btn-nav btn-siguiente"
                   style="flex:1;">
@@ -164,6 +197,7 @@
           {% else %}
           <!-- Mostrar SOLO cuando ya no quedan preguntas -->
           <button type="button"
+                  id="btn-finalizar-pregunta"
                   onclick="mostrarConfirmacion()"
                   class="btn-nav btn-finalizar"
                   style="flex:1;">
@@ -315,6 +349,23 @@
     opacity: 0.5;
 }
 
+.btn-confirmar {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%) !important;
+    color: white !important;
+}
+
+.btn-confirmar:hover:not(:disabled) {
+    background: linear-gradient(135deg, #138496 0%, #117a8b 100%) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.btn-confirmar:disabled {
+    background: #ccc !important;
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
 .btn-finalizar {
     background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
     color: white !important;
@@ -346,6 +397,16 @@
 
 .pregunta-grid.contestada {
     background: #4a90e2;
+    color: white;
+}
+
+.pregunta-grid.confirmada-correcta {
+    background: #28a745;
+    color: white;
+}
+
+.pregunta-grid.confirmada-incorrecta {
+    background: #dc3545;
     color: white;
 }
 
@@ -386,6 +447,8 @@
 </style>
 
 <script>
+let respuestaConfirmada = false;
+
 function mostrarConfirmacion() {
     const modal = document.getElementById('modalConfirmacion');
     modal.style.display = 'flex';
@@ -407,6 +470,136 @@ function irAPregunta(numero) {
     document.getElementById('formTest').submit();
 }
 
+// Función para habilitar el botón Confirmar cuando se selecciona una respuesta
+function habilitarConfirmar() {
+    const btnConfirmar = document.getElementById('btn-confirmar');
+    
+    if (btnConfirmar) {
+        // Si cambiamos de respuesta después de confirmar, resetear el estado
+        if (respuestaConfirmada) {
+            respuestaConfirmada = false;
+            
+            // Ocultar feedback
+            const feedbackDiv = document.getElementById('feedback-respuesta');
+            if (feedbackDiv) {
+                feedbackDiv.style.display = 'none';
+            }
+            
+            // Limpiar iconos y estilos de todas las respuestas
+            const todosLabels = document.querySelectorAll('.respuesta-opcion');
+            todosLabels.forEach(lbl => {
+                const icono = lbl.querySelector('.icono-feedback');
+                icono.style.display = 'none';
+                lbl.style.borderColor = '';
+                lbl.style.background = '';
+            });
+        }
+        
+        // Habilitar botón confirmar
+        btnConfirmar.disabled = false;
+    }
+}
+
+// Función para confirmar la respuesta y mostrar feedback
+function confirmarRespuesta() {
+    const respuestaSeleccionada = document.querySelector('input[type="radio"]:checked');
+    if (!respuestaSeleccionada) return;
+    
+    const label = respuestaSeleccionada.closest('.respuesta-opcion');
+    const esCorrecta = label.getAttribute('data-es-correcta') === 'true';
+    
+    // Marcar como confirmada
+    respuestaConfirmada = true;
+    
+    // Deshabilitar botón confirmar (pero mantenerlo visible)
+    const btnConfirmar = document.getElementById('btn-confirmar');
+    if (btnConfirmar) {
+        btnConfirmar.disabled = true;
+    }
+    
+    // NO deshabilitar opciones - permitir cambiar de opinión
+    // Las respuestas permanecen habilitadas para poder cambiar
+    
+    // Mostrar iconos en todas las respuestas
+    const todosLabels = document.querySelectorAll('.respuesta-opcion');
+    todosLabels.forEach(lbl => {
+        const icono = lbl.querySelector('.icono-feedback');
+        const esCorrectaLabel = lbl.getAttribute('data-es-correcta') === 'true';
+        
+        icono.style.display = 'block';
+        if (esCorrectaLabel) {
+            icono.textContent = '✓';
+            icono.style.color = '#28a745';
+            lbl.style.borderColor = '#28a745';
+            lbl.style.background = '#d4edda';
+        } else {
+            // Marcar respuestas incorrectas solo si fueron seleccionadas
+            if (lbl.querySelector('input[type="radio"]').checked) {
+                icono.textContent = '✗';
+                icono.style.color = '#dc3545';
+                lbl.style.borderColor = '#dc3545';
+                lbl.style.background = '#f8d7da';
+            }
+        }
+    });
+    
+    // Mostrar mensaje de feedback
+    const feedbackDiv = document.getElementById('feedback-respuesta');
+    const feedbackContenido = document.getElementById('feedback-contenido');
+    
+    if (esCorrecta) {
+        feedbackDiv.style.background = '#d4edda';
+        feedbackDiv.style.border = '2px solid #28a745';
+        feedbackDiv.style.color = '#155724';
+        feedbackContenido.innerHTML = '<strong>✓ ¡Correcto!</strong> Has seleccionado la respuesta correcta.';
+    } else {
+        feedbackDiv.style.background = '#f8d7da';
+        feedbackDiv.style.border = '2px solid #dc3545';
+        feedbackDiv.style.color = '#721c24';
+        feedbackContenido.innerHTML = '<strong>✗ Incorrecto.</strong> La respuesta correcta está marcada en verde.';
+    }
+    
+    feedbackDiv.style.display = 'block';
+    
+    // Scroll suave al feedback
+    feedbackDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    
+    // Enviar confirmación al servidor vía AJAX
+    const formData = new FormData();
+    formData.append('action', 'confirmar');
+    formData.append('pregunta_actual', document.querySelector('input[name="pregunta_actual"]').value);
+    
+    // Obtener el nombre del campo de pregunta y el valor de la respuesta
+    const preguntaActualIdx = document.querySelector('input[name="pregunta_actual"]').value;
+    const preguntaFieldName = respuestaSeleccionada.getAttribute('name');
+    const respuestaId = respuestaSeleccionada.value;
+    
+    formData.append(preguntaFieldName, respuestaId);
+    formData.append('csrfmiddlewaretoken', document.querySelector('input[name="csrfmiddlewaretoken"]').value);
+    
+    fetch(window.location.href, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Actualizar el grid - cambiar color del botón de pregunta actual
+            const preguntaActual = parseInt(preguntaActualIdx);
+            const gridButtons = document.querySelectorAll('.pregunta-grid');
+            if (gridButtons[preguntaActual]) {
+                gridButtons[preguntaActual].classList.remove('actual', 'contestada', 'pendiente');
+                if (data.es_correcta) {
+                    gridButtons[preguntaActual].classList.add('confirmada-correcta');
+                } else {
+                    gridButtons[preguntaActual].classList.add('confirmada-incorrecta');
+                }
+            }
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
 // Cerrar modal con ESC
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
@@ -420,6 +613,76 @@ document.getElementById('modalConfirmacion').addEventListener('click', function(
         cerrarModal();
     }
 });
+
+// Restaurar estado de pregunta confirmada al cargar
+{% if pregunta_confirmada and not es_examen and respuesta_es_correcta is not None %}
+window.addEventListener('load', function() {
+    console.log('Restaurando estado confirmado. pregunta_confirmada={{ pregunta_confirmada }}, es_correcta={{ respuesta_es_correcta }}');
+    
+    // Marcar como confirmada
+    respuestaConfirmada = true;
+    
+    // Simular confirmación visual
+    const respuestaSeleccionada = document.querySelector('input[type="radio"]:checked');
+    if (respuestaSeleccionada) {
+        const esCorrecta = {% if respuesta_es_correcta %}true{% else %}false{% endif %};
+        
+        console.log('Respuesta seleccionada encontrada, esCorrecta:', esCorrecta);
+        
+        // NO deshabilitar opciones - permitir cambiar de opinión
+        
+        // Mostrar iconos en todas las respuestas
+        const todosLabels = document.querySelectorAll('.respuesta-opcion');
+        todosLabels.forEach(lbl => {
+            const icono = lbl.querySelector('.icono-feedback');
+            const esCorrectaLabel = lbl.getAttribute('data-es-correcta') === 'true';
+            
+            icono.style.display = 'block';
+            if (esCorrectaLabel) {
+                icono.textContent = '✓';
+                icono.style.color = '#28a745';
+                lbl.style.borderColor = '#28a745';
+                lbl.style.background = '#d4edda';
+            } else {
+                if (lbl.querySelector('input[type="radio"]').checked) {
+                    icono.textContent = '✗';
+                    icono.style.color = '#dc3545';
+                    lbl.style.borderColor = '#dc3545';
+                    lbl.style.background = '#f8d7da';
+                }
+            }
+        });
+        
+        // Mostrar feedback
+        const feedbackDiv = document.getElementById('feedback-respuesta');
+        const feedbackContenido = document.getElementById('feedback-contenido');
+        
+        if (esCorrecta) {
+            feedbackDiv.style.background = '#d4edda';
+            feedbackDiv.style.border = '2px solid #28a745';
+            feedbackDiv.style.color = '#155724';
+            feedbackContenido.innerHTML = '<strong>✓ ¡Correcto!</strong> Has seleccionado la respuesta correcta.';
+        } else {
+            feedbackDiv.style.background = '#f8d7da';
+            feedbackDiv.style.border = '2px solid #dc3545';
+            feedbackDiv.style.color = '#721c24';
+            feedbackContenido.innerHTML = '<strong>✗ Incorrecto.</strong> La respuesta correcta está marcada en verde.';
+        }
+        
+        feedbackDiv.style.display = 'block';
+        
+        // Deshabilitar botón confirmar ya que ya fue confirmada (pero mantenerlo visible)
+        const btnConfirmar = document.getElementById('btn-confirmar');
+        if (btnConfirmar) {
+            btnConfirmar.disabled = true;
+        }
+        
+        console.log('Estado restaurado completamente');
+    } else {
+        console.log('No se encontró respuesta seleccionada');
+    }
+});
+{% endif %}
 
 {% if es_examen %}
 // Temporizador para el modo examen

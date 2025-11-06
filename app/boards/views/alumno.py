@@ -695,6 +695,21 @@ def resultado_test(request, intento_id):
     if session_key_pregunta in request.session:
         del request.session[session_key_pregunta]
     
+    # Obtener el siguiente test disponible (visible, disponible y con requisitos cumplidos)
+    siguiente_test = None
+    tests_candidatos = Test.objects.filter(
+        visible_alumnos=True,
+        disponible_alumno=True
+    ).exclude(
+        id=intento.test.id
+    ).order_by('id')
+    
+    # Filtrar por requisitos cumplidos
+    for test in tests_candidatos:
+        if test.alumno_cumple_requisitos(request.user):
+            siguiente_test = test
+            break
+    
     context = {
         'intento': intento,
         'respuestas_detalle': respuestas_detalle,
@@ -703,6 +718,7 @@ def resultado_test(request, intento_id):
         'total_fallidas': len(respuestas_fallidas),
         'total_correctas': len(respuestas_correctas),
         'total_sin_contestar': total_sin_contestar,
+        'siguiente_test': siguiente_test,
     }
     return render(request, 'boards/alumno/resultado.html', context)
 

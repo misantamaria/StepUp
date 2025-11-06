@@ -7,16 +7,16 @@ from .models import Pregunta, Respuesta, Tema, IntentTest, RespuestaAlumno, Test
 @admin.register(Tema)
 class TemaAdmin(admin.ModelAdmin):
     list_display = ['tema_id', 'total_preguntas', 'total_tests', 
-                    'visible_alumnos', 'disponible_alumno', 'visible_profesor', 'disponible_profesor', 'activo']
-    list_filter = ['visible_alumnos', 'disponible_alumno', 'visible_profesor', 'disponible_profesor', 'activo']
+                    'visible_alumnos', 'disponible_alumno', 'visible_profesor', 'disponible_profesor']
+    list_filter = ['visible_alumnos', 'disponible_alumno', 'visible_profesor', 'disponible_profesor']
     search_fields = ['tema_id']
     fieldsets = (
         ('Información Básica', {
             'fields': ('tema_id',)
         }),
         ('Visibilidad y Disponibilidad', {
-            'fields': (('visible_alumnos', 'disponible_alumno'), ('visible_profesor', 'disponible_profesor'), 'activo'),
-            'description': 'Un tema se muestra solo si está VISIBLE Y DISPONIBLE Y ACTIVO'
+            'fields': (('visible_alumnos', 'disponible_alumno'), ('visible_profesor', 'disponible_profesor')),
+            'description': 'Un tema se muestra solo si está VISIBLE Y DISPONIBLE'
         }),
     )
     
@@ -130,8 +130,8 @@ class RespuestaAdmin(admin.ModelAdmin):
 class TestAdmin(admin.ModelAdmin):
     list_display = ['nombre', 'tema', 'total_preguntas_count', 'requisito_display', 
                     'visible_alumnos', 'disponible_alumno', 'visible_profesor', 'disponible_profesor', 
-                    'tiempo_limite', 'activo', 'fecha_creacion']
-    list_filter = ['tema', 'visible_alumnos', 'disponible_alumno', 'visible_profesor', 'disponible_profesor', 'activo', 'fecha_creacion']
+                    'tiempo_limite', 'fecha_creacion']
+    list_filter = ['tema', 'visible_alumnos', 'disponible_alumno', 'visible_profesor', 'disponible_profesor', 'fecha_creacion']
     search_fields = ['nombre', 'descripcion', 'tema__tema_id']
     filter_horizontal = ['preguntas']
     readonly_fields = ['creado_por', 'fecha_creacion']
@@ -140,7 +140,7 @@ class TestAdmin(admin.ModelAdmin):
             'fields': ('nombre', 'descripcion', 'tema')
         }),
         ('Configuración', {
-            'fields': ('tiempo_limite', 'activo')
+            'fields': ('tiempo_limite',)
         }),
         ('Visibilidad y Disponibilidad', {
             'fields': (('visible_alumnos', 'disponible_alumno'), ('visible_profesor', 'disponible_profesor')),

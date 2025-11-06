@@ -43,13 +43,14 @@
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem; max-width: 800px; margin: 0 auto 2rem;">
             {% for detalle in respuestas_detalle %}
             <div class="pregunta-resultado-item"
+                 onclick="irAPregunta({{ forloop.counter }})"
                  style="
                     display: flex;
                     align-items: center;
                     gap: 0.75rem;
                     padding: 0.5rem;
                     border-radius: 8px;
-                    background: {% if detalle.es_correcta %}#e8f5e9{% elif not detalle.fue_contestada %}#f5f5f5{% else %}#ffebee{% endif %};
+                    cursor: pointer;
                 ">
                 <div style="
                     width: 40px;
@@ -68,7 +69,7 @@
                 </div>
                 <span style="
                     font-size: 0.9rem;
-                    color: {% if detalle.es_correcta %}#155724{% elif not detalle.fue_contestada %}#666{% else %}#721c24{% endif %};
+                    color: {% if detalle.es_correcta %}#28a745{% elif not detalle.fue_contestada %}#6c757d{% else %}#dc3545{% endif %};
                     font-weight: 500;
                 ">
                     {% if detalle.es_correcta %}Respuesta correcta{% elif not detalle.fue_contestada %}No respondida{% else %}Respuesta incorrecta{% endif %}
@@ -77,16 +78,16 @@
             {% endfor %}
         </div>
         
-        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; max-width: 600px; margin: 0 auto;">
             {% if total_fallidas > 0 %}
             <button onclick="mostrarTab('fallidas')" 
-                    style="padding: 1rem 2rem; background: #dc3545; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: 600; box-shadow: 0 2px 8px rgba(220,53,69,0.3); transition: transform 0.2s;">
+                    style="flex: 1; padding: 1rem 2rem; background: #dc3545; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: 600; box-shadow: 0 2px 8px rgba(220,53,69,0.3); transition: transform 0.2s; min-width: 180px;">
                 Revisar Fallidas
             </button>
             {% endif %}
             <button onclick="mostrarTab('todas')" 
-                    style="padding: 1rem 2rem; background: #2c5282; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: 600; box-shadow: 0 2px 8px rgba(44,82,130,0.3); transition: transform 0.2s;">
-                Ver Todas las Preguntas
+                    style="flex: 1; padding: 1rem 2rem; background: #2c5282; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: 600; box-shadow: 0 2px 8px rgba(44,82,130,0.3); transition: transform 0.2s; min-width: 180px;">
+                Ver Todas
             </button>
         </div>
     </div>
@@ -197,7 +198,7 @@
             </div>
             
             {% for detalle in respuestas_detalle %}
-            <div style="border: 2px solid {% if not detalle.fue_contestada %}#ffc107{% elif detalle.es_correcta %}#28a745{% else %}#dc3545{% endif %}; border-radius: 12px; padding: 2rem; margin-bottom: 2rem; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+            <div id="pregunta-{{ forloop.counter }}" style="border: 2px solid {% if not detalle.fue_contestada %}#ffc107{% elif detalle.es_correcta %}#28a745{% else %}#dc3545{% endif %}; border-radius: 12px; padding: 2rem; margin-bottom: 2rem; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.05); scroll-margin-top: 100px;">
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
                     <div>
                         <h4 style="margin: 0; color: #2c5282; font-size: 1.2rem;">
@@ -265,11 +266,17 @@
     <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 3rem; flex-wrap: wrap;">
         <a href="{% url 'boards:iniciar_test' intento.test.id %}" 
            style="background: linear-gradient(135deg, #2c5282 0%, #1a4d7a 100%); color: white; padding: 1rem 2rem; text-decoration: none; border-radius: 8px; font-weight: 600; display: inline-block; box-shadow: 0 2px 8px rgba(44,82,130,0.3);">
-            Repetir Test
+            ⟳ Repetir Test
         </a>
+        {% if siguiente_test %}
+        <a href="{% url 'boards:iniciar_test' siguiente_test.id %}" 
+           style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 1rem 2rem; text-decoration: none; border-radius: 8px; font-weight: 600; display: inline-block; box-shadow: 0 2px 8px rgba(40,167,69,0.3);">
+            ▶▶ Siguiente Test
+        </a>
+        {% endif %}
         <a href="{% url 'boards:dashboard_alumno' %}" 
            style="background: linear-gradient(135deg, #6c757d 0%, #495057 100%); color: white; padding: 1rem 2rem; text-decoration: none; border-radius: 8px; font-weight: 600; display: inline-block; box-shadow: 0 2px 8px rgba(108,117,125,0.3);">
-            ← Home
+            Inicio
         </a>
     </div>
 </div>
@@ -377,6 +384,33 @@ function volverAlResumen() {
     
     // Ocultar todas las secciones de respuestas
     document.querySelectorAll('.seccion-respuestas').forEach(s => s.style.display = 'none');
+}
+
+function irAPregunta(numeroPregunta) {
+    // Mostrar la sección "Ver Todas"
+    mostrarTab('todas');
+    
+    // Esperar un momento para que el DOM se actualice
+    setTimeout(function() {
+        // Buscar el elemento de la pregunta
+        const preguntaElemento = document.getElementById('pregunta-' + numeroPregunta);
+        
+        if (preguntaElemento) {
+            // Hacer scroll suave a la pregunta
+            preguntaElemento.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'start'
+            });
+            
+            // Añadir un efecto visual temporal
+            preguntaElemento.style.boxShadow = '0 4px 20px rgba(44, 82, 130, 0.4)';
+            preguntaElemento.style.transition = 'box-shadow 0.3s';
+            
+            setTimeout(function() {
+                preguntaElemento.style.boxShadow = '0 2px 8px rgba(0,0,0,0.05)';
+            }, 2000);
+        }
+    }, 100);
 }
 
 // Agregar efectos hover a los botones

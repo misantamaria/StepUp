@@ -68,12 +68,36 @@
         </div>
     </div>
     
-    <!-- Contador de preguntas -->
-    <div style="text-align: center; margin-bottom: 2rem;">
-        <div style="display: inline-block; background: #f8f9fa; padding: 1rem 2rem; border-radius: 8px; border: 2px solid #2c5282;">
-            <span style="font-size: 1.5rem; font-weight: bold; color: #2c5282;">
-                Pregunta {{ pregunta_actual|add:1 }} de {{ total_preguntas }}
-            </span>
+    <!-- Grid de preguntas (estilo DGT) -->
+    <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
+        <div style="display: flex; gap: 2rem; align-items: center; justify-content: center; flex-wrap: wrap;">
+            <!-- Grid de números -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(45px, 1fr)); gap: 0.5rem; max-width: 900px; flex: 1;">
+                {% for estado in estado_preguntas %}
+                <button type="submit" 
+                        onclick="irAPregunta({{ estado.numero|add:-1 }}); return false;"
+                        class="pregunta-grid {% if estado.actual %}actual{% elif estado.contestada %}contestada{% else %}pendiente{% endif %}"
+                        title="Pregunta {{ estado.numero }}{% if estado.contestada %} - Contestada{% else %} - Pendiente{% endif %}">
+                    {{ estado.numero }}
+                </button>
+                {% endfor %}
+            </div>
+            
+            <!-- Leyenda al lado -->
+            <div style="display: flex; flex-direction: column; gap: 0.75rem; padding: 0.5rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="width: 30px; height: 30px; background: #2c5282; border-radius: 4px; display: inline-block;"></span>
+                    <span style="font-size: 0.9rem;">Actual</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="width: 30px; height: 30px; background: #4a90e2; border-radius: 4px; display: inline-block;"></span>
+                    <span style="font-size: 0.9rem;">Contestada ({{ preguntas_contestadas }})</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="width: 30px; height: 30px; background: #ccc; border-radius: 4px; display: inline-block;"></span>
+                    <span style="font-size: 0.9rem;">Pendiente ({{ preguntas_sin_contestar }})</span>
+                </div>
+            </div>
         </div>
     </div>
     
@@ -147,38 +171,6 @@
           </button>
           {% endif %}
       
-        </div>
-
-        
-        <!-- Grid de preguntas (estilo DGT) -->
-        <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin-top: 2rem;">
-            <h4 style="color: #2c5282; margin-bottom: 1rem; text-align: center;">Estado de las Preguntas</h4>
-            
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(50px, 1fr)); gap: 0.5rem; max-width: 800px; margin: 0 auto;">
-                {% for estado in estado_preguntas %}
-                <button type="submit" 
-                        onclick="irAPregunta({{ estado.numero|add:-1 }}); return false;"
-                        class="pregunta-grid {% if estado.actual %}actual{% elif estado.contestada %}contestada{% else %}pendiente{% endif %}"
-                        title="Pregunta {{ estado.numero }}{% if estado.contestada %} - Contestada{% else %} - Pendiente{% endif %}">
-                    {{ estado.numero }}
-                </button>
-                {% endfor %}
-            </div>
-            
-            <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 1.5rem; flex-wrap: wrap;">
-                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                    <span style="width: 30px; height: 30px; background: #2c5282; border-radius: 4px; display: inline-block;"></span>
-                    <span>Actual</span>
-                </div>
-                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                    <span style="width: 30px; height: 30px; background: #4a90e2; border-radius: 4px; display: inline-block;"></span>
-                    <span>Contestada ({{ preguntas_contestadas }})</span>
-                </div>
-                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                    <span style="width: 30px; height: 30px; background: #ccc; border-radius: 4px; display: inline-block;"></span>
-                    <span>Pendiente ({{ preguntas_sin_contestar }})</span>
-                </div>
-            </div>
         </div>
     </form>
 </div>

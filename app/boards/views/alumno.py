@@ -641,11 +641,24 @@ def resultado_test(request, intento_id):
     
     # Preparar información detallada de cada respuesta
     respuestas_detalle = []
-    for resp_alumno in respuestas_alumno:
-        pregunta = resp_alumno.pregunta
-        
+    
+    # Determinar qué preguntas mostrar según el tipo de test
+    if intento.es_examen:
+        # En exámenes, solo mostrar preguntas contestadas
+        preguntas_a_mostrar = [resp.pregunta for resp in respuestas_alumno]
+    else:
+        # En tests normales, mostrar TODAS las preguntas del test
+        preguntas_a_mostrar = list(intento.test.preguntas.all())
+    
+    # Crear un diccionario de respuestas del alumno para búsqueda rápida
+    respuestas_dict = {resp.pregunta.pregunta_id: resp for resp in respuestas_alumno}
+    
+    for pregunta in preguntas_a_mostrar:
         # Obtener todas las opciones de respuesta de esta pregunta
         opciones = pregunta.get_respuestas()
+        
+        # Obtener la respuesta del alumno si existe
+        resp_alumno = respuestas_dict.get(pregunta.pregunta_id)
         
         # Encontrar la respuesta correcta y la del alumno
         respuesta_correcta_obj = None
@@ -654,7 +667,7 @@ def resultado_test(request, intento_id):
         for opcion in opciones:
             if opcion['es_correcta']:
                 respuesta_correcta_obj = opcion
-            if str(opcion['id']) == str(resp_alumno.respuesta):
+            if resp_alumno and str(opcion['id']) == str(resp_alumno.respuesta):
                 respuesta_alumno_obj = opcion
         
         respuestas_detalle.append({
@@ -662,8 +675,9 @@ def resultado_test(request, intento_id):
             'respuesta_alumno': resp_alumno,
             'respuesta_alumno_texto': respuesta_alumno_obj['contenido'] if respuesta_alumno_obj else 'No respondida',
             'respuesta_correcta_texto': respuesta_correcta_obj['contenido'] if respuesta_correcta_obj else '',
-            'es_correcta': resp_alumno.es_correcta,
+            'es_correcta': resp_alumno.es_correcta if resp_alumno else False,
             'todas_opciones': opciones,
+            'fue_contestada': resp_alumno is not None,
         })
     
     # Separar fallidas y correctas

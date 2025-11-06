@@ -806,22 +806,31 @@ def resultado_test(request, intento_id):
     
     # Si el test tiene tema y nivel, buscar siguiente de forma estructurada
     if test_actual.tema and test_actual.nivel:
-        # 1. Buscar SIGUIENTE test en la LISTA del MISMO nivel y tema (por orden de ID)
-        siguiente_test_mismo_nivel = Test.objects.filter(
+        # 1. Buscar tests SIN COMPLETAR del MISMO nivel y tema
+        tests_mismo_nivel = Test.objects.filter(
             tema=test_actual.tema,
             nivel=test_actual.nivel,
             visible_alumnos=True,
             disponible_alumno=True,
-            activo=True,
-            id__gt=test_actual.id  # Tests con ID mayor (siguientes en la lista)
-        ).order_by('id').first()
+            activo=True
+        ).order_by('id')
         
-        if siguiente_test_mismo_nivel:
-            # Hay más tests en este nivel
-            siguiente_test = siguiente_test_mismo_nivel
-            tipo_siguiente = 'test'
-            siguiente_bloqueado = not siguiente_test_mismo_nivel.alumno_cumple_requisitos(request.user)
-        else:
+        # Buscar el primer test sin completar del mismo nivel
+        for test in tests_mismo_nivel:
+            ya_completado = IntentTest.objects.filter(
+                alumno=request.user,
+                test=test,
+                completado=True
+            ).exists()
+            
+            if not ya_completado:
+                siguiente_test = test
+                tipo_siguiente = 'test'
+                siguiente_bloqueado = not test.alumno_cumple_requisitos(request.user)
+                break
+        
+        # Si no encontró ningún test sin completar, buscar siguiente nivel
+        if not siguiente_test:
             # No hay más tests en este nivel, buscar siguiente nivel
             nivel_orden = {'Facil': 1, 'Media': 2, 'Dificil': 3}
             nivel_actual_orden = nivel_orden.get(test_actual.nivel, 1)

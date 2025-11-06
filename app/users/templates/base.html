@@ -276,12 +276,6 @@
       <!-- Botones de navegación -->
       {% if request.user.is_authenticated %}
       <nav style="padding: 0; background: transparent; box-shadow: none; margin-bottom: 1rem; max-width: 12.5%; display: flex; align-items: center; gap: 0.5rem;">
-        <button class="nav-btn-header" onclick="window.history.back()" title="Volver atrás">
-          Atrás
-        </button>
-        <button class="nav-btn-header" onclick="window.history.forward()" title="Avanzar">
-          Adelante
-        </button>
         {% if request.user.is_staff %}
           {% if request.session.modo_actual == 'profesor' %}
             <a href="{% url 'boards:dashboard_profesor' %}" title="Dashboard Profesor">Inicio</a>

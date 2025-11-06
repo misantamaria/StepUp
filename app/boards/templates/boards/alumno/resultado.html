@@ -65,12 +65,16 @@
                 </div>
                 
                 {% for detalle in respuestas_fallidas %}
-                <div style="border: 3px solid #dc3545; border-radius: 12px; padding: 2rem; margin-bottom: 2rem; background: white; box-shadow: 0 2px 8px rgba(220,53,69,0.1);">
-                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
-                        <span style="font-size: 3rem;">❌</span>
+                <div style="border: 2px solid #dc3545; border-radius: 12px; padding: 2rem; margin-bottom: 2rem; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
                         <div>
-                            <h4 style="margin: 0; color: #dc3545; font-size: 1.2rem;">Pregunta {{ forloop.counter }}</h4>
-                            <small style="color: #666;">Dificultad: {{ detalle.pregunta.get_dificultad_display }} • Tema: {{ detalle.pregunta.tema }}</small>
+                            <h4 style="margin: 0; color: #2c5282; font-size: 1.2rem;">Pregunta {{ forloop.counter }}</h4>
+                            <small style="color: #666;">Dificultad: {{ detalle.pregunta.get_dificultad_display }} • Tema: {{ detalle.pregunta.tema }} • {{ detalle.pregunta.puntuacion }} pts</small>
+                        </div>
+                        <div style="text-align: right;">
+                            <span style="background: #dc3545; color: white; padding: 0.5rem 1rem; border-radius: 20px; font-weight: bold; font-size: 0.9rem;">
+                                INCORRECTA
+                            </span>
                         </div>
                     </div>
                     
@@ -78,39 +82,51 @@
                         {{ detalle.pregunta.enunciado }}
                     </h5>
                     
-                    <!-- Tu respuesta (incorrecta) -->
-                    <div style="background: #ffebee; border-left: 4px solid #dc3545; padding: 1.25rem; margin-bottom: 1rem; border-radius: 6px;">
-                        <strong style="color: #c82333;">❌ Tu respuesta:</strong>
-                        <p style="margin: 0.5rem 0 0 0; color: #721c24; font-size: 1.05rem;">{{ detalle.respuesta_alumno_texto }}</p>
-                    </div>
-                    
-                    <!-- Respuesta correcta -->
-                    <div style="background: #e8f5e9; border-left: 4px solid #28a745; padding: 1.25rem; margin-bottom: 1rem; border-radius: 6px;">
-                        <strong style="color: #1e7e34;">✓ Respuesta correcta:</strong>
-                        <p style="margin: 0.5rem 0 0 0; color: #155724; font-size: 1.05rem; font-weight: 600;">{{ detalle.respuesta_correcta_texto }}</p>
-                    </div>
-                    
-                    <!-- Mostrar todas las opciones con explicación -->
-                    <details style="margin-top: 1.5rem; cursor: pointer;">
-                        <summary style="color: #2c5282; font-weight: 600; padding: 0.75rem; background: #f8f9fa; border-radius: 6px; user-select: none;">
-                            Ver todas las opciones y explicación
-                        </summary>
-                        <div style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 6px;">
-                            {% for opcion in detalle.todas_opciones %}
-                            <div style="padding: 0.75rem; margin-bottom: 0.5rem; border-left: 3px solid {% if opcion.es_correcta %}#28a745{% else %}#6c757d{% endif %}; background: white; border-radius: 4px;">
-                                <span style="font-weight: 600; color: {% if opcion.es_correcta %}#28a745{% else %}#6c757d{% endif %};">
-                                    {% if opcion.es_correcta %}✓{% else %}○{% endif %}
+                    <!-- Mostrar todas las opciones estilo test -->
+                    <div style="margin-top: 1.5rem;">
+                        {% for opcion in detalle.todas_opciones %}
+                        <div style="
+                            display: block;
+                            padding: 1rem;
+                            margin-bottom: 0.75rem;
+                            border: 2px solid {% if opcion.es_correcta %}#28a745{% elif detalle.respuesta_alumno_texto == opcion.contenido %}#dc3545{% else %}#e0e0e0{% endif %};
+                            border-radius: 8px;
+                            background: {% if opcion.es_correcta %}#e8f5e9{% elif detalle.respuesta_alumno_texto == opcion.contenido %}#ffebee{% else %}white{% endif %};
+                            ">
+                            <div style="display: flex; align-items: center; gap: 1rem;">
+                                <span style="
+                                    flex-shrink: 0;
+                                    width: 32px;
+                                    height: 32px;
+                                    border: 2px solid {% if opcion.es_correcta %}#28a745{% elif detalle.respuesta_alumno_texto == opcion.contenido %}#dc3545{% else %}#ddd{% endif %};
+                                    border-radius: 6px;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    font-weight: bold;
+                                    background: {% if opcion.es_correcta %}#28a745{% elif detalle.respuesta_alumno_texto == opcion.contenido %}#dc3545{% else %}white{% endif %};
+                                    color: {% if opcion.es_correcta %}white{% elif detalle.respuesta_alumno_texto == opcion.contenido %}white{% else %}#666{% endif %};
+                                    ">
+                                    {{ forloop.counter }}
                                 </span>
-                                {{ opcion.contenido }}
+                                <span style="
+                                    flex: 1;
+                                    font-size: 1rem;
+                                    line-height: 1.5;
+                                    color: {% if opcion.es_correcta %}#155724{% elif detalle.respuesta_alumno_texto == opcion.contenido %}#721c24{% else %}#333{% endif %};
+                                    font-weight: {% if opcion.es_correcta %}600{% elif detalle.respuesta_alumno_texto == opcion.contenido %}600{% else %}normal{% endif %};
+                                    ">
+                                    {{ opcion.contenido }}
+                                </span>
                             </div>
-                            {% endfor %}
                         </div>
-                    </details>
+                        {% endfor %}
+                    </div>
                 </div>
                 {% endfor %}
             {% else %}
                 <div style="text-align: center; padding: 3rem; background: #e8f5e9; border-radius: 12px;">
-                    <div style="font-size: 4rem; margin-bottom: 1rem;"></div>
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">🎉</div>
                     <h3 style="color: #28a745; margin: 0;">¡Perfecto!</h3>
                     <p style="color: #155724; margin: 0.5rem 0 0 0;">No tienes respuestas incorrectas. ¡Excelente trabajo!</p>
                 </div>
@@ -126,13 +142,10 @@
             </div>
             
             {% for detalle in respuestas_detalle %}
-            <div style="border: 3px solid {% if not detalle.fue_contestada %}#ffc107{% elif detalle.es_correcta %}#28a745{% else %}#dc3545{% endif %}; border-radius: 12px; padding: 2rem; margin-bottom: 2rem; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
-                    <span style="font-size: 3rem;">
-                        {% if not detalle.fue_contestada %}⚠️{% elif detalle.es_correcta %}✅{% else %}❌{% endif %}
-                    </span>
-                    <div style="flex: 1;">
-                        <h4 style="margin: 0; color: {% if not detalle.fue_contestada %}#ffc107{% elif detalle.es_correcta %}#28a745{% else %}#dc3545{% endif %}; font-size: 1.2rem;">
+            <div style="border: 2px solid {% if not detalle.fue_contestada %}#ffc107{% elif detalle.es_correcta %}#28a745{% else %}#dc3545{% endif %}; border-radius: 12px; padding: 2rem; margin-bottom: 2rem; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+                    <div>
+                        <h4 style="margin: 0; color: #2c5282; font-size: 1.2rem;">
                             Pregunta {{ forloop.counter }}
                         </h4>
                         <small style="color: #666;">Dificultad: {{ detalle.pregunta.get_dificultad_display }} • Tema: {{ detalle.pregunta.tema }} • {{ detalle.pregunta.puntuacion }} pts</small>
@@ -148,50 +161,46 @@
                     {{ detalle.pregunta.enunciado }}
                 </h5>
                 
-                {% if detalle.fue_contestada %}
-                <!-- Tu respuesta -->
-                <div style="background: {% if detalle.es_correcta %}#e8f5e9{% else %}#ffebee{% endif %}; border-left: 4px solid {% if detalle.es_correcta %}#28a745{% else %}#dc3545{% endif %}; padding: 1.25rem; margin-bottom: 1rem; border-radius: 6px;">
-                    <strong style="color: {% if detalle.es_correcta %}#1e7e34{% else %}#c82333{% endif %};">
-                        {% if detalle.es_correcta %}✓{% else %}❌{% endif %} Tu respuesta:
-                    </strong>
-                    <p style="margin: 0.5rem 0 0 0; color: {% if detalle.es_correcta %}#155724{% else %}#721c24{% endif %}; font-size: 1.05rem;">
-                        {{ detalle.respuesta_alumno_texto }}
-                    </p>
-                </div>
-                {% else %}
-                <!-- No contestada -->
-                <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 1.25rem; margin-bottom: 1rem; border-radius: 6px;">
-                    <strong style="color: #856404;">⚠️ No respondiste esta pregunta</strong>
-                    <p style="margin: 0.5rem 0 0 0; color: #856404; font-size: 1.05rem;">
-                        Esta pregunta se dejó sin contestar durante el test.
-                    </p>
-                </div>
-                {% endif %}
-                
-                <!-- Respuesta correcta (siempre mostrar) -->
-                <div style="background: #e8f5e9; border-left: 4px solid #28a745; padding: 1.25rem; margin-bottom: 1rem; border-radius: 6px;">
-                    <strong style="color: #1e7e34;">✓ Respuesta correcta:</strong>
-                    <p style="margin: 0.5rem 0 0 0; color: #155724; font-size: 1.05rem; font-weight: 600;">
-                        {{ detalle.respuesta_correcta_texto }}
-                    </p>
-                </div>
-                
-                <!-- Todas las opciones -->
-                <details style="margin-top: 1.5rem; cursor: pointer;">
-                    <summary style="color: #2c5282; font-weight: 600; padding: 0.75rem; background: #f8f9fa; border-radius: 6px; user-select: none;">
-                        Ver todas las opciones
-                    </summary>
-                    <div style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 6px;">
-                        {% for opcion in detalle.todas_opciones %}
-                        <div style="padding: 0.75rem; margin-bottom: 0.5rem; border-left: 3px solid {% if opcion.es_correcta %}#28a745{% else %}#6c757d{% endif %}; background: white; border-radius: 4px;">
-                            <span style="font-weight: 600; color: {% if opcion.es_correcta %}#28a745{% else %}#6c757d{% endif %};">
-                                {% if opcion.es_correcta %}✓{% else %}○{% endif %}
+                <!-- Mostrar todas las opciones estilo test -->
+                <div style="margin-top: 1.5rem;">
+                    {% for opcion in detalle.todas_opciones %}
+                    <div style="
+                        display: block;
+                        padding: 1rem;
+                        margin-bottom: 0.75rem;
+                        border: 2px solid {% if opcion.es_correcta %}#28a745{% elif detalle.fue_contestada and detalle.respuesta_alumno_texto == opcion.contenido %}#dc3545{% else %}#e0e0e0{% endif %};
+                        border-radius: 8px;
+                        background: {% if opcion.es_correcta %}#e8f5e9{% elif detalle.fue_contestada and detalle.respuesta_alumno_texto == opcion.contenido %}#ffebee{% else %}white{% endif %};
+                        ">
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <span style="
+                                flex-shrink: 0;
+                                width: 32px;
+                                height: 32px;
+                                border: 2px solid {% if opcion.es_correcta %}#28a745{% elif detalle.fue_contestada and detalle.respuesta_alumno_texto == opcion.contenido %}#dc3545{% else %}#ddd{% endif %};
+                                border-radius: 6px;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                font-weight: bold;
+                                background: {% if opcion.es_correcta %}#28a745{% elif detalle.fue_contestada and detalle.respuesta_alumno_texto == opcion.contenido %}#dc3545{% else %}white{% endif %};
+                                color: {% if opcion.es_correcta %}white{% elif detalle.fue_contestada and detalle.respuesta_alumno_texto == opcion.contenido %}white{% else %}#666{% endif %};
+                                ">
+                                {{ forloop.counter }}
                             </span>
-                            {{ opcion.contenido }}
+                            <span style="
+                                flex: 1;
+                                font-size: 1rem;
+                                line-height: 1.5;
+                                color: {% if opcion.es_correcta %}#155724{% elif detalle.fue_contestada and detalle.respuesta_alumno_texto == opcion.contenido %}#721c24{% else %}#333{% endif %};
+                                font-weight: {% if opcion.es_correcta %}600{% elif detalle.fue_contestada and detalle.respuesta_alumno_texto == opcion.contenido %}600{% else %}normal{% endif %};
+                                ">
+                                {{ opcion.contenido }}
+                            </span>
                         </div>
-                        {% endfor %}
                     </div>
-                </details>
+                    {% endfor %}
+                </div>
             </div>
             {% endfor %}
         </div>

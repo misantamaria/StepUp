@@ -4,6 +4,9 @@ Vistas para el modo alumno: dashboard, tests, resultados.
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.utils import timezone
+from datetime import timedelta
+import random
 from ..models import Test, IntentTest, Tema, Pregunta, ProgresoTema, RespuestaAlumno
 from core.alumno.services import (
     get_dashboard_data as alumno_dashboard_data,
@@ -13,8 +16,279 @@ from core.alumno.services import (
 
 
 @login_required
+def seleccionar_modo_alumno(request):
+    """Vista para que el alumno seleccione entre modo Practicar o Examen"""
+    # Contar preguntas disponibles para el examen
+    es_profesor = request.user.is_staff
+    
+    # Obtener y guardar modo_test de la URL si es profesor
+    modo_test = False
+    if es_profesor:
+        modo_test_param = request.GET.get('modo_test', '').lower()
+        if modo_test_param == 'true':
+            modo_test = True
+            request.session['modo_test'] = True
+        elif modo_test_param == 'false':
+            modo_test = False
+            request.session['modo_test'] = False
+        else:
+            # Si no viene en URL, usar el de la sesión
+            modo_test = request.session.get('modo_test', False)
+    
+    if es_profesor:
+        tests_disponibles = Test.objects.filter(
+            activo=True, 
+            visible_profesor=True, 
+            disponible_profesor=True
+        )
+    else:
+        tests_disponibles = Test.objects.filter(
+            activo=True, 
+            visible_alumnos=True, 
+            disponible_alumno=True
+        )
+    
+    # Recopilar todas las preguntas de estos tests
+    preguntas_ids = []
+    for test in tests_disponibles:
+        preguntas_ids.extend(list(test.preguntas.values_list('pregunta_id', flat=True)))
+    
+    # Eliminar duplicados
+    preguntas_ids = list(set(preguntas_ids))
+    total_preguntas_disponibles = len(preguntas_ids)
+    examen_disponible = total_preguntas_disponibles >= 30
+    
+    context = {
+        'total_preguntas_disponibles': total_preguntas_disponibles,
+        'examen_disponible': examen_disponible,
+        'es_profesor': es_profesor,
+        'modo_test': modo_test,
+    }
+    
+    return render(request, 'boards/alumno/seleccionar_modo.html', context)
+
+
+@login_required
+def iniciar_examen(request):
+    """Inicia un examen con 30 preguntas aleatorias y 20 minutos de tiempo"""
+    # Si es staff en modo alumno, permitir
+    es_profesor = request.user.is_staff
+    
+    # Obtener todos los tests visibles y disponibles
+    if es_profesor:
+        tests_disponibles = Test.objects.filter(
+            activo=True, 
+            visible_profesor=True, 
+            disponible_profesor=True
+        )
+    else:
+        tests_disponibles = Test.objects.filter(
+            activo=True, 
+            visible_alumnos=True, 
+            disponible_alumno=True
+        )
+    
+    # Recopilar todas las preguntas de estos tests
+    preguntas_ids = []
+    for test in tests_disponibles:
+        preguntas_ids.extend(list(test.preguntas.values_list('pregunta_id', flat=True)))
+    
+    # Eliminar duplicados
+    preguntas_ids = list(set(preguntas_ids))
+    
+    # Verificar que haya al menos 30 preguntas
+    if len(preguntas_ids) < 30:
+        messages.error(request, f'No hay suficientes preguntas disponibles. Se necesitan 30 y solo hay {len(preguntas_ids)}.')
+        return redirect('boards:seleccionar_modo_alumno')
+    
+    # Seleccionar 30 preguntas aleatorias
+    preguntas_seleccionadas = random.sample(preguntas_ids, 30)
+    
+    # Crear un intento de examen (usaremos un IntentTest especial)
+    # Primero, necesitamos crear o obtener un Test especial para exámenes
+    test_examen, created = Test.objects.get_or_create(
+        nombre='EXAMEN_ALEATORIO',
+        defaults={
+            'descripcion': 'Examen con preguntas aleatorias',
+            'tiempo_limite': 20,  # 20 minutos
+            'activo': False,  # No visible en listados normales
+            'visible_alumnos': False,
+            'visible_profesor': False,
+            'disponible_alumno': False,
+            'disponible_profesor': False,
+            'nivel': 'Media',
+        }
+    )
+    
+    # Crear el intento
+    intento = IntentTest.objects.create(
+        alumno=request.user,
+        test=test_examen,
+        fecha_inicio=timezone.now(),
+        completado=False,
+        es_examen=True  # Marcar como examen
+    )
+    
+    # Guardar las preguntas seleccionadas en la sesión
+    request.session[f'examen_{intento.id}_preguntas'] = preguntas_seleccionadas
+    request.session[f'examen_{intento.id}_tiempo_inicio'] = timezone.now().isoformat()
+    
+    return redirect('boards:realizar_examen', intento_id=intento.id)
+
+
+@login_required
+def realizar_examen(request, intento_id):
+    """Realiza un examen con tiempo límite de 20 minutos"""
+    intento = get_object_or_404(IntentTest, id=intento_id, alumno=request.user)
+    
+    # Verificar que es un examen
+    if not intento.es_examen:
+        messages.error(request, 'Este no es un intento de examen válido.')
+        return redirect('boards:dashboard_alumno')
+    
+    if intento.completado:
+        return redirect('boards:resultado_test', intento_id=intento.id)
+    
+    # Obtener preguntas del examen desde la sesión
+    session_key_preguntas = f'examen_{intento_id}_preguntas'
+    session_key_tiempo = f'examen_{intento_id}_tiempo_inicio'
+    
+    if session_key_preguntas not in request.session:
+        messages.error(request, 'Examen no válido o expirado.')
+        return redirect('boards:seleccionar_modo_alumno')
+    
+    preguntas_ids = request.session[session_key_preguntas]
+    tiempo_inicio = timezone.datetime.fromisoformat(request.session[session_key_tiempo])
+    
+    # Obtener las preguntas
+    preguntas = list(Pregunta.objects.filter(pregunta_id__in=preguntas_ids))
+    # Ordenar según el orden en preguntas_ids
+    preguntas.sort(key=lambda p: preguntas_ids.index(p.pregunta_id))
+    
+    total_preguntas = len(preguntas)
+    
+    # Calcular tiempo restante
+    tiempo_transcurrido = timezone.now() - tiempo_inicio
+    tiempo_limite = timedelta(minutes=20)
+    tiempo_restante = tiempo_limite - tiempo_transcurrido
+    
+    # Si se acabó el tiempo, finalizar automáticamente
+    if tiempo_restante.total_seconds() <= 0:
+        # Calificar con las respuestas que tenga
+        session_key_respuestas = f'test_{intento_id}_respuestas'
+        respuestas_guardadas = request.session.get(session_key_respuestas, {})
+        
+        from django.http import QueryDict
+        query_dict = QueryDict('', mutable=True)
+        for idx, pregunta in enumerate(preguntas):
+            if str(idx) in respuestas_guardadas:
+                query_dict[f'pregunta_{pregunta.pregunta_id}'] = respuestas_guardadas[str(idx)]
+        
+        intento = alumno_grade_attempt(intento, query_dict)
+        
+        # Limpiar sesión
+        del request.session[session_key_preguntas]
+        del request.session[session_key_tiempo]
+        if session_key_respuestas in request.session:
+            del request.session[session_key_respuestas]
+        
+        messages.warning(request, 'El tiempo del examen ha finalizado.')
+        return redirect('boards:resultado_test', intento_id=intento.id)
+    
+    # Inicializar sesión de respuestas si no existe
+    session_key_respuestas = f'test_{intento_id}_respuestas'
+    if session_key_respuestas not in request.session:
+        request.session[session_key_respuestas] = {}
+    
+    respuestas_guardadas = request.session[session_key_respuestas]
+    
+    # Manejar POST - guardar respuesta y navegar
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        pregunta_actual = int(request.POST.get('pregunta_actual', 0))
+        
+        # Guardar respuesta si existe
+        respuesta_id = request.POST.get(f'pregunta_{preguntas[pregunta_actual].pregunta_id}')
+        if respuesta_id:
+            respuestas_guardadas[str(pregunta_actual)] = respuesta_id
+            request.session.modified = True
+        
+        # Finalizar examen
+        if action == 'finalizar':
+            from django.http import QueryDict
+            query_dict = QueryDict('', mutable=True)
+            for idx, pregunta in enumerate(preguntas):
+                if str(idx) in respuestas_guardadas:
+                    query_dict[f'pregunta_{pregunta.pregunta_id}'] = respuestas_guardadas[str(idx)]
+            
+            intento = alumno_grade_attempt(intento, query_dict)
+            
+            # Limpiar sesión
+            del request.session[session_key_preguntas]
+            del request.session[session_key_tiempo]
+            del request.session[session_key_respuestas]
+            
+            return redirect('boards:resultado_test', intento_id=intento.id)
+        
+        # Navegación entre preguntas
+        elif action == 'siguiente' and pregunta_actual < total_preguntas - 1:
+            pregunta_actual += 1
+        elif action == 'anterior' and pregunta_actual > 0:
+            pregunta_actual -= 1
+        elif action == 'ir_a':
+            ir_a = request.POST.get('ir_a_pregunta')
+            if ir_a:
+                pregunta_actual = int(ir_a)
+        elif action.startswith('ir_'):
+            pregunta_actual = int(action.split('_')[1])
+    else:
+        pregunta_actual = 0
+    
+    # Preparar datos de la pregunta actual
+    pregunta = preguntas[pregunta_actual]
+    respuestas = pregunta.get_respuestas()
+    
+    # Marcar respuesta seleccionada
+    respuesta_seleccionada = respuestas_guardadas.get(str(pregunta_actual))
+    
+    # Crear mapa de estado de preguntas (contestadas/no contestadas)
+    estado_preguntas = []
+    for idx in range(total_preguntas):
+        estado_preguntas.append({
+            'numero': idx + 1,
+            'contestada': str(idx) in respuestas_guardadas,
+            'actual': idx == pregunta_actual,
+        })
+    
+    context = {
+        'intento': intento,
+        'pregunta': pregunta,
+        'respuestas': respuestas,
+        'pregunta_numero': pregunta_actual + 1,
+        'total_preguntas': total_preguntas,
+        'pregunta_actual': pregunta_actual,
+        'pregunta_actual_idx': pregunta_actual,
+        'respuesta_seleccionada': respuesta_seleccionada,
+        'es_primera': pregunta_actual == 0,
+        'es_ultima': pregunta_actual == total_preguntas - 1,
+        'estado_preguntas': estado_preguntas,
+        'preguntas_contestadas': len(respuestas_guardadas),
+        'preguntas_sin_contestar': total_preguntas - len(respuestas_guardadas),
+        'contestadas': len(respuestas_guardadas),
+        'tiempo_restante_segundos': int(tiempo_restante.total_seconds()),
+        'es_examen': True,
+    }
+    
+    return render(request, 'boards/alumno/realizar_test.html', context)
+
+
+@login_required
 def dashboard_alumno(request):
     """Dashboard para alumnos - muestra tests disponibles"""
+    # Si no viene de la selección de modo, redirigir allí primero
+    if 'desde_seleccion' not in request.GET:
+        return redirect('boards:seleccionar_modo_alumno')
+    
     # Permitir a staff ver el modo alumno cuando está en sesión
     if request.user.is_staff:
         request.session['modo_actual'] = 'alumno'

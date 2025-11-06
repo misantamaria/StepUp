@@ -1,14 +1,36 @@
 {% extends "base.html" %}
 
-{% block title %}{{ test.nombre }} - StepUp{% endblock %}
+{% block title %}{% if es_examen %}Examen{% else %}{{ intento.test.nombre }}{% endif %} - StepUp{% endblock %}
 
 {% block content %}
 <div class="card" style="max-width: 1200px; margin: 0 auto;">
     <!-- Header del test -->
     <div style="background: linear-gradient(135deg, #2c5282 0%, #1a4d7a 100%); color: white; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
-        <h2 style="margin: 0; color: white;">{{ test.nombre }}</h2>
-        <div style="margin-top: 0.5rem; opacity: 0.9;">
-            Tiempo límite: {{ test.tiempo_limite }} minutos
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <h2 style="margin: 0; color: white;">{% if es_examen %}EXAMEN{% else %}{{ intento.test.nombre }}{% endif %}</h2>
+                <div style="margin-top: 0.5rem; opacity: 0.9;">
+                    {% if es_examen %}
+                        30 preguntas aleatorias - 20 minutos
+                    {% else %}
+                        Tiempo límite: {{ intento.test.tiempo_limite }} minutos
+                    {% endif %}
+                </div>
+            </div>
+            {% if es_examen %}
+            <div id="temporizador" style="
+                background: rgba(255, 255, 255, 0.2); 
+                padding: 1rem 2rem; 
+                border-radius: 8px; 
+                text-align: center;
+                border: 2px solid rgba(255, 255, 255, 0.3);
+            ">
+                <div style="font-size: 0.8rem; opacity: 0.9; margin-bottom: 0.3rem;">TIEMPO RESTANTE</div>
+                <div id="tiempo" style="font-size: 2rem; font-weight: bold; font-family: 'Courier New', monospace;">
+                    --:--
+                </div>
+            </div>
+            {% endif %}
         </div>
     </div>
     
@@ -59,27 +81,34 @@
         </div>
         
         <!-- Botones de navegación -->
-        <div style="display: flex; gap: 1rem; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap;">
-            <button type="submit" 
-                    onclick="document.getElementById('action').value='anterior'"
-                    {% if es_primera %}disabled{% endif %}
-                    class="btn-nav btn-anterior">
-                ← Anterior
-            </button>
-            
-            <button type="button" 
-                    onclick="mostrarConfirmacion()"
-                    class="btn-nav btn-finalizar">
-                ✓ Finalizar Test
-            </button>
-            
-            <button type="submit" 
-                    onclick="document.getElementById('action').value='siguiente'"
-                    {% if es_ultima %}disabled{% endif %}
-                    class="btn-nav btn-siguiente">
-                Siguiente →
-            </button>
+        <div style="display:flex; gap:1rem; justify-content:space-between; align-items:center; flex-wrap:wrap; margin-bottom:2rem;">
+        
+          {% if not es_primera %}
+          <button type="submit"
+                  onclick="document.getElementById('action').value='anterior'"
+                  class="btn-nav btn-anterior">
+            ← Anterior
+          </button>
+          {% endif %}
+      
+          {% if not es_ultima %}
+          <!-- Mostrar SOLO si hay siguiente -->
+          <button type="submit"
+                  onclick="document.getElementById('action').value='siguiente'"
+                  class="btn-nav btn-siguiente">
+            Siguiente →
+          </button>
+          {% else %}
+          <!-- Mostrar SOLO cuando ya no quedan preguntas -->
+          <button type="button"
+                  onclick="mostrarConfirmacion()"
+                  class="btn-nav btn-finalizar">
+            ✓ Finalizar Test
+          </button>
+          {% endif %}
+      
         </div>
+
         
         <!-- Grid de preguntas (estilo DGT) -->
         <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin-top: 2rem;">
@@ -358,6 +387,52 @@ document.getElementById('modalConfirmacion').addEventListener('click', function(
         cerrarModal();
     }
 });
+
+{% if es_examen %}
+// Temporizador para el modo examen
+let tiempoRestante = {{ tiempo_restante_segundos }};
+
+function actualizarTemporizador() {
+    const minutos = Math.floor(tiempoRestante / 60);
+    const segundos = tiempoRestante % 60;
+    
+    const display = document.getElementById('tiempo');
+    display.textContent = `${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
+    
+    // Cambiar color según el tiempo restante
+    const temporizadorDiv = document.getElementById('temporizador');
+    if (tiempoRestante <= 60) {
+        // Último minuto - rojo parpadeante
+        temporizadorDiv.style.background = 'rgba(220, 53, 69, 0.9)';
+        temporizadorDiv.style.animation = 'parpadeo 1s infinite';
+    } else if (tiempoRestante <= 300) {
+        // Últimos 5 minutos - naranja
+        temporizadorDiv.style.background = 'rgba(255, 193, 7, 0.9)';
+    }
+    
+    if (tiempoRestante <= 0) {
+        // Tiempo agotado - enviar formulario automáticamente
+        alert('El tiempo ha finalizado. El examen se enviará automáticamente.');
+        finalizarTest();
+    } else {
+        tiempoRestante--;
+        setTimeout(actualizarTemporizador, 1000);
+    }
+}
+
+// Iniciar temporizador
+actualizarTemporizador();
+
+// Añadir estilo de parpadeo
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes parpadeo {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+    }
+`;
+document.head.appendChild(style);
+{% endif %}
 </script>
 
 {% endblock %}

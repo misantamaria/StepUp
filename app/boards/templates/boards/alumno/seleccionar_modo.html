@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}Seleccionar Modo - StepUp{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 600px; margin: 4rem auto;">
+    
+    <!-- Toggle Modo Test para profesores -->
+    {% if es_profesor %}
+    <div style="background: #fff8e1; border: 2px solid #ffd54f; border-radius: 8px; padding: 1rem; margin-bottom: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
+            <div>
+                <strong style="color: #f57c00;">Modo Test</strong>
+                <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem; color: #666;">
+                    {% if modo_test %}
+                        Viendo <strong>todo el contenido disponible</strong> (incluido no visible)
+                    {% else %}
+                        Viendo solo contenido <strong>visible y disponible</strong>
+                    {% endif %}
+                </p>
+            </div>
+            <a href="?modo_test={% if modo_test %}false{% else %}true{% endif %}" 
+               style="background: {% if modo_test %}#f57c00{% else %}#2c5282{% endif %}; 
+                      color: white; 
+                      padding: 0.5rem 1rem; 
+                      border-radius: 6px; 
+                      text-decoration: none;
+                      white-space: nowrap;
+                      transition: all 0.2s;">
+                {% if modo_test %}Modo Normal{% else %}Activar Modo Test{% endif %}
+            </a>
+        </div>
+    </div>
+    {% endif %}
+    
+    {% if messages %}
+    <div style="margin-bottom: 1rem;">
+        {% for message in messages %}
+        <div style="padding: 1rem; background: {% if message.tags == 'error' %}#fee; border-left: 4px solid #c00{% else %}#efe; border-left: 4px solid #0c0{% endif %}; margin-bottom: 0.5rem;">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+        <!-- Modo Practicar -->
+        <a href="{% url 'boards:dashboard_alumno' %}?desde_seleccion=1{% if es_profesor and modo_test %}&modo_test=true{% endif %}" style="text-decoration: none;">
+            <div class="modo-card modo-practicar" style="
+                border: 3px solid #2c5282;
+                border-radius: 12px;
+                padding: 2rem 1rem;
+                text-align: center;
+                transition: all 0.3s;
+                background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+                cursor: pointer;
+                height: 100%;
+            ">
+                <h3 style="color: #2c5282; margin-bottom: 0.5rem;">Tests por tema</h3>
+                <p style="color: #1a4d7a; font-size: 0.9rem; margin: 0;">
+                    Realiza tests por temas y niveles<br>
+                    <span style="font-size: 0.8rem; color: #666;">Sin límite de tiempo</span>
+                </p>
+            </div>
+        </a>
+        
+        <!-- Modo Examen -->
+        {% if examen_disponible %}
+        <a href="{% url 'boards:iniciar_examen' %}{% if es_profesor and modo_test %}?modo_test=true{% endif %}" style="text-decoration: none;">
+            <div class="modo-card modo-examen" style="
+                border: 3px solid #d97706;
+                border-radius: 12px;
+                padding: 2rem 1rem;
+                text-align: center;
+                transition: all 0.3s;
+                background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+                cursor: pointer;
+                height: 100%;
+            ">
+                <h3 style="color: #d97706; margin-bottom: 0.5rem;">Examen</h3>
+                <p style="color: #92400e; font-size: 0.9rem; margin: 0;">
+                    30 preguntas aleatorias<br>
+                    <span style="font-size: 0.8rem; color: #666;">20 minutos de tiempo</span>
+                </p>
+            </div>
+        </a>
+        {% else %}
+        <div style="position: relative;">
+            <div class="modo-card modo-bloqueado" style="
+                border: 3px solid #95a5a6;
+                border-radius: 12px;
+                padding: 2rem 1rem;
+                text-align: center;
+                background: #ecf0f1;
+                cursor: not-allowed;
+                height: 100%;
+                opacity: 0.6;
+            ">
+                <div style="font-size: 3rem; margin-bottom: 1rem; color: #7f8c8d;">🔒</div>
+                <h3 style="color: #7f8c8d; margin-bottom: 0.5rem;">Examen</h3>
+                <p style="color: #95a5a6; font-size: 0.9rem; margin: 0;">
+                    Para desbloquear el modo examen necesitas tener 30 preguntas disponibles.<br>
+                    <span style="font-size: 0.8rem; color: #999;">
+                        Disponibles: {{ total_preguntas_disponibles }}/30
+                    </span>
+                </p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <div style="margin-top: 2rem; text-align: center;">
+        <a href="{% url 'boards:mi_progreso' %}" style="color: {{ THEME_COLORS.bg_medium }}; text-decoration: none; font-size: 0.9rem;">
+            Ver mi progreso
+        </a>
+    </div>
+</div>
+
+<style>
+    .modo-practicar:hover {
+        border-color: #1a4d7a;
+        transform: scale(1.05);
+        box-shadow: 0 8px 20px rgba(44, 82, 130, 0.3);
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%) !important;
+    }
+    
+    .modo-examen:hover {
+        border-color: #b45309;
+        transform: scale(1.05);
+        box-shadow: 0 8px 20px rgba(217, 119, 6, 0.3);
+        background: linear-gradient(135deg, #fef3c7 0%, #fcd34d 100%) !important;
+    }
+    
+    .modo-bloqueado {
+        pointer-events: none;
+    }
+</style>
+{% endblock %}

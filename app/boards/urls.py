@@ -15,6 +15,9 @@ urlpatterns = [
     
     # Rutas para alumnos
     path('alumno/', views.dashboard_alumno, name='dashboard_alumno'),
+    path('alumno/seleccionar-modo/', views.seleccionar_modo_alumno, name='seleccionar_modo_alumno'),
+    path('alumno/examen/iniciar/', views.iniciar_examen, name='iniciar_examen'),
+    path('alumno/examen/<int:intento_id>/', views.realizar_examen, name='realizar_examen'),
     path('alumno/progreso/', views.mi_progreso, name='mi_progreso'),
     path('alumno/progreso/temas/', views.estadisticas_temas, name='estadisticas_temas'),
     path('alumno/progreso/historial/', views.historial_intentos, name='historial_intentos'),

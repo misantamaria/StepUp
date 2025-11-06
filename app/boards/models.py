@@ -212,6 +212,9 @@ class IntentTest(models.Model):
     total_preguntas = models.IntegerField(default=0)
     respuestas_correctas = models.IntegerField(default=0)
     
+    # Campo para identificar si es un examen aleatorio
+    es_examen = models.BooleanField(default=False, help_text="¿Es un examen con preguntas aleatorias?")
+    
     class Meta:
         ordering = ['-fecha_inicio']
         verbose_name = 'Intento de Test'

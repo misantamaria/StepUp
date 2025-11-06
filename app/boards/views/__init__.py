@@ -19,6 +19,9 @@ from .home import (
 # Importar vistas de alumno
 from .alumno import (
     dashboard_alumno,
+    seleccionar_modo_alumno,
+    iniciar_examen,
+    realizar_examen,
     detalle_tema,
     tests_nivel,
     iniciar_test,
@@ -57,6 +60,9 @@ __all__ = [
     
     # Alumno
     'dashboard_alumno',
+    'seleccionar_modo_alumno',
+    'iniciar_examen',
+    'realizar_examen',
     'detalle_tema',
     'tests_nivel',
     'iniciar_test',

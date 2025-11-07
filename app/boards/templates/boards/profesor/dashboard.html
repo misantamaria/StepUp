@@ -2358,7 +2358,7 @@ async function editarPregunta(preguntaId) {
             const btnCerrar = document.createElement('button');
             btnCerrar.type = 'button';
             btnCerrar.textContent = '✕';
-            btnCerrar.title = 'Ya sé cómo funciona';
+            btnCerrar.title = 'No volver a mostrar';
             btnCerrar.style.background = 'transparent';
             btnCerrar.style.border = 'none';
             btnCerrar.style.color = '#1e3a8a';
@@ -2396,11 +2396,41 @@ async function editarPregunta(preguntaId) {
                 respuestaDiv.className = 'respuesta-item';
                 respuestaDiv.style.marginBottom = '0.75rem';
                 respuestaDiv.style.padding = '1rem';
+                respuestaDiv.style.paddingTop = '2.5rem'; // Espacio para la papelera
                 respuestaDiv.style.border = '2px solid #dee2e6';
                 respuestaDiv.style.borderRadius = '6px';
                 respuestaDiv.style.background = respuesta.es_correcta ? '#d4edda' : '#ffffff';
                 respuestaDiv.style.cursor = 'pointer';
                 respuestaDiv.style.transition = 'all 0.2s';
+                respuestaDiv.style.position = 'relative'; // Para posicionar la papelera
+                
+                // Botón eliminar (papelera en esquina superior derecha, fuera del flujo)
+                const btnEliminar = document.createElement('button');
+                btnEliminar.type = 'button';
+                btnEliminar.textContent = '🗑';
+                btnEliminar.title = 'Eliminar respuesta';
+                btnEliminar.style.position = 'absolute';
+                btnEliminar.style.top = '0.5rem';
+                btnEliminar.style.right = '0.5rem';
+                btnEliminar.style.background = '#dc3545';
+                btnEliminar.style.color = 'white';
+                btnEliminar.style.border = 'none';
+                btnEliminar.style.borderRadius = '4px';
+                btnEliminar.style.cursor = 'pointer';
+                btnEliminar.style.fontSize = '1rem';
+                btnEliminar.style.width = '32px';
+                btnEliminar.style.height = '32px';
+                btnEliminar.style.display = 'flex';
+                btnEliminar.style.alignItems = 'center';
+                btnEliminar.style.justifyContent = 'center';
+                btnEliminar.style.padding = '0';
+                btnEliminar.style.zIndex = '10';
+                btnEliminar.onclick = function(e) {
+                    e.stopPropagation();
+                    respuestaDiv.remove();
+                };
+                
+                respuestaDiv.appendChild(btnEliminar);
                 
                 // Radio oculto pero funcional
                 const radio = document.createElement('input');
@@ -2411,55 +2441,24 @@ async function editarPregunta(preguntaId) {
                 radio.style.display = 'none';
                 respuestaDiv.appendChild(radio);
                 
-                // Contenedor principal: input + papelera en la misma fila
-                const mainRow = document.createElement('div');
-                mainRow.style.display = 'flex';
-                mainRow.style.alignItems = 'center';
-                mainRow.style.gap = '0.5rem';
-                mainRow.style.marginBottom = '0.5rem';
-                
-                // Input de texto
+                // Input de texto (ocupa todo el ancho)
                 const input = document.createElement('input');
                 input.type = 'text';
                 input.className = 'respuesta-contenido';
                 input.value = respuesta.contenido;
                 input.placeholder = 'Contenido de la respuesta';
                 input.required = true;
-                input.style.flex = '1';
+                input.style.width = '100%';
                 input.style.padding = '0.5rem';
                 input.style.border = '1px solid #ced4da';
                 input.style.borderRadius = '4px';
                 input.style.fontSize = '0.95rem';
                 input.style.color = '#212529';
                 input.style.backgroundColor = '#ffffff';
-                input.style.height = '36px';
                 input.style.boxSizing = 'border-box';
+                input.style.marginBottom = '0.5rem';
                 
-                // Botón eliminar (papelera pequeña)
-                const btnEliminar = document.createElement('button');
-                btnEliminar.type = 'button';
-                btnEliminar.textContent = '🗑';
-                btnEliminar.title = 'Eliminar respuesta';
-                btnEliminar.style.background = '#dc3545';
-                btnEliminar.style.color = 'white';
-                btnEliminar.style.border = 'none';
-                btnEliminar.style.borderRadius = '4px';
-                btnEliminar.style.cursor = 'pointer';
-                btnEliminar.style.fontSize = '1rem';
-                btnEliminar.style.width = '36px';
-                btnEliminar.style.height = '36px';
-                btnEliminar.style.flexShrink = '0';
-                btnEliminar.style.display = 'flex';
-                btnEliminar.style.alignItems = 'center';
-                btnEliminar.style.justifyContent = 'center';
-                btnEliminar.style.padding = '0';
-                btnEliminar.onclick = function(e) {
-                    e.stopPropagation();
-                    respuestaDiv.remove();
-                };
-                
-                mainRow.appendChild(input);
-                mainRow.appendChild(btnEliminar);
+                respuestaDiv.appendChild(input);
                 
                 // Indicador de respuesta correcta
                 const indicador = document.createElement('div');
@@ -2468,7 +2467,6 @@ async function editarPregunta(preguntaId) {
                 indicador.style.color = respuesta.es_correcta ? '#155724' : '#6c757d';
                 indicador.textContent = respuesta.es_correcta ? '✓ Esta es la respuesta correcta' : '';
                 
-                respuestaDiv.appendChild(mainRow);
                 respuestaDiv.appendChild(indicador);
                 
                 // Hacer clic en el div completo marca como correcta
@@ -2491,10 +2489,6 @@ async function editarPregunta(preguntaId) {
                         } else {
                             item.style.background = '#ffffff';
                             item.style.borderColor = '#dee2e6';
-                            if (itemIndicador) {
-                                itemIndicador.textContent = 'Haz clic para marcar como correcta';
-                                itemIndicador.style.color = '#6c757d';
-                            }
                         }
                     });
                 };
@@ -2559,30 +2553,38 @@ function agregarRespuestaEditar() {
     radio.style.display = 'none';
     respuestaDiv.appendChild(radio);
     
-    // Contenedor principal: input + papelera en la misma fila
-    const mainRow = document.createElement('div');
-    mainRow.style.display = 'flex';
-    mainRow.style.alignItems = 'center';
-    mainRow.style.gap = '0.5rem';
-    mainRow.style.marginBottom = '0.5rem';
-    
-    // Input de texto
+    // Input de texto (ocupa todo el ancho)
     const input = document.createElement('input');
     input.type = 'text';
     input.className = 'respuesta-contenido';
     input.placeholder = 'Contenido de la respuesta';
     input.required = true;
-    input.style.flex = '1';
+    input.style.width = '100%';
     input.style.padding = '0.5rem';
     input.style.border = '1px solid #ced4da';
     input.style.borderRadius = '4px';
     input.style.fontSize = '0.95rem';
     input.style.color = '#212529';
     input.style.backgroundColor = '#ffffff';
-    input.style.height = '36px';
     input.style.boxSizing = 'border-box';
+    input.style.marginBottom = '0.5rem';
     
-    // Botón eliminar (papelera pequeña)
+    respuestaDiv.appendChild(input);
+    
+    // Contenedor para papelera e indicador (en la misma fila)
+    const bottomRow = document.createElement('div');
+    bottomRow.style.display = 'flex';
+    bottomRow.style.justifyContent = 'space-between';
+    bottomRow.style.alignItems = 'center';
+    
+    // Indicador de respuesta correcta (a la izquierda)
+    //const indicador = document.createElement('div');
+    //indicador.style.fontSize = '0.85rem';
+    //indicador.style.fontWeight = '500';
+    //indicador.style.color = '#6c757d';
+    //indicador.textContent = 'Haz clic para marcar como correcta';
+    
+    // Botón eliminar (papelera pequeña, a la derecha)
     const btnEliminar = document.createElement('button');
     btnEliminar.type = 'button';
     btnEliminar.textContent = '🗑';
@@ -2593,8 +2595,8 @@ function agregarRespuestaEditar() {
     btnEliminar.style.borderRadius = '4px';
     btnEliminar.style.cursor = 'pointer';
     btnEliminar.style.fontSize = '1rem';
-    btnEliminar.style.width = '36px';
-    btnEliminar.style.height = '36px';
+    btnEliminar.style.width = '32px';
+    btnEliminar.style.height = '32px';
     btnEliminar.style.flexShrink = '0';
     btnEliminar.style.display = 'flex';
     btnEliminar.style.alignItems = 'center';
@@ -2605,18 +2607,10 @@ function agregarRespuestaEditar() {
         respuestaDiv.remove();
     };
     
-    mainRow.appendChild(input);
-    mainRow.appendChild(btnEliminar);
+    bottomRow.appendChild(indicador);
+    bottomRow.appendChild(btnEliminar);
     
-    // Indicador de respuesta correcta
-    const indicador = document.createElement('div');
-    indicador.style.fontSize = '0.85rem';
-    indicador.style.fontWeight = '500';
-    indicador.style.color = '#6c757d';
-    indicador.textContent = 'Haz clic para marcar como correcta';
-    
-    respuestaDiv.appendChild(mainRow);
-    respuestaDiv.appendChild(indicador);
+    respuestaDiv.appendChild(bottomRow);
     
     // Hacer clic en el div completo marca como correcta
     respuestaDiv.onclick = function(e) {

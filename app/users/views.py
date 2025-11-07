@@ -72,7 +72,7 @@ El equipo de StepUp
                 
                 send_mail(subject, message, from_email, recipient_list, fail_silently=False)
                 
-                messages.success(request, f'''✅ Usuario {username} creado correctamente. 
+                messages.success(request, f''' Usuario {username} creado correctamente. 
 📧 Email de bienvenida enviado a {final_email}
 📬 Revisa tu bandeja de entrada (y carpeta de spam)''')
                     

@@ -3,6 +3,68 @@
 {% block title %}Dashboard Profesor - StepUp{% endblock %}
 
 {% block content %}
+<script>
+// Definir funciones globales necesarias antes de renderizar el contenido
+function switchTab(tab) {
+    const tabTemas = document.getElementById('tab-temas');
+    const tabTests = document.getElementById('tab-tests');
+    const tabPreguntas = document.getElementById('tab-preguntas');
+    const contentTemas = document.getElementById('content-temas');
+    const contentTests = document.getElementById('content-tests');
+    const contentPreguntas = document.getElementById('content-preguntas');
+    
+    if (!tabTemas || !tabTests || !tabPreguntas || !contentTemas || !contentTests || !contentPreguntas) {
+        console.error('No se encontraron todos los elementos necesarios');
+        return;
+    }
+    
+    const primaryColor = '#2563eb';
+    
+    // Resetear todos los tabs
+    [tabTemas, tabTests, tabPreguntas].forEach(tab => {
+        tab.style.background = 'transparent';
+        tab.style.color = '#666';
+        tab.style.border = '1px solid #d0d0d0';
+        tab.style.borderBottom = '3px solid transparent';
+    });
+    
+    // Ocultar todos los contenidos
+    contentTemas.style.display = 'none';
+    contentTests.style.display = 'none';
+    contentPreguntas.style.display = 'none';
+    
+    // Activar el tab seleccionado
+    if (tab === 'temas') {
+        tabTemas.style.background = primaryColor;
+        tabTemas.style.color = 'white';
+        tabTemas.style.border = '1px solid ' + primaryColor;
+        tabTemas.style.borderBottom = '3px solid ' + primaryColor;
+        contentTemas.style.display = 'block';
+    } else if (tab === 'tests') {
+        tabTests.style.background = primaryColor;
+        tabTests.style.color = 'white';
+        tabTests.style.border = '1px solid ' + primaryColor;
+        tabTests.style.borderBottom = '3px solid ' + primaryColor;
+        contentTests.style.display = 'block';
+    } else if (tab === 'preguntas') {
+        tabPreguntas.style.background = primaryColor;
+        tabPreguntas.style.color = 'white';
+        tabPreguntas.style.border = '1px solid ' + primaryColor;
+        tabPreguntas.style.borderBottom = '3px solid ' + primaryColor;
+        contentPreguntas.style.display = 'block';
+    }
+}
+
+function toggleEstadisticas() {
+    const estadisticas = document.getElementById('estadisticas');
+    if (estadisticas.style.display === 'none') {
+        estadisticas.style.display = 'block';
+    } else {
+        estadisticas.style.display = 'none';
+    }
+}
+</script>
+
 <div class="card">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
         <h2 style="color: {{ THEME_COLORS.primary }}; margin: 0;"> Panel del Profesor</h2>
@@ -473,10 +535,10 @@
 
         <div style="display: flex; gap: 1rem; justify-content: flex-end;">
             <button onclick="cerrarModalEliminar()" style="background: #6c757d; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 1rem;">
-                ❌ No, cancelar
+                 No, cancelar
             </button>
             <button id="btnConfirmarEliminar" onclick="confirmarEliminarTest()" style="background: #dc3545; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 1rem;">
-                ✅ Sí, eliminar
+                 Sí, eliminar
             </button>
         </div>
     </div>
@@ -513,10 +575,10 @@
 
         <div style="display: flex; gap: 1rem; justify-content: flex-end;">
             <button onclick="cerrarModalEliminarTema()" style="background: #6c757d; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 1rem;">
-                ❌ No, cancelar
+                 No, cancelar
             </button>
             <button id="btnConfirmarEliminarTema" onclick="confirmarEliminarTema()" style="background: #dc3545; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 1rem;">
-                ✅ Sí, eliminar todo
+                 Sí, eliminar todo
             </button>
         </div>
     </div>
@@ -544,10 +606,10 @@
 
             <div style="display: flex; gap: 1rem; justify-content: flex-end;">
                 <button type="button" onclick="cerrarModalCrearTema()" style="background: #6c757d; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 1rem;">
-                    ❌ Cancelar
+                     Cancelar
                 </button>
                 <button type="submit" id="btnCrearTema" style="background: {{ THEME_COLORS.primary }}; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 1rem;">
-                    ✅ Crear Tema
+                     Crear Tema
                 </button>
             </div>
         </form>
@@ -608,10 +670,10 @@
 
             <div style="display: flex; gap: 1rem; justify-content: flex-end;">
                 <button type="button" onclick="cerrarModalCrearTest()" style="background: #6c757d; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 1rem;">
-                    ❌ Cancelar
+                     Cancelar
                 </button>
                 <button type="submit" id="btnCrearTest" style="background: {{ THEME_COLORS.primary }}; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 1rem;">
-                    ✅ Crear Test
+                     Crear Test
                 </button>
             </div>
         </form>
@@ -679,10 +741,10 @@
 
             <div style="display: flex; gap: 1rem; justify-content: flex-end;">
                 <button type="button" onclick="cerrarModalCrearPregunta()" style="background: #6c757d; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 1rem;">
-                    ❌ Cancelar
+                     Cancelar
                 </button>
                 <button type="submit" id="btnCrearPregunta" style="background: {{ THEME_COLORS.primary }}; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 1rem;">
-                    ✅ Crear Pregunta
+                     Crear Pregunta
                 </button>
             </div>
         </form>
@@ -713,10 +775,10 @@
 
             <div style="display: flex; gap: 1rem; justify-content: flex-end;">
                 <button type="button" onclick="cerrarModalEditarTema()" style="background: #6c757d; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 1rem;">
-                    ❌ Cancelar
+                     Cancelar
                 </button>
                 <button type="submit" id="btnGuardarTema" style="background: {{ THEME_COLORS.primary }}; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 1rem;">
-                    ✅ Guardar Cambios
+                     Guardar Cambios
                 </button>
             </div>
         </form>
@@ -785,10 +847,10 @@
 
             <div style="display: flex; gap: 1rem; justify-content: flex-end;">
                 <button type="button" onclick="cerrarModalEditarTest()" style="background: #6c757d; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 1rem;">
-                    ❌ Cancelar
+                     Cancelar
                 </button>
                 <button type="submit" id="btnGuardarTest" style="background: {{ THEME_COLORS.primary }}; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 1rem;">
-                    ✅ Guardar Cambios
+                     Guardar Cambios
                 </button>
             </div>
         </form>
@@ -849,10 +911,10 @@
 
             <div style="display: flex; gap: 1rem; justify-content: flex-end;">
                 <button type="button" onclick="cerrarModalEditarPregunta()" style="background: #6c757d; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 1rem;">
-                    ❌ Cancelar
+                     Cancelar
                 </button>
                 <button type="submit" id="btnGuardarPregunta" style="background: {{ THEME_COLORS.primary }}; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 1rem;">
-                    ✅ Guardar Cambios
+                     Guardar Cambios
                 </button>
             </div>
         </form>
@@ -1344,22 +1406,22 @@ async function confirmarEliminarTest() {
             cerrarModalEliminar();
             
             // Mostrar mensaje de éxito
-            alert('✅ Test eliminado correctamente');
+            alert(' Test eliminado correctamente');
             
             // Recargar la página para actualizar estadísticas
             setTimeout(() => {
                 window.location.reload();
             }, 1000);
         } else {
-            alert('❌ Error al eliminar el test: ' + (data.error || 'Error desconocido'));
+            alert(' Error al eliminar el test: ' + (data.error || 'Error desconocido'));
             btnConfirmar.disabled = false;
-            btnConfirmar.textContent = '✅ Sí, eliminar';
+            btnConfirmar.textContent = ' Sí, eliminar';
         }
     } catch (error) {
         console.error('Error al eliminar test:', error);
-        alert('❌ Error al eliminar el test. Por favor, intenta de nuevo.');
+        alert(' Error al eliminar el test. Por favor, intenta de nuevo.');
         btnConfirmar.disabled = false;
-        btnConfirmar.textContent = '✅ Sí, eliminar';
+        btnConfirmar.textContent = ' Sí, eliminar';
     }
 }
 
@@ -1433,22 +1495,22 @@ async function confirmarEliminarTema() {
             cerrarModalEliminarTema();
             
             // Mostrar mensaje de éxito con información
-            alert(`✅ Tema eliminado correctamente\n\n${data.info || ''}`);
+            alert(` Tema eliminado correctamente\n\n${data.info || ''}`);
             
             // Recargar la página para actualizar estadísticas
             setTimeout(() => {
                 window.location.reload();
             }, 1000);
         } else {
-            alert('❌ Error al eliminar el tema: ' + (data.error || 'Error desconocido'));
+            alert(' Error al eliminar el tema: ' + (data.error || 'Error desconocido'));
             btnConfirmar.disabled = false;
-            btnConfirmar.textContent = '✅ Sí, eliminar todo';
+            btnConfirmar.textContent = ' Sí, eliminar todo';
         }
     } catch (error) {
         console.error('Error al eliminar tema:', error);
-        alert('❌ Error al eliminar el tema. Por favor, intenta de nuevo.');
+        alert(' Error al eliminar el tema. Por favor, intenta de nuevo.');
         btnConfirmar.disabled = false;
-        btnConfirmar.textContent = '✅ Sí, eliminar todo';
+        btnConfirmar.textContent = ' Sí, eliminar todo';
     }
 }
 
@@ -1661,20 +1723,20 @@ async function crearTema(event) {
         const data = await response.json();
         
         if (data.success) {
-            alert('✅ ' + data.message);
+            alert(' ' + data.message);
             cerrarModalCrearTema();
             // Recargar la página para mostrar el nuevo tema
             window.location.reload();
         } else {
-            alert('❌ ' + data.error);
+            alert(' ' + data.error);
             btnCrear.disabled = false;
-            btnCrear.textContent = '✅ Crear Tema';
+            btnCrear.textContent = ' Crear Tema';
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('❌ Error al crear el tema. Por favor, intenta de nuevo.');
+        alert(' Error al crear el tema. Por favor, intenta de nuevo.');
         btnCrear.disabled = false;
-        btnCrear.textContent = '✅ Crear Tema';
+        btnCrear.textContent = ' Crear Tema';
     }
 }
 
@@ -1731,20 +1793,20 @@ async function crearTest(event) {
         const result = await response.json();
         
         if (result.success) {
-            alert('✅ ' + result.message);
+            alert(' ' + result.message);
             cerrarModalCrearTest();
             // Recargar la página para mostrar el nuevo test
             window.location.reload();
         } else {
-            alert('❌ ' + result.error);
+            alert(' ' + result.error);
             btnCrear.disabled = false;
-            btnCrear.textContent = '✅ Crear Test';
+            btnCrear.textContent = ' Crear Test';
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('❌ Error al crear el test. Por favor, intenta de nuevo.');
+        alert(' Error al crear el test. Por favor, intenta de nuevo.');
         btnCrear.disabled = false;
-        btnCrear.textContent = '✅ Crear Test';
+        btnCrear.textContent = ' Crear Test';
     }
 }
 
@@ -1804,7 +1866,8 @@ function agregarRespuesta() {
     inputTexto.className = 'input-respuesta-texto';
     inputTexto.required = true;
     inputTexto.placeholder = 'Escribe la respuesta aquí';
-    inputTexto.style.cssText = 'width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 0.95rem;';
+    // Usar setAttribute para forzar los estilos
+    inputTexto.setAttribute('style', 'width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 0.95rem; color: #212529 !important; background: white !important;');
     
     inputContainer.appendChild(inputTexto);
     
@@ -1865,9 +1928,9 @@ async function crearPregunta(event) {
     const radioSeleccionado = document.querySelector('input[name="respuesta_correcta"]:checked');
     
     if (!radioSeleccionado) {
-        alert('❌ Debes marcar una respuesta como correcta');
+        alert(' Debes marcar una respuesta como correcta');
         btnCrear.disabled = false;
-        btnCrear.textContent = '✅ Crear Pregunta';
+        btnCrear.textContent = ' Crear Pregunta';
         return;
     }
     
@@ -1885,9 +1948,9 @@ async function crearPregunta(event) {
     });
     
     if (respuestas.length < 2) {
-        alert('❌ Debes proporcionar al menos 2 respuestas');
+        alert(' Debes proporcionar al menos 2 respuestas');
         btnCrear.disabled = false;
-        btnCrear.textContent = '✅ Crear Pregunta';
+        btnCrear.textContent = ' Crear Pregunta';
         return;
     }
     
@@ -1912,19 +1975,19 @@ async function crearPregunta(event) {
         const result = await response.json();
         
         if (result.success) {
-            alert('✅ ' + result.message);
+            alert(' ' + result.message);
             cerrarModalCrearPregunta();
             // No recargar la página, solo cerrar el modal
         } else {
-            alert('❌ ' + result.error);
+            alert(' ' + result.error);
             btnCrear.disabled = false;
-            btnCrear.textContent = '✅ Crear Pregunta';
+            btnCrear.textContent = ' Crear Pregunta';
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('❌ Error al crear la pregunta. Por favor, intenta de nuevo.');
+        alert(' Error al crear la pregunta. Por favor, intenta de nuevo.');
         btnCrear.disabled = false;
-        btnCrear.textContent = '✅ Crear Pregunta';
+        btnCrear.textContent = ' Crear Pregunta';
     }
 }
 
@@ -2101,19 +2164,19 @@ async function guardarCambiosTema(event) {
         const data = await response.json();
         
         if (data.success) {
-            alert('✅ ' + data.message);
+            alert(data.message);
             cerrarModalEditarTema();
             location.reload(); // Recargar para mostrar cambios
         } else {
-            alert('❌ ' + (data.error || 'Error al guardar cambios'));
+            alert(' ' + (data.error || 'Error al guardar cambios'));
             btnGuardar.disabled = false;
-            btnGuardar.textContent = '✅ Guardar Cambios';
+            btnGuardar.textContent = 'Guardar Cambios';
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('❌ Error al guardar cambios del tema');
+        alert(' Error al guardar cambios del tema');
         btnGuardar.disabled = false;
-        btnGuardar.textContent = '✅ Guardar Cambios';
+        btnGuardar.textContent = ' Guardar Cambios';
     }
 }
 
@@ -2163,11 +2226,11 @@ async function editarTest(testId) {
             
             modal.style.display = 'flex';
         } else {
-            alert('❌ Error al cargar datos del test');
+            alert(' Error al cargar datos del test');
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('❌ Error al cargar datos del test');
+        alert(' Error al cargar datos del test');
     }
 }
 
@@ -2209,19 +2272,19 @@ async function guardarCambiosTest(event) {
         const result = await response.json();
         
         if (result.success) {
-            alert('✅ ' + result.message);
+            alert(' ' + result.message);
             cerrarModalEditarTest();
             location.reload();
         } else {
-            alert('❌ ' + (result.error || 'Error al guardar cambios'));
+            alert(' ' + (result.error || 'Error al guardar cambios'));
             btnGuardar.disabled = false;
-            btnGuardar.textContent = '✅ Guardar Cambios';
+            btnGuardar.textContent = ' Guardar Cambios';
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('❌ Error al guardar cambios del test');
+        alert(' Error al guardar cambios del test');
         btnGuardar.disabled = false;
-        btnGuardar.textContent = '✅ Guardar Cambios';
+        btnGuardar.textContent = ' Guardar Cambios';
     }
 }
 
@@ -2259,6 +2322,8 @@ async function editarPregunta(preguntaId) {
         const response = await fetch(`/profesor/pregunta/${preguntaId}/obtener/`);
         const data = await response.json();
         
+        console.log('Datos recibidos de la pregunta:', data);
+        
         if (data.success) {
             document.getElementById('editPreguntaTema').value = data.tema;
             document.getElementById('editPreguntaEnunciado').value = data.enunciado;
@@ -2269,7 +2334,9 @@ async function editarPregunta(preguntaId) {
             const contenedor = document.getElementById('editContenedorRespuestas');
             contenedor.innerHTML = '';
             
+            console.log('Respuestas a cargar:', data.respuestas);
             data.respuestas.forEach((respuesta, index) => {
+                console.log(`Respuesta ${index}:`, respuesta.contenido);
                 // Crear el elemento div
                 const respuestaDiv = document.createElement('div');
                 respuestaDiv.className = 'respuesta-item';
@@ -2293,10 +2360,8 @@ async function editarPregunta(preguntaId) {
                 input.value = respuesta.contenido;
                 input.placeholder = 'Contenido de la respuesta';
                 input.required = true;
-                input.style.flex = '1';
-                input.style.padding = '0.5rem';
-                input.style.border = '1px solid #ced4da';
-                input.style.borderRadius = '4px';
+                // Usar setAttribute para forzar los estilos
+                input.setAttribute('style', 'flex: 1; padding: 0.5rem; border: 1px solid #ced4da; border-radius: 4px; color: #212529 !important; background: white !important;');
                 
                 // Botón eliminar
                 const btnEliminar = document.createElement('button');
@@ -2348,11 +2413,11 @@ async function editarPregunta(preguntaId) {
             
             modal.style.display = 'flex';
         } else {
-            alert('❌ Error al cargar datos de la pregunta');
+            alert(' Error al cargar datos de la pregunta');
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('❌ Error al cargar datos de la pregunta');
+        alert(' Error al cargar datos de la pregunta');
     }
 }
 
@@ -2391,10 +2456,8 @@ function agregarRespuestaEditar() {
     input.className = 'respuesta-contenido';
     input.placeholder = 'Contenido de la respuesta';
     input.required = true;
-    input.style.flex = '1';
-    input.style.padding = '0.5rem';
-    input.style.border = '1px solid #ced4da';
-    input.style.borderRadius = '4px';
+    // Usar setAttribute para forzar los estilos
+    input.setAttribute('style', 'flex: 1; padding: 0.5rem; border: 1px solid #ced4da; border-radius: 4px; color: #212529 !important; background: white !important;');
     
     // Botón eliminar
     const btnEliminar = document.createElement('button');
@@ -2465,17 +2528,17 @@ async function guardarCambiosPregunta(event) {
     
     // Validaciones
     if (respuestas.length < 2) {
-        alert('❌ Debe haber al menos 2 respuestas');
+        alert(' Debe haber al menos 2 respuestas');
         btnGuardar.disabled = false;
-        btnGuardar.textContent = '✅ Guardar Cambios';
+        btnGuardar.textContent = ' Guardar Cambios';
         return;
     }
     
     const correctas = respuestas.filter(r => r.es_correcta);
     if (correctas.length !== 1) {
-        alert('❌ Debe haber exactamente una respuesta correcta');
+        alert(' Debe haber exactamente una respuesta correcta');
         btnGuardar.disabled = false;
-        btnGuardar.textContent = '✅ Guardar Cambios';
+        btnGuardar.textContent = ' Guardar Cambios';
         return;
     }
     
@@ -2500,19 +2563,19 @@ async function guardarCambiosPregunta(event) {
         const result = await response.json();
         
         if (result.success) {
-            alert('✅ ' + result.message);
+            alert(' ' + result.message);
             cerrarModalEditarPregunta();
             location.reload();
         } else {
-            alert('❌ ' + (result.error || 'Error al guardar cambios'));
+            alert(' ' + (result.error || 'Error al guardar cambios'));
             btnGuardar.disabled = false;
-            btnGuardar.textContent = '✅ Guardar Cambios';
+            btnGuardar.textContent = ' Guardar Cambios';
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('❌ Error al guardar cambios de la pregunta');
+        alert(' Error al guardar cambios de la pregunta');
         btnGuardar.disabled = false;
-        btnGuardar.textContent = '✅ Guardar Cambios';
+        btnGuardar.textContent = ' Guardar Cambios';
     }
 }
 

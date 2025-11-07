@@ -154,7 +154,7 @@ def seleccionar_modo(request):
         
         # Guardar en sesión
         request.session['modo_actual'] = modo
-        print(f"✅ Modo guardado en sesión: {request.session.get('modo_actual')}")
+        print(f" Modo guardado en sesión: {request.session.get('modo_actual')}")
         
         # Guardar preferencia si lo solicitó
         if no_preguntar:

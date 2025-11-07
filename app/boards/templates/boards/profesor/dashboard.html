@@ -2352,7 +2352,8 @@ async function editarPregunta(preguntaId) {
             instrucciones.style.gap = '1rem';
             
             const textoInstrucciones = document.createElement('span');
-            textoInstrucciones.textContent = '💡 Haz clic en una respuesta para marcarla como correcta';
+            textoInstrucciones.textContent = 'Haz clic en una respuesta para marcarla como correcta';
+            textoInstrucciones.style.flex = '1';
             
             const btnCerrar = document.createElement('button');
             btnCerrar.type = 'button';

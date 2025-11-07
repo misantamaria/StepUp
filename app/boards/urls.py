@@ -37,6 +37,11 @@ urlpatterns = [
     path('profesor/test/<int:test_id>/eliminar/', views.delete_test, name='delete_test'),
     path('profesor/tema/<str:tema_id>/eliminar/', views.delete_tema, name='delete_tema'),
     
+    # Rutas para crear mediante modales
+    path('profesor/tema/crear/', views.crear_tema_modal, name='crear_tema_modal'),
+    path('profesor/test/crear/', views.crear_test_modal, name='crear_test_modal'),
+    path('profesor/pregunta/crear/', views.crear_pregunta_modal, name='crear_pregunta_modal'),
+    
     # Rutas para gestión de preguntas desde BDD
     path('profesor/preguntas/', views_bdd.listar_preguntas, name='listar_preguntas_bdd'),
     path('profesor/preguntas/crear/', views_bdd.crear_pregunta_view, name='crear_pregunta_bdd'),

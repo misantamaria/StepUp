@@ -188,3 +188,164 @@ def toggle_tema_field(request, tema_id):
         })
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+@login_required
+@user_passes_test(es_profesor, login_url='/')
+@require_POST
+def crear_tema_modal(request):
+    """Crea un nuevo tema desde el modal (usando SQL directo)"""
+    import json
+    from django.db import connection
+    
+    try:
+        data = json.loads(request.body)
+        tema_id = data.get('tema_id', '').strip()
+        
+        if not tema_id:
+            return JsonResponse({'success': False, 'error': 'El nombre del tema es obligatorio'}, status=400)
+        
+        # Insertar directamente en la base de datos
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO Tema (Tema_ID, visible_alumnos, disponible_alumno, visible_profesor, disponible_profesor, activo)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, [tema_id, False, False, True, True, True])
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Tema "{tema_id}" creado correctamente',
+            'tema_id': tema_id
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': f'Error al crear el tema: {str(e)}'
+        }, status=400)
+
+
+@login_required
+@user_passes_test(es_profesor, login_url='/')
+@require_POST
+def crear_test_modal(request):
+    """Crea un nuevo test desde el modal (usando SQL directo)"""
+    import json
+    from django.db import connection
+    
+    try:
+        data = json.loads(request.body)
+        nombre = data.get('nombre', '').strip()
+        descripcion = data.get('descripcion', '').strip()
+        tema_id = data.get('tema_id', '').strip()
+        nivel = data.get('nivel', 'Facil')
+        tiempo_limite = int(data.get('tiempo_limite', 30))
+        
+        if not nombre:
+            return JsonResponse({'success': False, 'error': 'El nombre del test es obligatorio'}, status=400)
+        
+        if not tema_id:
+            return JsonResponse({'success': False, 'error': 'Debe seleccionar un tema'}, status=400)
+        
+        # Crear el test usando Django ORM para obtener el ID
+        test = Test.objects.create(
+            nombre=nombre,
+            descripcion=descripcion,
+            tema_id=tema_id,
+            nivel=nivel,
+            tiempo_limite=tiempo_limite,
+            visible_alumnos=False,
+            visible_profesor=True,
+            disponible_alumno=False,
+            disponible_profesor=True,
+            creado_por=request.user
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Test "{nombre}" creado correctamente',
+            'test_id': test.id,
+            'tema_id': tema_id
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': f'Error al crear el test: {str(e)}'
+        }, status=400)
+
+
+@login_required
+@user_passes_test(es_profesor, login_url='/')
+@require_POST
+def crear_pregunta_modal(request):
+    """Crea una nueva pregunta con sus respuestas desde el modal (usando SQL directo)"""
+    import json
+    from django.db import connection
+    
+    try:
+        data = json.loads(request.body)
+        tema_id = data.get('tema_id', '').strip()
+        enunciado = data.get('enunciado', '').strip()
+        dificultad = data.get('dificultad', 'Facil')
+        puntuacion = int(data.get('puntuacion', 1))
+        respuestas = data.get('respuestas', [])
+        
+        # Validaciones
+        if not tema_id:
+            return JsonResponse({'success': False, 'error': 'Debe seleccionar un tema'}, status=400)
+        
+        if not enunciado:
+            return JsonResponse({'success': False, 'error': 'El enunciado es obligatorio'}, status=400)
+        
+        if len(respuestas) < 2:
+            return JsonResponse({'success': False, 'error': 'Debe proporcionar al menos 2 respuestas'}, status=400)
+        
+        # Verificar que haya exactamente una respuesta correcta
+        correctas = [r for r in respuestas if r.get('es_correcta', False)]
+        if len(correctas) != 1:
+            return JsonResponse({'success': False, 'error': 'Debe haber exactamente una respuesta correcta'}, status=400)
+        
+        # Insertar pregunta y respuestas en la base de datos
+        with connection.cursor() as cursor:
+            # Obtener el siguiente ID de pregunta
+            cursor.execute("SELECT MAX(Pregunta_ID) FROM Pregunta")
+            max_id = cursor.fetchone()[0]
+            pregunta_id = (max_id or 0) + 1
+            
+            # Insertar pregunta
+            cursor.execute("""
+                INSERT INTO Pregunta (Pregunta_ID, Tema, Enunciado, Dificultad, Puntuacion)
+                VALUES (%s, %s, %s, %s, %s)
+            """, [pregunta_id, tema_id, enunciado, dificultad, puntuacion])
+            
+            # Obtener el siguiente ID de respuesta
+            cursor.execute("SELECT MAX(Respuesta_ID) FROM Respuesta")
+            max_resp_id = cursor.fetchone()[0]
+            respuesta_id = (max_resp_id or 0) + 1
+            
+            # Insertar respuestas
+            for respuesta in respuestas:
+                contenido = respuesta.get('contenido', '').strip()
+                if not contenido:
+                    continue
+                
+                es_correcta = respuesta.get('es_correcta', False)
+                solucion = 'Correcta' if es_correcta else 'Incorrecta'
+                
+                cursor.execute("""
+                    INSERT INTO Respuesta (Respuesta_ID, Pregunta_ID, Solucion, Contenido)
+                    VALUES (%s, %s, %s, %s)
+                """, [respuesta_id, pregunta_id, solucion, contenido])
+                
+                respuesta_id += 1
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Pregunta creada correctamente con {len(respuestas)} respuestas',
+            'pregunta_id': pregunta_id,
+            'tema_id': tema_id
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': f'Error al crear la pregunta: {str(e)}'
+        }, status=400)

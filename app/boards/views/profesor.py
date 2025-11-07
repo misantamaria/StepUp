@@ -5,6 +5,7 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
+from django.db.models import Count
 from .decorators import es_profesor
 from core.profesor.services import get_dashboard_data as profesor_dashboard_data, get_student_stats
 from boards.models import Test, Tema
@@ -349,3 +350,225 @@ def crear_pregunta_modal(request):
             'success': False,
             'error': f'Error al crear la pregunta: {str(e)}'
         }, status=400)
+
+
+@login_required
+@user_passes_test(es_profesor, login_url='/')
+def get_tema_details(request, tema_id):
+    """Obtiene los detalles de un tema para edición"""
+    try:
+        tema = get_object_or_404(Tema, tema_id=tema_id)
+        tests = tema.tests.all().annotate(num_preguntas=Count('preguntas'))
+        
+        tests_data = [{
+            'id': test.id,
+            'nombre': test.nombre,
+            'preguntas': test.num_preguntas,
+            'tiempo': test.tiempo_limite
+        } for test in tests]
+        
+        return JsonResponse({
+            'success': True,
+            'tema_id': tema.tema_id,
+            'tests': tests_data
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+
+@login_required
+@user_passes_test(es_profesor, login_url='/')
+@require_POST
+def update_tema(request, tema_id):
+    """Actualiza el nombre de un tema"""
+    import json
+    from django.db import connection
+    
+    try:
+        tema = get_object_or_404(Tema, tema_id=tema_id)
+        data = json.loads(request.body)
+        nuevo_nombre = data.get('nuevo_nombre', '').strip()
+        
+        if not nuevo_nombre:
+            return JsonResponse({'success': False, 'error': 'El nombre del tema es obligatorio'}, status=400)
+        
+        # Si el nombre cambió, actualizar en la base de datos
+        if nuevo_nombre != tema_id:
+            with connection.cursor() as cursor:
+                # Actualizar el nombre del tema
+                cursor.execute("""
+                    UPDATE Tema SET Tema_ID = %s WHERE Tema_ID = %s
+                """, [nuevo_nombre, tema_id])
+                
+                # Actualizar las referencias en otras tablas
+                cursor.execute("""
+                    UPDATE Pregunta SET Tema = %s WHERE Tema = %s
+                """, [nuevo_nombre, tema_id])
+                
+                cursor.execute("""
+                    UPDATE Test SET Tema_ID = %s WHERE Tema_ID = %s
+                """, [nuevo_nombre, tema_id])
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Tema actualizado correctamente'
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+
+@login_required
+@user_passes_test(es_profesor, login_url='/')
+def get_test_data(request, test_id):
+    """Obtiene todos los datos de un test para edición"""
+    try:
+        test = get_object_or_404(Test, id=test_id)
+        preguntas = test.preguntas.all()
+        
+        preguntas_data = []
+        for pregunta in preguntas:
+            respuestas = pregunta.get_respuestas()
+            preguntas_data.append({
+                'id': pregunta.pregunta_id,
+                'enunciado': pregunta.enunciado,
+                'dificultad': pregunta.dificultad,
+                'respuestas': len(respuestas)
+            })
+        
+        return JsonResponse({
+            'success': True,
+            'id': test.id,
+            'tema': test.tema.tema_id if test.tema else '',
+            'nombre': test.nombre,
+            'descripcion': test.descripcion or '',
+            'nivel': test.nivel or 'Facil',
+            'tiempo_limite': test.tiempo_limite,
+            'preguntas': preguntas_data
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+
+@login_required
+@user_passes_test(es_profesor, login_url='/')
+@require_POST
+def update_test(request, test_id):
+    """Actualiza los datos de un test"""
+    import json
+    
+    try:
+        test = get_object_or_404(Test, id=test_id)
+        data = json.loads(request.body)
+        
+        test.tema_id = data.get('tema')
+        test.nombre = data.get('nombre', '').strip()
+        test.descripcion = data.get('descripcion', '').strip()
+        test.nivel = data.get('nivel', 'Facil')
+        test.tiempo_limite = int(data.get('tiempo_limite', 30))
+        test.save()
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Test actualizado correctamente'
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+
+@login_required
+@user_passes_test(es_profesor, login_url='/')
+def get_pregunta_data(request, pregunta_id):
+    """Obtiene todos los datos de una pregunta para edición"""
+    try:
+        from boards.models import Pregunta
+        pregunta = get_object_or_404(Pregunta, pregunta_id=pregunta_id)
+        respuestas = pregunta.get_respuestas()
+        
+        respuestas_data = [{
+            'contenido': r['contenido'],
+            'es_correcta': r['es_correcta']
+        } for r in respuestas]
+        
+        return JsonResponse({
+            'success': True,
+            'id': pregunta.pregunta_id,
+            'tema': pregunta.tema,
+            'enunciado': pregunta.enunciado,
+            'dificultad': pregunta.dificultad,
+            'puntuacion': pregunta.puntuacion,
+            'respuestas': respuestas_data
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+
+@login_required
+@user_passes_test(es_profesor, login_url='/')
+@require_POST
+def update_pregunta(request, pregunta_id):
+    """Actualiza una pregunta y sus respuestas"""
+    import json
+    from django.db import connection
+    
+    try:
+        from boards.models import Pregunta
+        pregunta = get_object_or_404(Pregunta, pregunta_id=pregunta_id)
+        data = json.loads(request.body)
+        
+        tema = data.get('tema', '').strip()
+        enunciado = data.get('enunciado', '').strip()
+        dificultad = data.get('dificultad', 'Facil')
+        puntuacion = int(data.get('puntuacion', 1))
+        respuestas = data.get('respuestas', [])
+        
+        # Validaciones
+        if not tema or not enunciado:
+            return JsonResponse({'success': False, 'error': 'Tema y enunciado son obligatorios'}, status=400)
+        
+        if len(respuestas) < 2:
+            return JsonResponse({'success': False, 'error': 'Debe haber al menos 2 respuestas'}, status=400)
+        
+        correctas = [r for r in respuestas if r.get('es_correcta', False)]
+        if len(correctas) != 1:
+            return JsonResponse({'success': False, 'error': 'Debe haber exactamente una respuesta correcta'}, status=400)
+        
+        # Actualizar pregunta y respuestas
+        with connection.cursor() as cursor:
+            # Actualizar pregunta
+            cursor.execute("""
+                UPDATE Pregunta 
+                SET Tema = %s, Enunciado = %s, Dificultad = %s, Puntuacion = %s
+                WHERE Pregunta_ID = %s
+            """, [tema, enunciado, dificultad, puntuacion, pregunta_id])
+            
+            # Eliminar respuestas antiguas
+            cursor.execute("DELETE FROM Respuesta WHERE Pregunta_ID = %s", [pregunta_id])
+            
+            # Obtener el siguiente ID de respuesta
+            cursor.execute("SELECT MAX(Respuesta_ID) FROM Respuesta")
+            max_resp_id = cursor.fetchone()[0]
+            respuesta_id = (max_resp_id or 0) + 1
+            
+            # Insertar nuevas respuestas
+            for respuesta in respuestas:
+                contenido = respuesta.get('contenido', '').strip()
+                if not contenido:
+                    continue
+                
+                es_correcta = respuesta.get('es_correcta', False)
+                solucion = 'Correcta' if es_correcta else 'Incorrecta'
+                
+                cursor.execute("""
+                    INSERT INTO Respuesta (Respuesta_ID, Pregunta_ID, Solucion, Contenido)
+                    VALUES (%s, %s, %s, %s)
+                """, [respuesta_id, pregunta_id, solucion, contenido])
+                
+                respuesta_id += 1
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Pregunta actualizada correctamente'
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+

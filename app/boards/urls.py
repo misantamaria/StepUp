@@ -42,6 +42,14 @@ urlpatterns = [
     path('profesor/test/crear/', views.crear_test_modal, name='crear_test_modal'),
     path('profesor/pregunta/crear/', views.crear_pregunta_modal, name='crear_pregunta_modal'),
     
+    # Rutas para editar mediante modales
+    path('profesor/tema/<str:tema_id>/detalles/', views.get_tema_details, name='get_tema_details'),
+    path('profesor/tema/<str:tema_id>/actualizar/', views.update_tema, name='update_tema'),
+    path('profesor/test/<int:test_id>/obtener/', views.get_test_data, name='get_test_data'),
+    path('profesor/test/<int:test_id>/actualizar/', views.update_test, name='update_test'),
+    path('profesor/pregunta/<int:pregunta_id>/obtener/', views.get_pregunta_data, name='get_pregunta_data'),
+    path('profesor/pregunta/<int:pregunta_id>/actualizar/', views.update_pregunta, name='update_pregunta'),
+    
     # Rutas para gestión de preguntas desde BDD
     path('profesor/preguntas/', views_bdd.listar_preguntas, name='listar_preguntas_bdd'),
     path('profesor/preguntas/crear/', views_bdd.crear_pregunta_view, name='crear_pregunta_bdd'),

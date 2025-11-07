@@ -69,6 +69,12 @@ def get_dashboard_data() -> Dict[str, Any]:
     total_tests = Test.objects.count()
     total_preguntas = Pregunta.objects.count()
     total_temas = temas.count()
+    
+    # Todos los tests (para la vista simplificada)
+    todos_tests = Test.objects.all().select_related('tema').annotate(num_intentos=Count('intentos')).order_by('tema__tema_id', 'nombre')
+    
+    # Todas las preguntas (para la vista de preguntas)
+    todas_preguntas = Pregunta.objects.all().order_by('tema', 'pregunta_id')
 
     return {
         'total_alumnos': total_alumnos,
@@ -81,6 +87,8 @@ def get_dashboard_data() -> Dict[str, Any]:
         'total_preguntas': total_preguntas,
         'total_temas': total_temas,
         'temas_con_tests': temas_con_tests,
+        'todos_tests': todos_tests,
+        'todas_preguntas': todas_preguntas,
         'alumnos_unicos': alumnos_unicos,
         'tests_unicos': tests_unicos,
         'temas_unicos': temas_unicos,

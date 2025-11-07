@@ -45,6 +45,12 @@ from .profesor import (
     crear_tema_modal,
     crear_test_modal,
     crear_pregunta_modal,
+    get_tema_details,
+    update_tema,
+    get_test_data,
+    update_test,
+    get_pregunta_data,
+    update_pregunta,
 )
 
 # Importar decoradores
@@ -88,6 +94,12 @@ __all__ = [
     'crear_tema_modal',
     'crear_test_modal',
     'crear_pregunta_modal',
+    'get_tema_details',
+    'update_tema',
+    'get_test_data',
+    'update_test',
+    'get_pregunta_data',
+    'update_pregunta',
     
     # Decoradores
     'es_alumno',

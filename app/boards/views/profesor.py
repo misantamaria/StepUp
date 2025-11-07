@@ -240,6 +240,7 @@ def crear_test_modal(request):
         tema_id = data.get('tema_id', '').strip()
         nivel = data.get('nivel', 'Facil')
         tiempo_limite = int(data.get('tiempo_limite', 0)) if data.get('tiempo_limite') else 0
+        es_aleatorio = data.get('es_aleatorio', False)
         
         # Si tiempo_limite es 0 o None, significa tiempo infinito
         if tiempo_limite < 0:
@@ -251,6 +252,20 @@ def crear_test_modal(request):
         if not tema_id:
             return JsonResponse({'success': False, 'error': 'Debe seleccionar un tema'}, status=400)
         
+        # Preparar configuración aleatoria si aplica
+        configuracion_aleatoria = None
+        if es_aleatorio:
+            temas_aleatorios = data.get('temas_aleatorios', [])
+            num_preguntas = data.get('num_preguntas_aleatorias', 10)
+            
+            if not temas_aleatorios:
+                return JsonResponse({'success': False, 'error': 'Debe seleccionar al menos un tema para el examen aleatorio'}, status=400)
+            
+            configuracion_aleatoria = {
+                'temas': temas_aleatorios,
+                'num_preguntas': num_preguntas
+            }
+        
         # Crear el test usando Django ORM para obtener el ID
         test = Test.objects.create(
             nombre=nombre,
@@ -258,6 +273,8 @@ def crear_test_modal(request):
             tema_id=tema_id,
             nivel=nivel,
             tiempo_limite=tiempo_limite,
+            es_aleatorio=es_aleatorio,
+            configuracion_aleatoria=configuracion_aleatoria,
             visible_alumnos=False,
             visible_profesor=True,
             disponible_alumno=False,

@@ -832,10 +832,58 @@ function toggleEstadisticas() {
                 <div>
                     <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">
                         Tiempo Límite (min) 
-                        <span style="color: #6c757d; cursor: help; font-size: 1rem;" title="Campo opcional. Dejar en 0 para tiempo infinito (sin temporizador)">ℹ️</span>
+                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%; background: #6c757d; color: white; font-size: 11px; font-weight: bold; cursor: help; margin-left: 4px; font-family: serif;" title="Campo opcional. Dejar en 0 para tiempo infinito (sin temporizador)">i</span>
                     </label>
                     <input type="number" id="inputTestTiempo" min="0" max="180" value="30" placeholder="0 = tiempo infinito"
                            style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;">
+                </div>
+            </div>
+
+            <!-- Checkbox para examen aleatorio -->
+            <div style="margin-bottom: 1.5rem; padding: 1rem; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 6px;">
+                <label style="display: flex; align-items: center; cursor: pointer; font-weight: 500;">
+                    <input type="checkbox" id="inputTestAleatorio" onchange="toggleOpcionesAleatorias()" 
+                           style="width: 18px; height: 18px; cursor: pointer; margin-right: 0.75rem; accent-color: #ffc107;">
+                    <span>🎲 Examen Aleatorio (selecciona preguntas al azar)</span>
+                </label>
+            </div>
+
+            <!-- Opciones de examen aleatorio (ocultas por defecto) -->
+            <div id="opcionesAleatorias" style="display: none; margin-bottom: 1.5rem; padding: 1.5rem; background: #f8f9fa; border: 2px solid #ffc107; border-radius: 8px;">
+                <h4 style="margin: 0 0 1rem 0; color: #856404; font-size: 1rem;">⚙️ Configuración del Examen Aleatorio</h4>
+                
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">
+                        Seleccionar Temas 
+                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%; background: #6c757d; color: white; font-size: 11px; font-weight: bold; cursor: help; margin-left: 4px; font-family: serif;" title="Selecciona uno o más temas de los que se tomarán las preguntas al azar">i</span>
+                    </label>
+                    <div id="temasAleatoriosCheckboxes" style="max-height: 150px; overflow-y: auto; padding: 0.75rem; background: white; border: 1px solid #ddd; border-radius: 6px;">
+                        {% for item in temas_con_tests %}
+                        <label style="display: block; padding: 0.5rem; cursor: pointer; border-radius: 4px;" 
+                               onmouseover="this.style.background='#f8f9fa'" 
+                               onmouseout="this.style.background='transparent'">
+                            <input type="checkbox" name="temasAleatorios" value="{{ item.tema.tema_id }}" 
+                                   style="width: 16px; height: 16px; cursor: pointer; margin-right: 0.5rem; accent-color: #ffc107;">
+                            <span>{{ item.tema.tema_id }} ({{ item.total_preguntas }} preguntas)</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">
+                        Número de Preguntas por Examen
+                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%; background: #6c757d; color: white; font-size: 11px; font-weight: bold; cursor: help; margin-left: 4px; font-family: serif;" title="Cuántas preguntas se seleccionarán al azar cada vez que un alumno haga el examen">i</span>
+                    </label>
+                    <input type="number" id="inputNumPreguntasAleatorias" min="1" max="100" value="10" 
+                           style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;"
+                           placeholder="Ej: 10">
+                </div>
+
+                <div style="margin-top: 1rem; padding: 0.75rem; background: #e7f3ff; border-left: 3px solid #0d6efd; border-radius: 4px;">
+                    <p style="margin: 0; font-size: 0.85rem; color: #004085;">
+                        <strong>💡 Nota:</strong> Cada alumno recibirá un conjunto diferente de preguntas seleccionadas aleatoriamente de los temas elegidos.
+                    </p>
                 </div>
             </div>
 
@@ -1035,7 +1083,7 @@ function toggleEstadisticas() {
                 <div>
                     <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">
                         Tiempo (min) 
-                        <span style="color: #6c757d; cursor: help; font-size: 1rem;" title="Campo opcional. Dejar en 0 para tiempo infinito (sin temporizador)">ℹ️</span>
+                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%; background: #6c757d; color: white; font-size: 11px; font-weight: bold; cursor: help; margin-left: 4px; font-family: serif;" title="Campo opcional. Dejar en 0 para tiempo infinito (sin temporizador)">i</span>
                     </label>
                     <input type="number" id="editTestTiempo" min="0" max="180" placeholder="0 = tiempo infinito"
                            style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;">
@@ -2149,6 +2197,12 @@ function mostrarModalCrearTest(temaId) {
     document.getElementById('inputTestDescripcion').value = '';
     document.getElementById('inputTestNivel').value = 'Facil';
     document.getElementById('inputTestTiempo').value = '30';
+    document.getElementById('inputTestAleatorio').checked = false;
+    document.getElementById('opcionesAleatorias').style.display = 'none';
+    
+    // Desmarcar todos los temas del examen aleatorio
+    document.querySelectorAll('input[name="temasAleatorios"]').forEach(cb => cb.checked = false);
+    document.getElementById('inputNumPreguntasAleatorias').value = '10';
     
     if (temaId) {
         // Si viene con un tema específico, pre-seleccionarlo
@@ -2159,6 +2213,23 @@ function mostrarModalCrearTest(temaId) {
     }
     
     modal.style.display = 'flex';
+}
+
+function toggleOpcionesAleatorias() {
+    const checkbox = document.getElementById('inputTestAleatorio');
+    const opciones = document.getElementById('opcionesAleatorias');
+    const temaSelect = document.getElementById('inputTestTemaId');
+    
+    if (checkbox.checked) {
+        opciones.style.display = 'block';
+        // Deshabilitar el selector de tema principal si es aleatorio
+        temaSelect.disabled = true;
+        temaSelect.style.background = '#e9ecef';
+    } else {
+        opciones.style.display = 'none';
+        temaSelect.disabled = false;
+        temaSelect.style.background = 'white';
+    }
 }
 
 function cerrarModalCrearTest() {
@@ -2172,13 +2243,35 @@ async function crearTest(event) {
     btnCrear.disabled = true;
     btnCrear.textContent = 'Creando...';
     
+    const esAleatorio = document.getElementById('inputTestAleatorio').checked;
+    
     const data = {
         tema_id: document.getElementById('inputTestTemaId').value,
         nombre: document.getElementById('inputTestNombre').value.trim(),
         descripcion: document.getElementById('inputTestDescripcion').value.trim(),
         nivel: document.getElementById('inputTestNivel').value,
-        tiempo_limite: parseInt(document.getElementById('inputTestTiempo').value)
+        tiempo_limite: parseInt(document.getElementById('inputTestTiempo').value),
+        es_aleatorio: esAleatorio
     };
+    
+    // Si es aleatorio, añadir configuración adicional
+    if (esAleatorio) {
+        const temasSeleccionados = Array.from(document.querySelectorAll('input[name="temasAleatorios"]:checked'))
+            .map(cb => cb.value);
+        
+        if (temasSeleccionados.length === 0) {
+            alert('⚠️ Debes seleccionar al menos un tema para el examen aleatorio');
+            btnCrear.disabled = false;
+            btnCrear.textContent = '➕ Crear Test';
+            return;
+        }
+        
+        data.temas_aleatorios = temasSeleccionados;
+        data.num_preguntas_aleatorias = parseInt(document.getElementById('inputNumPreguntasAleatorias').value);
+        
+        // Para examen aleatorio, usar el primer tema como tema principal
+        data.tema_id = temasSeleccionados[0];
+    }
     
     try {
         const response = await fetch('/profesor/test/crear/', {
@@ -2193,12 +2286,12 @@ async function crearTest(event) {
         const result = await response.json();
         
         if (result.success) {
-            alert(' ' + result.message);
+            alert('✅ ' + result.message);
             cerrarModalCrearTest();
             // Recargar la página para mostrar el nuevo test
             window.location.reload();
         } else {
-            alert(' ' + result.error);
+            alert('❌ ' + result.error);
             btnCrear.disabled = false;
             btnCrear.textContent = ' Crear Test';
         }

@@ -105,6 +105,10 @@ class Test(models.Model):
     preguntas = models.ManyToManyField(Pregunta, related_name='tests', blank=True)
     tiempo_limite = models.IntegerField(help_text="Tiempo en minutos", default=30)
     
+    # Configuración de examen aleatorio
+    es_aleatorio = models.BooleanField(default=False, help_text="¿Es un examen con preguntas aleatorias?")
+    configuracion_aleatoria = models.JSONField(null=True, blank=True, help_text="Configuración del examen aleatorio: temas y número de preguntas")
+    
     # Visibilidad: controla si el test aparece en la interfaz
     visible_alumnos = models.BooleanField(default=False, help_text="¿Visible para los alumnos?")
     visible_profesor = models.BooleanField(default=True, help_text="¿Visible para el profesor en modo alumno? (para pruebas)")

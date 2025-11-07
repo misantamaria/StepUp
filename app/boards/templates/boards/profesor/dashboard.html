@@ -703,34 +703,36 @@ function toggleEstadisticas() {
                        placeholder="Escribe aquí el enunciado de la pregunta"></textarea>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
-                <div>
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Dificultad <span style="color: #dc3545;">*</span></label>
-                    <select id="inputPreguntaDificultad" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;">
-                        <option value="Facil">Fácil</option>
-                        <option value="Media">Media</option>
-                        <option value="Dificil">Difícil</option>
-                    </select>
-                </div>
-                <div>
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Puntuación <span style="color: #dc3545;">*</span></label>
-                    <input type="number" id="inputPreguntaPuntuacion" min="1" max="10" value="1" required
-                           style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;">
-                </div>
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Dificultad <span style="color: #dc3545;">*</span></label>
+                <select id="inputPreguntaDificultad" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;">
+                    <option value="Facil">Fácil</option>
+                    <option value="Media">Media</option>
+                    <option value="Dificil">Difícil</option>
+                </select>
             </div>
+            
+            <input type="hidden" id="inputPreguntaPuntuacion" value="10">
 
             <div style="margin-bottom: 1.5rem;">
                 <label style="display: block; margin-bottom: 0.75rem; font-weight: 500;">Respuestas <span style="color: #dc3545;">*</span></label>
                 <div id="contenedorRespuestas">
                     <!-- Las respuestas se añadirán dinámicamente aquí -->
                 </div>
-                <button type="button" onclick="agregarRespuesta()" 
-                        style="margin-top: 0.75rem; background: #28a745; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">
-                    ➕ Añadir Respuesta
-                </button>
-                <small style="display: block; margin-top: 0.5rem; color: #6c757d; font-size: 0.85rem;">
-                    Debe haber exactamente una respuesta correcta
-                </small>
+                <div style="margin-top: 1rem; text-align: center;">
+                    <button type="button" onclick="agregarRespuesta()" 
+                            style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: {{ THEME_COLORS.primary_light }}; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1.5rem; font-weight: bold; transition: all 0.2s;"
+                            onmouseover="this.style.background='#00a8e8'; this.style.transform='scale(1.1)'"
+                            onmouseout="this.style.background='{{ THEME_COLORS.primary_light }}'; this.style.transform='scale(1)'"
+                            title="Añadir respuesta">
+                        +
+                    </button>
+                </div>
+                <div style="margin-top: 0.5rem; text-align: center;">
+                    <small style="color: #6c757d; font-size: 0.85rem;">
+                        Debe haber exactamente una respuesta correcta
+                    </small>
+                </div>
             </div>
 
             <div style="background: #fff3cd; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border-left: 4px solid #ffc107;">
@@ -882,31 +884,31 @@ function toggleEstadisticas() {
                        placeholder="Enunciado de la pregunta"></textarea>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
-                <div>
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Dificultad <span style="color: #dc3545;">*</span></label>
-                    <select id="editPreguntaDificultad" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;">
-                        <option value="Facil">Fácil</option>
-                        <option value="Media">Media</option>
-                        <option value="Dificil">Difícil</option>
-                    </select>
-                </div>
-                <div>
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Puntuación <span style="color: #dc3545;">*</span></label>
-                    <input type="number" id="editPreguntaPuntuacion" min="1" max="10" required
-                           style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;">
-                </div>
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Dificultad <span style="color: #dc3545;">*</span></label>
+                <select id="editPreguntaDificultad" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;">
+                    <option value="Facil">Fácil</option>
+                    <option value="Media">Media</option>
+                    <option value="Dificil">Difícil</option>
+                </select>
             </div>
+            
+            <input type="hidden" id="editPreguntaPuntuacion" value="10">
 
             <div style="margin-bottom: 1.5rem;">
                 <label style="display: block; margin-bottom: 0.75rem; font-weight: 500;">Respuestas <span style="color: #dc3545;">*</span></label>
                 <div id="editContenedorRespuestas">
                     <!-- Las respuestas se cargarán dinámicamente aquí -->
                 </div>
-                <button type="button" onclick="agregarRespuestaEditar()" 
-                        style="margin-top: 0.75rem; background: #28a745; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">
-                    ➕ Añadir Respuesta
-                </button>
+                <div style="text-align: center; margin-top: 1rem;">
+                    <button type="button" onclick="agregarRespuestaEditar()" 
+                            style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: {{ THEME_COLORS.primary_light }}; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1.5rem; font-weight: bold; transition: all 0.2s;"
+                            onmouseover="this.style.background='#00a8e8'; this.style.transform='scale(1.1)'"
+                            onmouseout="this.style.background='{{ THEME_COLORS.primary_light }}'; this.style.transform='scale(1)'"
+                            title="Añadir respuesta">
+                        +
+                    </button>
+                </div>
             </div>
 
             <div style="display: flex; gap: 1rem; justify-content: flex-end;">
@@ -2334,24 +2336,86 @@ async function editarPregunta(preguntaId) {
             const contenedor = document.getElementById('editContenedorRespuestas');
             contenedor.innerHTML = '';
             
+            // Agregar instrucciones con botón de cerrar
+            const instrucciones = document.createElement('div');
+            instrucciones.id = 'instruccionesEditarRespuestas';
+            instrucciones.style.marginBottom = '1rem';
+            instrucciones.style.padding = '0.75rem 1rem';
+            instrucciones.style.background = '#e7f3ff';
+            instrucciones.style.borderLeft = '4px solid #2563eb';
+            instrucciones.style.borderRadius = '4px';
+            instrucciones.style.fontSize = '0.9rem';
+            instrucciones.style.color = '#1e3a8a';
+            instrucciones.style.display = 'flex';
+            instrucciones.style.justifyContent = 'space-between';
+            instrucciones.style.alignItems = 'center';
+            instrucciones.style.gap = '1rem';
+            
+            const textoInstrucciones = document.createElement('span');
+            textoInstrucciones.textContent = '💡 Haz clic en una respuesta para marcarla como correcta';
+            
+            const btnCerrar = document.createElement('button');
+            btnCerrar.type = 'button';
+            btnCerrar.textContent = '✕';
+            btnCerrar.title = 'Ya sé cómo funciona';
+            btnCerrar.style.background = 'transparent';
+            btnCerrar.style.border = 'none';
+            btnCerrar.style.color = '#1e3a8a';
+            btnCerrar.style.fontSize = '1.2rem';
+            btnCerrar.style.cursor = 'pointer';
+            btnCerrar.style.padding = '0';
+            btnCerrar.style.width = '24px';
+            btnCerrar.style.height = '24px';
+            btnCerrar.style.display = 'flex';
+            btnCerrar.style.alignItems = 'center';
+            btnCerrar.style.justifyContent = 'center';
+            btnCerrar.style.borderRadius = '50%';
+            btnCerrar.style.transition = 'background 0.2s';
+            btnCerrar.onmouseover = function() { this.style.background = 'rgba(30, 58, 138, 0.1)'; };
+            btnCerrar.onmouseout = function() { this.style.background = 'transparent'; };
+            btnCerrar.onclick = function() {
+                instrucciones.style.display = 'none';
+                // Guardar preferencia en localStorage
+                localStorage.setItem('ocultarInstruccionesRespuestas', 'true');
+            };
+            
+            instrucciones.appendChild(textoInstrucciones);
+            instrucciones.appendChild(btnCerrar);
+            
+            // Solo mostrar si no se ha ocultado antes
+            if (localStorage.getItem('ocultarInstruccionesRespuestas') !== 'true') {
+                contenedor.appendChild(instrucciones);
+            }
+            
             console.log('Respuestas a cargar:', data.respuestas);
             data.respuestas.forEach((respuesta, index) => {
                 console.log(`Respuesta ${index}:`, respuesta.contenido);
                 // Crear el elemento div
                 const respuestaDiv = document.createElement('div');
                 respuestaDiv.className = 'respuesta-item';
-                respuestaDiv.style.marginBottom = '1rem';
+                respuestaDiv.style.marginBottom = '0.75rem';
                 respuestaDiv.style.padding = '1rem';
-                respuestaDiv.style.border = '1px solid #dee2e6';
+                respuestaDiv.style.border = '2px solid #dee2e6';
                 respuestaDiv.style.borderRadius = '6px';
-                respuestaDiv.style.background = '#f8f9fa';
+                respuestaDiv.style.background = respuesta.es_correcta ? '#d4edda' : '#ffffff';
+                respuestaDiv.style.cursor = 'pointer';
+                respuestaDiv.style.transition = 'all 0.2s';
                 
-                // Contenedor para input y botón
-                const inputContainer = document.createElement('div');
-                inputContainer.style.display = 'flex';
-                inputContainer.style.gap = '1rem';
-                inputContainer.style.alignItems = 'start';
-                inputContainer.style.marginBottom = '0.5rem';
+                // Radio oculto pero funcional
+                const radio = document.createElement('input');
+                radio.type = 'radio';
+                radio.name = 'respuestaCorrectaEdit';
+                radio.className = 'respuesta-correcta';
+                radio.checked = respuesta.es_correcta;
+                radio.style.display = 'none';
+                respuestaDiv.appendChild(radio);
+                
+                // Contenedor principal: input + papelera en la misma fila
+                const mainRow = document.createElement('div');
+                mainRow.style.display = 'flex';
+                mainRow.style.alignItems = 'center';
+                mainRow.style.gap = '0.5rem';
+                mainRow.style.marginBottom = '0.5rem';
                 
                 // Input de texto
                 const input = document.createElement('input');
@@ -2360,52 +2424,93 @@ async function editarPregunta(preguntaId) {
                 input.value = respuesta.contenido;
                 input.placeholder = 'Contenido de la respuesta';
                 input.required = true;
-                // Usar setAttribute para forzar los estilos
-                input.setAttribute('style', 'flex: 1; padding: 0.5rem; border: 1px solid #ced4da; border-radius: 4px; color: #212529 !important; background: white !important;');
+                input.style.flex = '1';
+                input.style.padding = '0.5rem';
+                input.style.border = '1px solid #ced4da';
+                input.style.borderRadius = '4px';
+                input.style.fontSize = '0.95rem';
+                input.style.color = '#212529';
+                input.style.backgroundColor = '#ffffff';
+                input.style.height = '36px';
+                input.style.boxSizing = 'border-box';
                 
-                // Botón eliminar
+                // Botón eliminar (papelera pequeña)
                 const btnEliminar = document.createElement('button');
                 btnEliminar.type = 'button';
-                btnEliminar.textContent = '🗑️';
+                btnEliminar.textContent = '🗑';
+                btnEliminar.title = 'Eliminar respuesta';
                 btnEliminar.style.background = '#dc3545';
                 btnEliminar.style.color = 'white';
                 btnEliminar.style.border = 'none';
-                btnEliminar.style.padding = '0.5rem 0.75rem';
                 btnEliminar.style.borderRadius = '4px';
                 btnEliminar.style.cursor = 'pointer';
-                btnEliminar.onclick = function() {
+                btnEliminar.style.fontSize = '1rem';
+                btnEliminar.style.width = '36px';
+                btnEliminar.style.height = '36px';
+                btnEliminar.style.flexShrink = '0';
+                btnEliminar.style.display = 'flex';
+                btnEliminar.style.alignItems = 'center';
+                btnEliminar.style.justifyContent = 'center';
+                btnEliminar.style.padding = '0';
+                btnEliminar.onclick = function(e) {
+                    e.stopPropagation();
                     respuestaDiv.remove();
                 };
                 
-                inputContainer.appendChild(input);
-                inputContainer.appendChild(btnEliminar);
+                mainRow.appendChild(input);
+                mainRow.appendChild(btnEliminar);
                 
-                // Label para respuesta correcta
-                const label = document.createElement('label');
-                label.style.display = 'flex';
-                label.style.alignItems = 'center';
-                label.style.gap = '0.5rem';
-                label.style.cursor = 'pointer';
+                // Indicador de respuesta correcta
+                const indicador = document.createElement('div');
+                indicador.style.fontSize = '0.85rem';
+                indicador.style.fontWeight = '500';
+                indicador.style.color = respuesta.es_correcta ? '#155724' : '#6c757d';
+                indicador.textContent = respuesta.es_correcta ? '✓ Esta es la respuesta correcta' : '';
                 
-                const radio = document.createElement('input');
-                radio.type = 'radio';
-                radio.name = 'respuestaCorrectaEdit';
-                radio.className = 'respuesta-correcta';
-                radio.checked = respuesta.es_correcta;
-                radio.style.width = '18px';
-                radio.style.height = '18px';
-                radio.style.cursor = 'pointer';
+                respuestaDiv.appendChild(mainRow);
+                respuestaDiv.appendChild(indicador);
                 
-                const span = document.createElement('span');
-                span.textContent = 'Respuesta correcta';
-                span.style.fontSize = '0.9rem';
-                span.style.color = '#495057';
+                // Hacer clic en el div completo marca como correcta
+                respuestaDiv.onclick = function(e) {
+                    if (e.target === input || e.target === btnEliminar) return;
+                    
+                    radio.checked = true;
+                    
+                    // Actualizar estilos de todas las respuestas
+                    document.querySelectorAll('#editContenedorRespuestas .respuesta-item').forEach(item => {
+                        const itemRadio = item.querySelector('input[type="radio"]');
+                        const itemIndicador = item.querySelector('div:last-child');
+                        if (itemRadio && itemRadio.checked) {
+                            item.style.background = '#d4edda';
+                            item.style.borderColor = '#28a745';
+                            if (itemIndicador) {
+                                itemIndicador.textContent = '✓ Esta es la respuesta correcta';
+                                itemIndicador.style.color = '#155724';
+                            }
+                        } else {
+                            item.style.background = '#ffffff';
+                            item.style.borderColor = '#dee2e6';
+                            if (itemIndicador) {
+                                itemIndicador.textContent = 'Haz clic para marcar como correcta';
+                                itemIndicador.style.color = '#6c757d';
+                            }
+                        }
+                    });
+                };
                 
-                label.appendChild(radio);
-                label.appendChild(span);
-                
-                respuestaDiv.appendChild(inputContainer);
-                respuestaDiv.appendChild(label);
+                // Hover effect
+                respuestaDiv.onmouseenter = function() {
+                    if (!radio.checked) {
+                        respuestaDiv.style.borderColor = '#2563eb';
+                        respuestaDiv.style.background = '#f8f9fa';
+                    }
+                };
+                respuestaDiv.onmouseleave = function() {
+                    if (!radio.checked) {
+                        respuestaDiv.style.borderColor = '#dee2e6';
+                        respuestaDiv.style.background = '#ffffff';
+                    }
+                };
                 
                 contenedor.appendChild(respuestaDiv);
                 contadorRespuestasEditar++;
@@ -2437,18 +2542,28 @@ function agregarRespuestaEditar() {
     // Crear el elemento div
     const respuestaDiv = document.createElement('div');
     respuestaDiv.className = 'respuesta-item';
-    respuestaDiv.style.marginBottom = '1rem';
+    respuestaDiv.style.marginBottom = '0.75rem';
     respuestaDiv.style.padding = '1rem';
-    respuestaDiv.style.border = '1px solid #dee2e6';
+    respuestaDiv.style.border = '2px solid #dee2e6';
     respuestaDiv.style.borderRadius = '6px';
-    respuestaDiv.style.background = '#f8f9fa';
+    respuestaDiv.style.background = '#ffffff';
+    respuestaDiv.style.cursor = 'pointer';
+    respuestaDiv.style.transition = 'all 0.2s';
     
-    // Contenedor para input y botón
-    const inputContainer = document.createElement('div');
-    inputContainer.style.display = 'flex';
-    inputContainer.style.gap = '1rem';
-    inputContainer.style.alignItems = 'start';
-    inputContainer.style.marginBottom = '0.5rem';
+    // Radio oculto pero funcional
+    const radio = document.createElement('input');
+    radio.type = 'radio';
+    radio.name = 'respuestaCorrectaEdit';
+    radio.className = 'respuesta-correcta';
+    radio.style.display = 'none';
+    respuestaDiv.appendChild(radio);
+    
+    // Contenedor principal: input + papelera en la misma fila
+    const mainRow = document.createElement('div');
+    mainRow.style.display = 'flex';
+    mainRow.style.alignItems = 'center';
+    mainRow.style.gap = '0.5rem';
+    mainRow.style.marginBottom = '0.5rem';
     
     // Input de texto
     const input = document.createElement('input');
@@ -2456,51 +2571,93 @@ function agregarRespuestaEditar() {
     input.className = 'respuesta-contenido';
     input.placeholder = 'Contenido de la respuesta';
     input.required = true;
-    // Usar setAttribute para forzar los estilos
-    input.setAttribute('style', 'flex: 1; padding: 0.5rem; border: 1px solid #ced4da; border-radius: 4px; color: #212529 !important; background: white !important;');
+    input.style.flex = '1';
+    input.style.padding = '0.5rem';
+    input.style.border = '1px solid #ced4da';
+    input.style.borderRadius = '4px';
+    input.style.fontSize = '0.95rem';
+    input.style.color = '#212529';
+    input.style.backgroundColor = '#ffffff';
+    input.style.height = '36px';
+    input.style.boxSizing = 'border-box';
     
-    // Botón eliminar
+    // Botón eliminar (papelera pequeña)
     const btnEliminar = document.createElement('button');
     btnEliminar.type = 'button';
-    btnEliminar.textContent = '🗑️';
+    btnEliminar.textContent = '🗑';
+    btnEliminar.title = 'Eliminar respuesta';
     btnEliminar.style.background = '#dc3545';
     btnEliminar.style.color = 'white';
     btnEliminar.style.border = 'none';
-    btnEliminar.style.padding = '0.5rem 0.75rem';
     btnEliminar.style.borderRadius = '4px';
     btnEliminar.style.cursor = 'pointer';
-    btnEliminar.onclick = function() {
+    btnEliminar.style.fontSize = '1rem';
+    btnEliminar.style.width = '36px';
+    btnEliminar.style.height = '36px';
+    btnEliminar.style.flexShrink = '0';
+    btnEliminar.style.display = 'flex';
+    btnEliminar.style.alignItems = 'center';
+    btnEliminar.style.justifyContent = 'center';
+    btnEliminar.style.padding = '0';
+    btnEliminar.onclick = function(e) {
+        e.stopPropagation();
         respuestaDiv.remove();
     };
     
-    inputContainer.appendChild(input);
-    inputContainer.appendChild(btnEliminar);
+    mainRow.appendChild(input);
+    mainRow.appendChild(btnEliminar);
     
-    // Label para respuesta correcta
-    const label = document.createElement('label');
-    label.style.display = 'flex';
-    label.style.alignItems = 'center';
-    label.style.gap = '0.5rem';
-    label.style.cursor = 'pointer';
+    // Indicador de respuesta correcta
+    const indicador = document.createElement('div');
+    indicador.style.fontSize = '0.85rem';
+    indicador.style.fontWeight = '500';
+    indicador.style.color = '#6c757d';
+    indicador.textContent = 'Haz clic para marcar como correcta';
     
-    const radio = document.createElement('input');
-    radio.type = 'radio';
-    radio.name = 'respuestaCorrectaEdit';
-    radio.className = 'respuesta-correcta';
-    radio.style.width = '18px';
-    radio.style.height = '18px';
-    radio.style.cursor = 'pointer';
+    respuestaDiv.appendChild(mainRow);
+    respuestaDiv.appendChild(indicador);
     
-    const span = document.createElement('span');
-    span.textContent = 'Respuesta correcta';
-    span.style.fontSize = '0.9rem';
-    span.style.color = '#495057';
+    // Hacer clic en el div completo marca como correcta
+    respuestaDiv.onclick = function(e) {
+        if (e.target === input || e.target === btnEliminar) return;
+        
+        radio.checked = true;
+        
+        // Actualizar estilos de todas las respuestas
+        document.querySelectorAll('#editContenedorRespuestas .respuesta-item').forEach(item => {
+            const itemRadio = item.querySelector('input[type="radio"]');
+            const itemIndicador = item.querySelector('div:last-child');
+            if (itemRadio && itemRadio.checked) {
+                item.style.background = '#d4edda';
+                item.style.borderColor = '#28a745';
+                if (itemIndicador) {
+                    itemIndicador.textContent = '✓ Esta es la respuesta correcta';
+                    itemIndicador.style.color = '#155724';
+                }
+            } else {
+                item.style.background = '#ffffff';
+                item.style.borderColor = '#dee2e6';
+                if (itemIndicador) {
+                    itemIndicador.textContent = 'Haz clic para marcar como correcta';
+                    itemIndicador.style.color = '#6c757d';
+                }
+            }
+        });
+    };
     
-    label.appendChild(radio);
-    label.appendChild(span);
-    
-    respuestaDiv.appendChild(inputContainer);
-    respuestaDiv.appendChild(label);
+    // Hover effect
+    respuestaDiv.onmouseenter = function() {
+        if (!radio.checked) {
+            respuestaDiv.style.borderColor = '#2563eb';
+            respuestaDiv.style.background = '#f8f9fa';
+        }
+    };
+    respuestaDiv.onmouseleave = function() {
+        if (!radio.checked) {
+            respuestaDiv.style.borderColor = '#dee2e6';
+            respuestaDiv.style.background = '#ffffff';
+        }
+    };
     
     contenedor.appendChild(respuestaDiv);
 }

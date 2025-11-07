@@ -239,7 +239,11 @@ def crear_test_modal(request):
         descripcion = data.get('descripcion', '').strip()
         tema_id = data.get('tema_id', '').strip()
         nivel = data.get('nivel', 'Facil')
-        tiempo_limite = int(data.get('tiempo_limite', 30))
+        tiempo_limite = int(data.get('tiempo_limite', 0)) if data.get('tiempo_limite') else 0
+        
+        # Si tiempo_limite es 0 o None, significa tiempo infinito
+        if tiempo_limite < 0:
+            tiempo_limite = 0
         
         if not nombre:
             return JsonResponse({'success': False, 'error': 'El nombre del test es obligatorio'}, status=400)
@@ -464,7 +468,13 @@ def update_test(request, test_id):
         test.nombre = data.get('nombre', '').strip()
         test.descripcion = data.get('descripcion', '').strip()
         test.nivel = data.get('nivel', 'Facil')
-        test.tiempo_limite = int(data.get('tiempo_limite', 30))
+        tiempo_limite = int(data.get('tiempo_limite', 0)) if data.get('tiempo_limite') else 0
+        
+        # Si tiempo_limite es 0 o None, significa tiempo infinito
+        if tiempo_limite < 0:
+            tiempo_limite = 0
+            
+        test.tiempo_limite = tiempo_limite
         test.save()
         
         return JsonResponse({

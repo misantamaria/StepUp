@@ -430,7 +430,13 @@ function toggleEstadisticas() {
                             {% endif %}
                         </td>
                         <td style="text-align: center; font-weight: 500;">{{ test.total_preguntas }}</td>
-                        <td style="text-align: center;">{{ test.tiempo_limite }} min</td>
+                        <td style="text-align: center;">
+                            {% if test.tiempo_limite == 0 %}
+                                <span style="color: #6c757d; font-style: italic;">∞ Sin límite</span>
+                            {% else %}
+                                {{ test.tiempo_limite }} min
+                            {% endif %}
+                        </td>
                         <td style="text-align: center;">{{ test.num_intentos|default:0 }}</td>
                         <td style="text-align: center;" onclick="event.stopPropagation()">
                             <a href="#" 
@@ -824,8 +830,11 @@ function toggleEstadisticas() {
                     </select>
                 </div>
                 <div>
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Tiempo Límite (min) <span style="color: #dc3545;">*</span></label>
-                    <input type="number" id="inputTestTiempo" min="1" max="180" value="30" required
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">
+                        Tiempo Límite (min) 
+                        <span style="color: #6c757d; cursor: help; font-size: 1rem;" title="Campo opcional. Dejar en 0 para tiempo infinito (sin temporizador)">ℹ️</span>
+                    </label>
+                    <input type="number" id="inputTestTiempo" min="0" max="180" value="30" placeholder="0 = tiempo infinito"
                            style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;">
                 </div>
             </div>
@@ -1024,8 +1033,11 @@ function toggleEstadisticas() {
                     </select>
                 </div>
                 <div>
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Tiempo (min) <span style="color: #dc3545;">*</span></label>
-                    <input type="number" id="editTestTiempo" min="1" max="180" required
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">
+                        Tiempo (min) 
+                        <span style="color: #6c757d; cursor: help; font-size: 1rem;" title="Campo opcional. Dejar en 0 para tiempo infinito (sin temporizador)">ℹ️</span>
+                    </label>
+                    <input type="number" id="editTestTiempo" min="0" max="180" placeholder="0 = tiempo infinito"
                            style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;">
                 </div>
             </div>
@@ -1858,7 +1870,7 @@ async function confirmarEliminarPregunta() {
     btnConfirmar.textContent = 'Eliminando...';
     
     try {
-        const response = await fetch(`/profesor/pregunta/${preguntaIdAEliminar}/eliminar/`, {
+        const response = await fetch(`/profesor/preguntas/${preguntaIdAEliminar}/eliminar/`, {
             method: 'POST',
             headers: {
                 'X-CSRFToken': getCookie('csrftoken'),

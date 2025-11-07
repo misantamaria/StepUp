@@ -48,7 +48,7 @@ def seleccionar_modo(request):
         no_preguntar = request.POST.get('no_preguntar') == 'on'
         
         # Debug: verificar datos recibidos
-        print(f"🔍 POST recibido - Modo: {modo}, No preguntar: {no_preguntar}, POST data: {request.POST}")
+        print(f" POST recibido - Modo: {modo}, No preguntar: {no_preguntar}, POST data: {request.POST}")
         
         # Validar modo
         if modo not in ['alumno', 'profesor']:

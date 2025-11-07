@@ -388,7 +388,7 @@ function toggleEstadisticas() {
 
 <!-- Contenido: Gestionar Preguntas -->
 <div id="content-preguntas" style="display: none;">
-    <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem; font-size: 1.2rem;">📝 Gestión de Preguntas</h3>
+    <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem; font-size: 1.2rem;"> Gestión de Preguntas</h3>
     
     <!-- Total de preguntas -->
     <div style="margin-bottom: 1.5rem; padding: 0.75rem 1rem; background: #e7f3ff; border-left: 4px solid {{ THEME_COLORS.primary }}; border-radius: 4px;">
@@ -397,7 +397,7 @@ function toggleEstadisticas() {
 
     <!-- Filtros de búsqueda -->
     <div style="margin-bottom: 1.5rem; padding: 1.5rem; background: #f8f9fa; border-radius: 8px; border: 1px solid #e0e0e0;">
-        <h4 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1rem; font-size: 1rem;">🔍 Filtros de Búsqueda</h4>
+        <h4 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1rem; font-size: 1rem;"> Filtros de Búsqueda</h4>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; align-items: end;">
             <div>
                 <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: {{ THEME_COLORS.text_active }};">Tema:</label>
@@ -515,8 +515,17 @@ function toggleEstadisticas() {
 
 <!-- Modal de confirmación de eliminación -->
 <div id="modalEliminar" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
-    <div style="background: white; border-radius: 12px; padding: 2rem; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
-        <h3 style="color: #dc3545; margin-bottom: 1.5rem; font-size: 1.3rem;">⚠️ Confirmar Eliminación de Test</h3>
+    <div id="modalEliminarContent" style="background: white; border-radius: 12px; padding: 2rem; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.3); position: relative; transition: all 0.3s ease;">
+        <!-- Botones de control del modal -->
+        <div style="position: absolute; top: 0.75rem; right: 0.75rem; display: flex; gap: 0.5rem; z-index: 10;">
+            <button onclick="toggleMaximizeModal('modalEliminar')" style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid #dee2e6; background: white; color: #6c757d; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; transition: all 0.2s;" onmouseover="this.style.background='#f8f9fa'; this.style.borderColor='#adb5bd'" onmouseout="this.style.background='white'; this.style.borderColor='#dee2e6'" title="Maximizar/Restaurar">
+                ⛶
+            </button>
+            <button onclick="cerrarModalEliminar()" style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid #dee2e6; background: white; color: #6c757d; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: bold; transition: all 0.2s;" onmouseover="this.style.background='#f8f9fa'; this.style.borderColor='#dc3545'; this.style.color='#dc3545'" onmouseout="this.style.background='white'; this.style.borderColor='#dee2e6'; this.style.color='#6c757d'" title="Cerrar">
+                ✕
+            </button>
+        </div>
+        <h3 style="color: #dc3545; margin-bottom: 1.5rem; font-size: 1.3rem; padding-right: 4rem;">⚠️ Confirmar Eliminación de Test</h3>
         
         <div style="margin-bottom: 1.5rem; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
             <p style="margin-bottom: 0.5rem;"><strong>Nombre del test:</strong></p>
@@ -546,8 +555,17 @@ function toggleEstadisticas() {
 
 <!-- Modal de confirmación de eliminación de TEMA -->
 <div id="modalEliminarTema" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
-    <div style="background: white; border-radius: 12px; padding: 2rem; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
-        <h3 style="color: #dc3545; margin-bottom: 1.5rem; font-size: 1.3rem;">⚠️ Confirmar Eliminación de Tema</h3>
+    <div id="modalEliminarTemaContent" style="background: white; border-radius: 12px; padding: 2rem; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.3); position: relative; transition: all 0.3s ease;">
+        <!-- Botones de control del modal -->
+        <div style="position: absolute; top: 0.75rem; right: 0.75rem; display: flex; gap: 0.5rem; z-index: 10;">
+            <button onclick="toggleMaximizeModal('modalEliminarTema')" style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid #dee2e6; background: white; color: #6c757d; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; transition: all 0.2s;" onmouseover="this.style.background='#f8f9fa'; this.style.borderColor='#adb5bd'" onmouseout="this.style.background='white'; this.style.borderColor='#dee2e6'" title="Maximizar/Restaurar">
+                ⛶
+            </button>
+            <button onclick="cerrarModalEliminarTema()" style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid #dee2e6; background: white; color: #6c757d; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: bold; transition: all 0.2s;" onmouseover="this.style.background='#f8f9fa'; this.style.borderColor='#dc3545'; this.style.color='#dc3545'" onmouseout="this.style.background='white'; this.style.borderColor='#dee2e6'; this.style.color='#6c757d'" title="Cerrar">
+                ✕
+            </button>
+        </div>
+        <h3 style="color: #dc3545; margin-bottom: 1.5rem; font-size: 1.3rem; padding-right: 4rem;">⚠️ Confirmar Eliminación de Tema</h3>
         
         <div style="margin-bottom: 1.5rem; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
             <p style="margin-bottom: 0.5rem;"><strong>Nombre del tema:</strong></p>
@@ -586,8 +604,17 @@ function toggleEstadisticas() {
 
 <!-- Modal para crear nuevo TEMA -->
 <div id="modalCrearTema" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
-    <div style="background: white; border-radius: 12px; padding: 2rem; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
-        <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem; font-size: 1.3rem;">➕ Crear Nuevo Tema</h3>
+    <div id="modalCrearTemaContent" style="background: white; border-radius: 12px; padding: 2rem; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.3); position: relative; transition: all 0.3s ease;">
+        <!-- Botones de control del modal -->
+        <div style="position: absolute; top: 0.75rem; right: 0.75rem; display: flex; gap: 0.5rem; z-index: 10;">
+            <button onclick="toggleMaximizeModal('modalCrearTema')" style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid #dee2e6; background: white; color: #6c757d; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; transition: all 0.2s;" onmouseover="this.style.background='#f8f9fa'; this.style.borderColor='#adb5bd'" onmouseout="this.style.background='white'; this.style.borderColor='#dee2e6'" title="Maximizar/Restaurar">
+                ⛶
+            </button>
+            <button onclick="cerrarModalCrearTema()" style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid #dee2e6; background: white; color: #6c757d; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: bold; transition: all 0.2s;" onmouseover="this.style.background='#f8f9fa'; this.style.borderColor='#dc3545'; this.style.color='#dc3545'" onmouseout="this.style.background='white'; this.style.borderColor='#dee2e6'; this.style.color='#6c757d'" title="Cerrar">
+                ✕
+            </button>
+        </div>
+        <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem; font-size: 1.3rem; padding-right: 4rem;">➕ Crear Nuevo Tema</h3>
         
         <form id="formCrearTema" onsubmit="crearTema(event)">
             <div style="margin-bottom: 1.5rem;">
@@ -682,8 +709,17 @@ function toggleEstadisticas() {
 
 <!-- Modal para crear nueva PREGUNTA -->
 <div id="modalCrearPregunta" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
-    <div style="background: white; border-radius: 12px; padding: 2rem; max-width: 800px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
-        <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem; font-size: 1.3rem;">➕ Crear Nueva Pregunta</h3>
+    <div id="modalCrearPreguntaContent" style="background: white; border-radius: 12px; padding: 2rem; max-width: 800px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.3); position: relative; transition: all 0.3s ease;">
+        <!-- Botones de control del modal -->
+        <div style="position: absolute; top: 0.75rem; right: 0.75rem; display: flex; gap: 0.5rem; z-index: 10;">
+            <button onclick="toggleMaximizeModal('modalCrearPregunta')" style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid #dee2e6; background: white; color: #6c757d; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; transition: all 0.2s;" onmouseover="this.style.background='#f8f9fa'; this.style.borderColor='#adb5bd'" onmouseout="this.style.background='white'; this.style.borderColor='#dee2e6'" title="Maximizar/Restaurar">
+                ⛶
+            </button>
+            <button onclick="cerrarModalCrearPregunta()" style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid #dee2e6; background: white; color: #6c757d; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: bold; transition: all 0.2s;" onmouseover="this.style.background='#f8f9fa'; this.style.borderColor='#dc3545'; this.style.color='#dc3545'" onmouseout="this.style.background='white'; this.style.borderColor='#dee2e6'; this.style.color='#6c757d'" title="Cerrar">
+                ✕
+            </button>
+        </div>
+        <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem; font-size: 1.3rem; padding-right: 4rem;">➕ Crear Nueva Pregunta</h3>
         
         <form id="formCrearPregunta" onsubmit="crearPregunta(event)">
             <div style="margin-bottom: 1.5rem;">
@@ -755,8 +791,17 @@ function toggleEstadisticas() {
 
 <!-- Modal para EDITAR TEMA -->
 <div id="modalEditarTema" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; overflow-y: auto;">
-    <div style="background: white; border-radius: 12px; padding: 2rem; max-width: 900px; width: 90%; max-height: 85vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.3); margin: 2rem auto;">
-        <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem; font-size: 1.3rem;">🖉 Editar Tema</h3>
+    <div id="modalEditarTemaContent" style="background: white; border-radius: 12px; padding: 2rem; max-width: 900px; width: 90%; max-height: 85vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.3); margin: 2rem auto; position: relative; transition: all 0.3s ease;">
+        <!-- Botones de control del modal -->
+        <div style="position: absolute; top: 0.75rem; right: 0.75rem; display: flex; gap: 0.5rem; z-index: 10;">
+            <button onclick="toggleMaximizeModal('modalEditarTema')" style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid #dee2e6; background: white; color: #6c757d; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; transition: all 0.2s;" onmouseover="this.style.background='#f8f9fa'; this.style.borderColor='#adb5bd'" onmouseout="this.style.background='white'; this.style.borderColor='#dee2e6'" title="Maximizar/Restaurar">
+                ⛶
+            </button>
+            <button onclick="cerrarModalEditarTema()" style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid #dee2e6; background: white; color: #6c757d; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: bold; transition: all 0.2s;" onmouseover="this.style.background='#f8f9fa'; this.style.borderColor='#dc3545'; this.style.color='#dc3545'" onmouseout="this.style.background='white'; this.style.borderColor='#dee2e6'; this.style.color='#6c757d'" title="Cerrar">
+                ✕
+            </button>
+        </div>
+        <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem; font-size: 1.3rem; padding-right: 4rem;">🖉 Editar Tema</h3>
         
         <form id="formEditarTema" onsubmit="guardarCambiosTema(event)">
             <input type="hidden" id="editTemaIdOriginal">
@@ -789,8 +834,17 @@ function toggleEstadisticas() {
 
 <!-- Modal para EDITAR TEST -->
 <div id="modalEditarTest" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; overflow-y: auto;">
-    <div style="background: white; border-radius: 12px; padding: 2rem; max-width: 900px; width: 90%; max-height: 85vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.3); margin: 2rem auto;">
-        <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem; font-size: 1.3rem;">🖉 Editar Test</h3>
+    <div id="modalEditarTestContent" style="background: white; border-radius: 12px; padding: 2rem; max-width: 900px; width: 90%; max-height: 85vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.3); margin: 2rem auto; position: relative; transition: all 0.3s ease;">
+        <!-- Botones de control del modal -->
+        <div style="position: absolute; top: 0.75rem; right: 0.75rem; display: flex; gap: 0.5rem; z-index: 10;">
+            <button onclick="toggleMaximizeModal('modalEditarTest')" style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid #dee2e6; background: white; color: #6c757d; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; transition: all 0.2s;" onmouseover="this.style.background='#f8f9fa'; this.style.borderColor='#adb5bd'" onmouseout="this.style.background='white'; this.style.borderColor='#dee2e6'" title="Maximizar/Restaurar">
+                ⛶
+            </button>
+            <button onclick="cerrarModalEditarTest()" style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid #dee2e6; background: white; color: #6c757d; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: bold; transition: all 0.2s;" onmouseover="this.style.background='#f8f9fa'; this.style.borderColor='#dc3545'; this.style.color='#dc3545'" onmouseout="this.style.background='white'; this.style.borderColor='#dee2e6'; this.style.color='#6c757d'" title="Cerrar">
+                ✕
+            </button>
+        </div>
+        <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem; font-size: 1.3rem; padding-right: 4rem;">🖉 Editar Test</h3>
         
         <form id="formEditarTest" onsubmit="guardarCambiosTest(event)">
             <input type="hidden" id="editTestId">
@@ -861,8 +915,17 @@ function toggleEstadisticas() {
 
 <!-- Modal para EDITAR PREGUNTA -->
 <div id="modalEditarPregunta" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; overflow-y: auto;">
-    <div style="background: white; border-radius: 12px; padding: 2rem; max-width: 800px; width: 90%; max-height: 85vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.3); margin: 2rem auto;">
-        <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem; font-size: 1.3rem;">🖉 Editar Pregunta</h3>
+    <div id="modalEditarPreguntaContent" style="background: white; border-radius: 12px; padding: 2rem; max-width: 800px; width: 90%; max-height: 85vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.3); margin: 2rem auto; position: relative; transition: all 0.3s ease;">
+        <!-- Botones de control del modal -->
+        <div style="position: absolute; top: 0.75rem; right: 0.75rem; display: flex; gap: 0.5rem; z-index: 10;">
+            <button onclick="toggleMaximizeModal('modalEditarPregunta')" style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid #dee2e6; background: white; color: #6c757d; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; transition: all 0.2s;" onmouseover="this.style.background='#f8f9fa'; this.style.borderColor='#adb5bd'" onmouseout="this.style.background='white'; this.style.borderColor='#dee2e6'" title="Maximizar/Restaurar">
+                ⛶
+            </button>
+            <button onclick="cerrarModalEditarPregunta()" style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid #dee2e6; background: white; color: #6c757d; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: bold; transition: all 0.2s;" onmouseover="this.style.background='#f8f9fa'; this.style.borderColor='#dc3545'; this.style.color='#dc3545'" onmouseout="this.style.background='white'; this.style.borderColor='#dee2e6'; this.style.color='#6c757d'" title="Cerrar">
+                ✕
+            </button>
+        </div>
+        <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem; font-size: 1.3rem; padding-right: 4rem;">🖉 Editar Pregunta</h3>
         
         <form id="formEditarPregunta" onsubmit="guardarCambiosPregunta(event)">
             <input type="hidden" id="editPreguntaId">
@@ -1296,6 +1359,43 @@ function getCookie(name) {
         }
     }
     return cookieValue;
+}
+
+// Función para maximizar/restaurar modales
+const modalStates = {};
+
+function toggleMaximizeModal(modalId) {
+    const modalContent = document.getElementById(modalId + 'Content');
+    if (!modalContent) return;
+    
+    // Si no existe el estado, inicializarlo como no maximizado
+    if (!modalStates[modalId]) {
+        modalStates[modalId] = {
+            isMaximized: false,
+            originalMaxWidth: modalContent.style.maxWidth,
+            originalWidth: modalContent.style.width,
+            originalMaxHeight: modalContent.style.maxHeight,
+            originalMargin: modalContent.style.margin
+        };
+    }
+    
+    const state = modalStates[modalId];
+    
+    if (state.isMaximized) {
+        // Restaurar tamaño original
+        modalContent.style.maxWidth = state.originalMaxWidth;
+        modalContent.style.width = state.originalWidth;
+        modalContent.style.maxHeight = state.originalMaxHeight;
+        modalContent.style.margin = state.originalMargin;
+        state.isMaximized = false;
+    } else {
+        // Maximizar
+        modalContent.style.maxWidth = '95vw';
+        modalContent.style.width = '95%';
+        modalContent.style.maxHeight = '95vh';
+        modalContent.style.margin = '2.5vh auto';
+        state.isMaximized = true;
+    }
 }
 
 // Variables globales para el modal de eliminación
@@ -2118,7 +2218,7 @@ async function editarTema(temaId) {
                             <div style="display: flex; gap: 0.5rem;">
                                 <button type="button" onclick="editarTestDesdeModal(${test.id}); event.stopPropagation();" 
                                         style="background: {{ THEME_COLORS.primary }}; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">
-                                    ✏️ Editar
+                                    🖉
                                 </button>
                             </div>
                         </div>`;
@@ -2217,7 +2317,7 @@ async function editarTest(testId) {
                             <div style="display: flex; gap: 0.5rem;">
                                 <button type="button" onclick="editarPreguntaDesdeModal(${pregunta.id}); event.stopPropagation();" 
                                         style="background: {{ THEME_COLORS.primary }}; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">
-                                    ✏️ Editar
+                                    🖉 Editar
                                 </button>
                             </div>
                         </div>`;

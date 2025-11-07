@@ -200,22 +200,27 @@ function toggleEstadisticas() {
         <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem; font-size: 1.2rem;"> Gestión de Temas</h3>
         
         <div style="margin-bottom: 2rem; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
-            <table style="margin: 0;">
+            <table id="tablaTemas" style="margin: 0;">
                 <thead>
                     <tr>
                         <th style="width: 90px; text-align: center;">Visible<br>Alumnos</th>
                         <th style="width: 90px; text-align: center;">Disponible<br>Alumnos</th>
                         <th style="width: 90px; text-align: center;">Visible<br>Profesor</th>
                         <th style="width: 90px; text-align: center;">Disponible<br>Profesor</th>
-                        <th>Tema</th>
-                        <th style="width: 100px; text-align: center;">Preguntas</th>
-                        <th style="width: 80px; text-align: center;">Tests</th>
+                        <th style="cursor: pointer; position: relative;" onclick="ordenarTablaTemas('tema')">Tema <span style="float: right; color: #ccc;">↕</span></th>
+                        <th style="width: 100px; text-align: center; cursor: pointer; position: relative;" onclick="ordenarTablaTemas('preguntas')">Preguntas <span style="float: right; color: #ccc;">↕</span></th>
+                        <th style="width: 80px; text-align: center; cursor: pointer; position: relative;" onclick="ordenarTablaTemas('tests')">Tests <span style="float: right; color: #ccc;">↕</span></th>
                         <th style="width: 100px; text-align: center;">Acciones</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="tbodyTemas">
                     {% for item in temas_con_tests %}
-                    <tr id="tema-row-{{ item.tema.tema_id }}" style="{% if item.tema.visible_alumnos and item.tema.disponible_alumno %}background: #e3f2fd;{% elif item.tema.visible_profesor and item.tema.disponible_profesor %}background: #fff8e1;{% endif %}">
+                    <tr class="fila-tema"
+                        id="tema-row-{{ item.tema.tema_id }}" 
+                        data-tema="{{ item.tema.tema_id|lower }}"
+                        data-preguntas="{{ item.total_preguntas }}"
+                        data-tests="{{ item.tests.count }}"
+                        style="{% if item.tema.visible_alumnos and item.tema.disponible_alumno %}background: #e3f2fd;{% elif item.tema.visible_profesor and item.tema.disponible_profesor %}background: #fff8e1;{% endif %}">
                         <td style="text-align: center;">
                             <label style="display: flex; align-items: center; justify-content: center; cursor: pointer;">
                                 <input type="checkbox" 
@@ -354,10 +359,10 @@ function toggleEstadisticas() {
                         <th style="width: 100px; text-align: center;">Disponible<br>Alumnos</th>
                         <th style="width: 100px; text-align: center;">Visible<br>Profesor</th>
                         <th style="width: 100px; text-align: center;">Disponible<br>Profesor</th>
-                        <th style="cursor: pointer;" onclick="ordenarTablaTests('tema')">Tema ↕</th>
-                        <th style="cursor: pointer;" onclick="ordenarTablaTests('nombre')">Test ↕</th>
-                        <th style="width: 100px; text-align: center; cursor: pointer;" onclick="ordenarTablaTests('preguntas')">Preguntas ↕</th>
-                        <th style="width: 100px; text-align: center; cursor: pointer;" onclick="ordenarTablaTests('tiempo')">Tiempo ↕</th>
+                        <th style="cursor: pointer; position: relative;" onclick="ordenarTablaTests('tema')">Tema <span style="float: right; color: #ccc;">↕</span></th>
+                        <th style="cursor: pointer; position: relative;" onclick="ordenarTablaTests('nombre')">Test <span style="float: right; color: #ccc;">↕</span></th>
+                        <th style="width: 100px; text-align: center; cursor: pointer; position: relative;" onclick="ordenarTablaTests('preguntas')">Preguntas <span style="float: right; color: #ccc;">↕</span></th>
+                        <th style="width: 100px; text-align: center; cursor: pointer; position: relative;" onclick="ordenarTablaTests('tiempo')">Tiempo <span style="float: right; color: #ccc;">↕</span></th>
                         <th style="width: 100px; text-align: center;">Intentos</th>
                         <th style="width: 100px; text-align: center;">Acciones</th>
                     </tr>
@@ -520,10 +525,10 @@ function toggleEstadisticas() {
         <table id="tablaPreguntas">
             <thead>
                 <tr>
-                    <th style="width: 80px; text-align: center; cursor: pointer;" onclick="ordenarTablaPreguntas('id')">ID ↕</th>
-                    <th style="cursor: pointer;" onclick="ordenarTablaPreguntas('tema')">Tema ↕</th>
-                    <th style="cursor: pointer;" onclick="ordenarTablaPreguntas('enunciado')">Enunciado ↕</th>
-                    <th style="width: 120px; text-align: center; cursor: pointer;" onclick="ordenarTablaPreguntas('dificultad')">Dificultad ↕</th>
+                    <th style="width: 80px; text-align: center; cursor: pointer; position: relative;" onclick="ordenarTablaPreguntas('id')">ID <span style="float: right; color: #ccc;">↕</span></th>
+                    <th style="cursor: pointer; position: relative;" onclick="ordenarTablaPreguntas('tema')">Tema <span style="float: right; color: #ccc;">↕</span></th>
+                    <th style="cursor: pointer; position: relative;" onclick="ordenarTablaPreguntas('enunciado')">Enunciado <span style="float: right; color: #ccc;">↕</span></th>
+                    <th style="width: 120px; text-align: center; cursor: pointer; position: relative;" onclick="ordenarTablaPreguntas('dificultad')">Dificultad <span style="float: right; color: #ccc;">↕</span></th>
                     <th style="width: 100px; text-align: center;">Acciones</th>
                 </tr>
             </thead>
@@ -562,7 +567,7 @@ function toggleEstadisticas() {
                             🖉
                         </a>
                         <a href="#" 
-                           onclick="mostrarModalEliminarPregunta({{ pregunta.pregunta_id }}, '{{ pregunta.enunciado|truncatewords:10|escapejs }}'); return false;" 
+                           onclick="event.stopPropagation(); mostrarModalEliminarPregunta({{ pregunta.pregunta_id }}, '{{ pregunta.enunciado|truncatewords:10|escapejs }}'); return false;" 
                            style="color: #dc3545; text-decoration: none; font-size: 1.2rem;" 
                            title="Eliminar">
                             🗑️
@@ -678,6 +683,61 @@ function toggleEstadisticas() {
             </button>
             <button id="btnConfirmarEliminarTema" onclick="confirmarEliminarTema()" style="background: #dc3545; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 1rem;">
                  Sí, eliminar todo
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmación de eliminación de PREGUNTA -->
+<div id="modalEliminarPregunta" class="modal-overlay">
+    <div id="modalEliminarPreguntaContent" class="modal-content modal-content-small">
+        <!-- Botones de control del modal -->
+        <div class="modal-controls">
+            <button onclick="toggleMaximizeModal('modalEliminarPregunta')" class="modal-btn" title="Maximizar/Restaurar">
+                ⛶
+            </button>
+            <button onclick="cerrarModalEliminarPregunta()" class="modal-btn modal-btn-close" title="Cerrar">
+                ✕
+            </button>
+        </div>
+        <h3 style="color: #dc3545; margin-bottom: 1.5rem; font-size: 1.3rem; padding-right: 4rem;">⚠️ Confirmar Eliminación de Pregunta</h3>
+        
+        <div style="margin-bottom: 1.5rem; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+            <p style="margin-bottom: 0.5rem;"><strong>ID de la pregunta:</strong></p>
+            <p id="modalPreguntaId" style="color: {{ THEME_COLORS.primary }}; font-size: 1.1rem; margin: 0;"></p>
+        </div>
+
+        <div style="margin-bottom: 1.5rem; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+            <p style="margin-bottom: 0.5rem;"><strong>Enunciado:</strong></p>
+            <p id="modalPreguntaEnunciado" style="color: #495057; font-size: 0.95rem; margin: 0;"></p>
+        </div>
+
+        <!-- Sección expandible de respuestas -->
+        <div style="margin-bottom: 1.5rem;">
+            <button id="btnExpandirRespuestas" onclick="toggleRespuestasEliminar()" 
+                    style="width: 100%; padding: 0.75rem; background: #e7f3ff; border: 1px solid #2563eb; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; font-weight: 500; color: #2563eb; transition: all 0.2s;"
+                    onmouseover="this.style.background='#dbeafe'" 
+                    onmouseout="this.style.background='#e7f3ff'">
+                <span>Ver respuestas</span>
+                <span id="iconoExpandir">▼</span>
+            </button>
+            <div id="contenedorRespuestasEliminar" style="display: none; margin-top: 0.75rem; padding: 1rem; background: #f8f9fa; border-radius: 6px; border: 1px solid #dee2e6;">
+                <p style="color: #6c757d; font-style: italic; margin: 0;">Cargando respuestas...</p>
+            </div>
+        </div>
+
+        <div style="background: #fff3cd; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border-left: 4px solid #ffc107;">
+            <p style="margin: 0; color: #856404; font-size: 0.95rem;">
+                <strong>⚠️ Advertencia:</strong> Esta acción eliminará permanentemente la pregunta y todas sus respuestas asociadas. Esta acción no se puede deshacer.
+            </p>
+        </div>
+
+        <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+            <button onclick="cerrarModalEliminarPregunta()" style="background: #6c757d; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 1rem;">
+                 No, cancelar
+            </button>
+            <button id="btnConfirmarEliminarPregunta" onclick="confirmarEliminarPregunta()" style="background: #dc3545; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 1rem;">
+                 Sí, eliminar
             </button>
         </div>
     </div>
@@ -1697,6 +1757,151 @@ async function confirmarEliminarTema() {
     }
 }
 
+// ===========================================
+// FUNCIONES PARA ELIMINAR PREGUNTA
+// ===========================================
+let preguntaIdAEliminar = null;
+let respuestasCargadas = false;
+
+function mostrarModalEliminarPregunta(preguntaId, enunciado) {
+    preguntaIdAEliminar = preguntaId;
+    const modal = document.getElementById('modalEliminarPregunta');
+    const modalId = document.getElementById('modalPreguntaId');
+    const modalEnunciado = document.getElementById('modalPreguntaEnunciado');
+    
+    modalId.textContent = preguntaId;
+    modalEnunciado.textContent = enunciado;
+    
+    // Reset estado de respuestas
+    respuestasCargadas = false;
+    const contenedor = document.getElementById('contenedorRespuestasEliminar');
+    contenedor.style.display = 'none';
+    document.getElementById('iconoExpandir').textContent = '▼';
+    
+    modal.style.display = 'flex';
+}
+
+async function toggleRespuestasEliminar() {
+    const contenedor = document.getElementById('contenedorRespuestasEliminar');
+    const icono = document.getElementById('iconoExpandir');
+    
+    if (contenedor.style.display === 'none') {
+        contenedor.style.display = 'block';
+        icono.textContent = '▲';
+        
+        // Cargar respuestas si no se han cargado aún
+        if (!respuestasCargadas) {
+            await cargarRespuestasEliminar();
+        }
+    } else {
+        contenedor.style.display = 'none';
+        icono.textContent = '▼';
+    }
+}
+
+async function cargarRespuestasEliminar() {
+    const contenedor = document.getElementById('contenedorRespuestasEliminar');
+    contenedor.innerHTML = '<p style="color: #6c757d; font-style: italic; margin: 0;">Cargando respuestas...</p>';
+    
+    try {
+        const response = await fetch(`/profesor/pregunta/${preguntaIdAEliminar}/respuestas/`);
+        const data = await response.json();
+        
+        if (data.success && data.respuestas && data.respuestas.length > 0) {
+            let html = '<div style="max-height: 300px; overflow-y: auto;">';
+            
+            data.respuestas.forEach((resp, index) => {
+                const esCorrecta = resp.es_correcta;
+                const bgColor = esCorrecta ? '#d4edda' : '#f8f9fa';
+                const borderColor = esCorrecta ? '#28a745' : '#dee2e6';
+                const iconoCheck = esCorrecta ? '✅ ' : '';
+                
+                html += `
+                    <div style="padding: 0.75rem; margin-bottom: 0.5rem; background: ${bgColor}; border: 1px solid ${borderColor}; border-radius: 6px;">
+                        <div style="display: flex; align-items: start; gap: 0.5rem;">
+                            <span style="font-weight: bold; color: #495057; min-width: 20px;">${index + 1}.</span>
+                            <div style="flex: 1;">
+                                <p style="margin: 0; color: #212529;">${iconoCheck}${resp.texto}</p>
+                                ${esCorrecta ? '<p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: #28a745; font-weight: 500;">Respuesta correcta</p>' : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            contenedor.innerHTML = html;
+            respuestasCargadas = true;
+        } else if (data.respuestas && data.respuestas.length === 0) {
+            contenedor.innerHTML = '<p style="color: #856404; font-style: italic; margin: 0;">⚠️ Esta pregunta no tiene respuestas asociadas.</p>';
+            respuestasCargadas = true;
+        } else {
+            contenedor.innerHTML = '<p style="color: #dc3545; font-style: italic; margin: 0;">❌ Error al cargar las respuestas.</p>';
+        }
+    } catch (error) {
+        console.error('Error al cargar respuestas:', error);
+        contenedor.innerHTML = '<p style="color: #dc3545; font-style: italic; margin: 0;">❌ Error al cargar las respuestas.</p>';
+    }
+}
+
+function cerrarModalEliminarPregunta() {
+    const modal = document.getElementById('modalEliminarPregunta');
+    modal.style.display = 'none';
+    preguntaIdAEliminar = null;
+}
+
+async function confirmarEliminarPregunta() {
+    if (!preguntaIdAEliminar) return;
+    
+    const btnConfirmar = document.getElementById('btnConfirmarEliminarPregunta');
+    btnConfirmar.disabled = true;
+    btnConfirmar.textContent = 'Eliminando...';
+    
+    try {
+        const response = await fetch(`/profesor/pregunta/${preguntaIdAEliminar}/eliminar/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json',
+            },
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Eliminar la fila de la pregunta de la tabla
+            const rows = document.querySelectorAll('.fila-pregunta');
+            rows.forEach(row => {
+                if (row.getAttribute('data-id') == preguntaIdAEliminar) {
+                    row.style.backgroundColor = '#d4edda';
+                    setTimeout(() => {
+                        row.remove();
+                        // Actualizar contador
+                        const totalPreguntas = document.getElementById('totalPreguntas');
+                        if (totalPreguntas) {
+                            const count = parseInt(totalPreguntas.textContent) - 1;
+                            totalPreguntas.textContent = count;
+                        }
+                        aplicarFiltrosPreguntas();
+                    }, 500);
+                }
+            });
+            
+            cerrarModalEliminarPregunta();
+            alert('✅ Pregunta eliminada correctamente');
+        } else {
+            alert('❌ Error al eliminar la pregunta: ' + (data.error || 'Error desconocido'));
+            btnConfirmar.disabled = false;
+            btnConfirmar.textContent = '🗑️ Sí, eliminar';
+        }
+    } catch (error) {
+        console.error('Error al eliminar pregunta:', error);
+        alert('Error al eliminar la pregunta. Por favor, intenta de nuevo.');
+        btnConfirmar.disabled = false;
+        btnConfirmar.textContent = '🗑️ Sí, eliminar';
+    }
+}
+
 // Funciones para filtrado de la tabla de intentos
 function aplicarFiltros() {
     const filtroAlumno = document.getElementById('filtroAlumno').value.toLowerCase();
@@ -2192,6 +2397,72 @@ document.addEventListener('click', function(event) {
 });
 
 // ===========================================
+// FUNCIONES PARA ORDENAR TEMAS
+// ===========================================
+let ordenTemaActual = { columna: null, ascendente: true };
+
+function ordenarTablaTemas(columna) {
+    const tbody = document.getElementById('tbodyTemas');
+    const filas = Array.from(tbody.querySelectorAll('.fila-tema'));
+    
+    // Cambiar dirección si es la misma columna
+    if (ordenTemaActual.columna === columna) {
+        ordenTemaActual.ascendente = !ordenTemaActual.ascendente;
+    } else {
+        ordenTemaActual.columna = columna;
+        ordenTemaActual.ascendente = true;
+    }
+    
+    filas.sort((a, b) => {
+        let valorA, valorB;
+        
+        switch(columna) {
+            case 'tema':
+                valorA = a.dataset.tema;
+                valorB = b.dataset.tema;
+                break;
+            case 'preguntas':
+                valorA = parseInt(a.dataset.preguntas);
+                valorB = parseInt(b.dataset.preguntas);
+                break;
+            case 'tests':
+                valorA = parseInt(a.dataset.tests);
+                valorB = parseInt(b.dataset.tests);
+                break;
+            default:
+                return 0;
+        }
+        
+        if (valorA < valorB) return ordenTemaActual.ascendente ? -1 : 1;
+        if (valorA > valorB) return ordenTemaActual.ascendente ? 1 : -1;
+        return 0;
+    });
+    
+    // Reordenar las filas en el DOM
+    const filaAgregar = tbody.querySelector('tr:last-child'); // Fila del botón +
+    filas.forEach(fila => tbody.insertBefore(fila, filaAgregar));
+    
+    // Actualizar icono de ordenación
+    actualizarIconosOrdenTemas(columna);
+}
+
+function actualizarIconosOrdenTemas(columnaActual) {
+    // Actualizar todos los headers de la tabla de temas
+    const headers = document.querySelectorAll('#tablaTemas thead th[onclick]');
+    headers.forEach(header => {
+        const columna = header.getAttribute('onclick').match(/'([^']+)'/)[1];
+        const textoBase = header.textContent.replace(/[↑↓↕]/g, '').trim();
+        
+        if (columna === columnaActual) {
+            const flecha = ordenTemaActual.ascendente ? '↑' : '↓';
+            header.innerHTML = `${textoBase} <span style="float: right;">${flecha}</span>`;
+        } else {
+            header.innerHTML = `${textoBase} <span style="float: right; color: #ccc;">↕</span>`;
+        }
+    });
+}
+
+// ===========================================
 // FUNCIONES PARA FILTROS DE TESTS
 // ===========================================
 function aplicarFiltrosTests() {
@@ -2270,6 +2541,130 @@ function ordenarTablaTests(columna) {
     // Reordenar las filas en el DOM
     const filaAgregar = tbody.querySelector('tr:last-child'); // Fila del botón +
     filas.forEach(fila => tbody.insertBefore(fila, filaAgregar));
+    
+    // Actualizar icono de ordenación
+    actualizarIconosOrdenTests(columna);
+}
+
+function actualizarIconosOrdenTests(columnaActual) {
+    // Actualizar todos los headers de la tabla de tests
+    const headers = document.querySelectorAll('#tablaTests thead th[onclick]');
+    headers.forEach(header => {
+        const columna = header.getAttribute('onclick').match(/'([^']+)'/)[1];
+        const textoBase = header.textContent.replace(/[↑↓↕]/g, '').trim();
+        
+        if (columna === columnaActual) {
+            const flecha = ordenTestActual.ascendente ? '↑' : '↓';
+            header.innerHTML = `${textoBase} <span style="float: right;">${flecha}</span>`;
+        } else {
+            header.innerHTML = `${textoBase} <span style="float: right; color: #ccc;">↕</span>`;
+        }
+    });
+}
+
+// ===========================================
+// FUNCIONES PARA FILTROS DE PREGUNTAS
+// ===========================================
+function aplicarFiltrosPreguntas() {
+    const filtroTema = document.getElementById('filtroTema').value.toLowerCase();
+    const filtroDificultad = document.getElementById('filtroDificultad').value.toLowerCase();
+    const filtroEnunciado = document.getElementById('filtroEnunciado').value.toLowerCase();
+    const filas = document.querySelectorAll('#tbodyPreguntas .fila-pregunta');
+    
+    let visibles = 0;
+    filas.forEach(fila => {
+        const tema = fila.dataset.tema;
+        const dificultad = fila.dataset.dificultad;
+        const enunciado = fila.dataset.enunciado;
+        
+        const cumpleTema = !filtroTema || tema === filtroTema;
+        const cumpleDificultad = !filtroDificultad || dificultad === filtroDificultad;
+        const cumpleEnunciado = !filtroEnunciado || enunciado.includes(filtroEnunciado);
+        
+        if (cumpleTema && cumpleDificultad && cumpleEnunciado) {
+            fila.style.display = '';
+            visibles++;
+        } else {
+            fila.style.display = 'none';
+        }
+    });
+    
+    document.getElementById('numPreguntasFiltradas').textContent = visibles;
+}
+
+function limpiarFiltrosPreguntas() {
+    document.getElementById('filtroTema').value = '';
+    document.getElementById('filtroDificultad').value = '';
+    document.getElementById('filtroEnunciado').value = '';
+    aplicarFiltrosPreguntas();
+}
+
+let ordenPreguntaActual = { columna: null, ascendente: true };
+
+function ordenarTablaPreguntas(columna) {
+    const tbody = document.getElementById('tbodyPreguntas');
+    const filas = Array.from(tbody.querySelectorAll('.fila-pregunta'));
+    
+    // Cambiar dirección si es la misma columna
+    if (ordenPreguntaActual.columna === columna) {
+        ordenPreguntaActual.ascendente = !ordenPreguntaActual.ascendente;
+    } else {
+        ordenPreguntaActual.columna = columna;
+        ordenPreguntaActual.ascendente = true;
+    }
+    
+    filas.sort((a, b) => {
+        let valorA, valorB;
+        
+        switch(columna) {
+            case 'id':
+                valorA = parseInt(a.dataset.id);
+                valorB = parseInt(b.dataset.id);
+                break;
+            case 'tema':
+                valorA = a.dataset.tema;
+                valorB = b.dataset.tema;
+                break;
+            case 'enunciado':
+                valorA = a.dataset.enunciado;
+                valorB = b.dataset.enunciado;
+                break;
+            case 'dificultad':
+                // Orden: Facil < Media < Dificil
+                const orden = { 'facil': 1, 'media': 2, 'dificil': 3 };
+                valorA = orden[a.dataset.dificultad] || 999;
+                valorB = orden[b.dataset.dificultad] || 999;
+                break;
+            default:
+                return 0;
+        }
+        
+        if (valorA < valorB) return ordenPreguntaActual.ascendente ? -1 : 1;
+        if (valorA > valorB) return ordenPreguntaActual.ascendente ? 1 : -1;
+        return 0;
+    });
+    
+    // Reordenar las filas en el DOM
+    filas.forEach(fila => tbody.appendChild(fila));
+    
+    // Actualizar icono de ordenación
+    actualizarIconosOrdenPreguntas(columna);
+}
+
+function actualizarIconosOrdenPreguntas(columnaActual) {
+    // Actualizar todos los headers de la tabla de preguntas
+    const headers = document.querySelectorAll('#tablaPreguntas thead th[onclick]');
+    headers.forEach(header => {
+        const columna = header.getAttribute('onclick').match(/'([^']+)'/)[1];
+        const textoBase = header.textContent.replace(/[↑↓↕]/g, '').trim();
+        
+        if (columna === columnaActual) {
+            const flecha = ordenPreguntaActual.ascendente ? '↑' : '↓';
+            header.innerHTML = `${textoBase} <span style="float: right;">${flecha}</span>`;
+        } else {
+            header.innerHTML = `${textoBase} <span style="float: right; color: #ccc;">↕</span>`;
+        }
+    });
 }
 
 // ===========================================

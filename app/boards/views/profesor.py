@@ -572,3 +572,36 @@ def update_pregunta(request, pregunta_id):
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=400)
 
+
+@login_required
+@user_passes_test(es_profesor, login_url='/')
+def obtener_respuestas_pregunta(request, pregunta_id):
+    """Obtiene las respuestas de una pregunta (para mostrar en modal de eliminar)"""
+    from django.db import connection
+    
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT Respuesta_ID, Contenido, Solucion
+                FROM Respuesta
+                WHERE Pregunta_ID = %s
+                ORDER BY Respuesta_ID
+            """, [pregunta_id])
+            
+            respuestas = []
+            for row in cursor.fetchall():
+                respuestas.append({
+                    'id': row[0],
+                    'texto': row[1],
+                    'es_correcta': row[2] == 1 or row[2] == '1' or row[2] is True
+                })
+        
+        return JsonResponse({
+            'success': True,
+            'respuestas': respuestas
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=400)

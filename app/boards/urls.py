@@ -36,6 +36,7 @@ urlpatterns = [
     path('profesor/test/<int:test_id>/detalles/', views.get_test_details, name='get_test_details'),
     path('profesor/test/<int:test_id>/eliminar/', views.delete_test, name='delete_test'),
     path('profesor/tema/<str:tema_id>/eliminar/', views.delete_tema, name='delete_tema'),
+    path('profesor/pregunta/<int:pregunta_id>/respuestas/', views.obtener_respuestas_pregunta, name='obtener_respuestas_pregunta'),
     
     # Rutas para crear mediante modales
     path('profesor/tema/crear/', views.crear_tema_modal, name='crear_tema_modal'),

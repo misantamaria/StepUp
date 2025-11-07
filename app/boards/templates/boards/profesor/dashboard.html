@@ -3,6 +3,87 @@
 {% block title %}Dashboard Profesor - StepUp{% endblock %}
 
 {% block content %}
+<style>
+/* Estilos para los modales */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    max-width: 800px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.modal-content-small {
+    max-width: 600px;
+}
+
+.modal-content-large {
+    max-width: 900px;
+    max-height: 85vh;
+    margin: 2rem auto;
+}
+
+/* Botones de control sticky */
+.modal-controls {
+    position: sticky;
+    top: 0;
+    right: 0;
+    float: right;
+    display: flex;
+    gap: 0.5rem;
+    z-index: 10;
+    background: white;
+    padding: 0.5rem;
+    margin: -0.5rem -0.5rem 0.5rem 0.5rem;
+    border-radius: 6px;
+    border: 1px solid #e3e6ea;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.modal-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+    background: white;
+    color: #6c757d;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    transition: all 0.2s;
+}
+
+.modal-btn:hover {
+    background: #f8f9fa;
+    border-color: #adb5bd;
+}
+
+.modal-btn-close:hover {
+    border-color: #dc3545;
+    color: #dc3545;
+}
+</style>
+
 <script>
 // Definir funciones globales necesarias antes de renderizar el contenido
 function switchTab(tab) {
@@ -514,14 +595,14 @@ function toggleEstadisticas() {
 </div> <!-- Fin de content-preguntas -->
 
 <!-- Modal de confirmación de eliminación -->
-<div id="modalEliminar" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
-    <div id="modalEliminarContent" style="background: white; border-radius: 12px; padding: 2rem; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.3); position: relative; transition: all 0.3s ease;">
+<div id="modalEliminar" class="modal-overlay">
+    <div id="modalEliminarContent" class="modal-content modal-content-small">
         <!-- Botones de control del modal -->
-        <div style="position: sticky; top: 0; right: 0; float: right; display: flex; gap: 0.5rem; z-index: 10; background: white; padding: 0.5rem; margin: -0.5rem -0.5rem 0.5rem 0.5rem; border-radius: 6px;">
-            <button onclick="toggleMaximizeModal('modalEliminar')" style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid #dee2e6; background: white; color: #6c757d; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; transition: all 0.2s;" onmouseover="this.style.background='#f8f9fa'; this.style.borderColor='#adb5bd'" onmouseout="this.style.background='white'; this.style.borderColor='#dee2e6'" title="Maximizar/Restaurar">
+        <div class="modal-controls">
+            <button onclick="toggleMaximizeModal('modalEliminar')" class="modal-btn" title="Maximizar/Restaurar">
                 ⛶
             </button>
-            <button onclick="cerrarModalEliminar()" style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid #dee2e6; background: white; color: #6c757d; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: bold; transition: all 0.2s;" onmouseover="this.style.background='#f8f9fa'; this.style.borderColor='#dc3545'; this.style.color='#dc3545'" onmouseout="this.style.background='white'; this.style.borderColor='#dee2e6'; this.style.color='#6c757d'" title="Cerrar">
+            <button onclick="cerrarModalEliminar()" class="modal-btn modal-btn-close" title="Cerrar">
                 ✕
             </button>
         </div>
@@ -554,14 +635,14 @@ function toggleEstadisticas() {
 </div>
 
 <!-- Modal de confirmación de eliminación de TEMA -->
-<div id="modalEliminarTema" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
-    <div id="modalEliminarTemaContent" style="background: white; border-radius: 12px; padding: 2rem; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.3); position: relative; transition: all 0.3s ease;">
+<div id="modalEliminarTema" class="modal-overlay">
+    <div id="modalEliminarTemaContent" class="modal-content modal-content-small">
         <!-- Botones de control del modal -->
-        <div style="position: sticky; top: 0; right: 0; float: right; display: flex; gap: 0.5rem; z-index: 10; background: white; padding: 0.5rem; margin: -0.5rem -0.5rem 0.5rem 0.5rem; border-radius: 6px;">
-            <button onclick="toggleMaximizeModal('modalEliminarTema')" style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid #dee2e6; background: white; color: #6c757d; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; transition: all 0.2s;" onmouseover="this.style.background='#f8f9fa'; this.style.borderColor='#adb5bd'" onmouseout="this.style.background='white'; this.style.borderColor='#dee2e6'" title="Maximizar/Restaurar">
+        <div class="modal-controls">
+            <button onclick="toggleMaximizeModal('modalEliminarTema')" class="modal-btn" title="Maximizar/Restaurar">
                 ⛶
             </button>
-            <button onclick="cerrarModalEliminarTema()" style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid #dee2e6; background: white; color: #6c757d; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: bold; transition: all 0.2s;" onmouseover="this.style.background='#f8f9fa'; this.style.borderColor='#dc3545'; this.style.color='#dc3545'" onmouseout="this.style.background='white'; this.style.borderColor='#dee2e6'; this.style.color='#6c757d'" title="Cerrar">
+            <button onclick="cerrarModalEliminarTema()" class="modal-btn modal-btn-close" title="Cerrar">
                 ✕
             </button>
         </div>
@@ -603,14 +684,14 @@ function toggleEstadisticas() {
 </div>
 
 <!-- Modal para crear nuevo TEMA -->
-<div id="modalCrearTema" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
-    <div id="modalCrearTemaContent" style="background: white; border-radius: 12px; padding: 2rem; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.3); position: relative; transition: all 0.3s ease;">
+<div id="modalCrearTema" class="modal-overlay">
+    <div id="modalCrearTemaContent" class="modal-content modal-content-small">
         <!-- Botones de control del modal -->
-        <div style="position: sticky; top: 0; right: 0; float: right; display: flex; gap: 0.5rem; z-index: 10; background: white; padding: 0.5rem; margin: -0.5rem -0.5rem 0.5rem 0.5rem; border-radius: 6px;">
-            <button onclick="toggleMaximizeModal('modalCrearTema')" style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid #dee2e6; background: white; color: #6c757d; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; transition: all 0.2s;" onmouseover="this.style.background='#f8f9fa'; this.style.borderColor='#adb5bd'" onmouseout="this.style.background='white'; this.style.borderColor='#dee2e6'" title="Maximizar/Restaurar">
+        <div class="modal-controls">
+            <button onclick="toggleMaximizeModal('modalCrearTema')" class="modal-btn" title="Maximizar/Restaurar">
                 ⛶
             </button>
-            <button onclick="cerrarModalCrearTema()" style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid #dee2e6; background: white; color: #6c757d; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: bold; transition: all 0.2s;" onmouseover="this.style.background='#f8f9fa'; this.style.borderColor='#dc3545'; this.style.color='#dc3545'" onmouseout="this.style.background='white'; this.style.borderColor='#dee2e6'; this.style.color='#6c757d'" title="Cerrar">
+            <button onclick="cerrarModalCrearTema()" class="modal-btn modal-btn-close" title="Cerrar">
                 ✕
             </button>
         </div>
@@ -708,14 +789,14 @@ function toggleEstadisticas() {
 </div>
 
 <!-- Modal para crear nueva PREGUNTA -->
-<div id="modalCrearPregunta" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
-    <div id="modalCrearPreguntaContent" style="background: white; border-radius: 12px; padding: 2rem; max-width: 800px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.3); position: relative; transition: all 0.3s ease;">
+<div id="modalCrearPregunta" class="modal-overlay">
+    <div id="modalCrearPreguntaContent" class="modal-content">
         <!-- Botones de control del modal -->
-        <div style="position: sticky; top: 0; right: 0; float: right; display: flex; gap: 0.5rem; z-index: 10; background: white; padding: 0.5rem; margin: -0.5rem -0.5rem 0.5rem 0.5rem; border-radius: 6px;">
-            <button onclick="toggleMaximizeModal('modalCrearPregunta')" style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid #dee2e6; background: white; color: #6c757d; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; transition: all 0.2s;" onmouseover="this.style.background='#f8f9fa'; this.style.borderColor='#adb5bd'" onmouseout="this.style.background='white'; this.style.borderColor='#dee2e6'" title="Maximizar/Restaurar">
+        <div class="modal-controls">
+            <button onclick="toggleMaximizeModal('modalCrearPregunta')" class="modal-btn" title="Maximizar/Restaurar">
                 ⛶
             </button>
-            <button onclick="cerrarModalCrearPregunta()" style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid #dee2e6; background: white; color: #6c757d; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: bold; transition: all 0.2s;" onmouseover="this.style.background='#f8f9fa'; this.style.borderColor='#dc3545'; this.style.color='#dc3545'" onmouseout="this.style.background='white'; this.style.borderColor='#dee2e6'; this.style.color='#6c757d'" title="Cerrar">
+            <button onclick="cerrarModalCrearPregunta()" class="modal-btn modal-btn-close" title="Cerrar">
                 ✕
             </button>
         </div>
@@ -790,14 +871,14 @@ function toggleEstadisticas() {
 </div>
 
 <!-- Modal para EDITAR TEMA -->
-<div id="modalEditarTema" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; overflow-y: auto;">
-    <div id="modalEditarTemaContent" style="background: white; border-radius: 12px; padding: 2rem; max-width: 900px; width: 90%; max-height: 85vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.3); margin: 2rem auto; position: relative; transition: all 0.3s ease;">
+<div id="modalEditarTema" class="modal-overlay" style="overflow-y: auto;">
+    <div id="modalEditarTemaContent" class="modal-content modal-content-large">
         <!-- Botones de control del modal -->
-        <div style="position: sticky; top: 0; right: 0; float: right; display: flex; gap: 0.5rem; z-index: 10; background: white; padding: 0.5rem; margin: -0.5rem -0.5rem 0.5rem 0.5rem; border-radius: 6px;">
-            <button onclick="toggleMaximizeModal('modalEditarTema')" style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid #dee2e6; background: white; color: #6c757d; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; transition: all 0.2s;" onmouseover="this.style.background='#f8f9fa'; this.style.borderColor='#adb5bd'" onmouseout="this.style.background='white'; this.style.borderColor='#dee2e6'" title="Maximizar/Restaurar">
+        <div class="modal-controls">
+            <button onclick="toggleMaximizeModal('modalEditarTema')" class="modal-btn" title="Maximizar/Restaurar">
                 ⛶
             </button>
-            <button onclick="cerrarModalEditarTema()" style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid #dee2e6; background: white; color: #6c757d; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: bold; transition: all 0.2s;" onmouseover="this.style.background='#f8f9fa'; this.style.borderColor='#dc3545'; this.style.color='#dc3545'" onmouseout="this.style.background='white'; this.style.borderColor='#dee2e6'; this.style.color='#6c757d'" title="Cerrar">
+            <button onclick="cerrarModalEditarTema()" class="modal-btn modal-btn-close" title="Cerrar">
                 ✕
             </button>
         </div>
@@ -833,14 +914,14 @@ function toggleEstadisticas() {
 </div>
 
 <!-- Modal para EDITAR TEST -->
-<div id="modalEditarTest" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; overflow-y: auto;">
-    <div id="modalEditarTestContent" style="background: white; border-radius: 12px; padding: 2rem; max-width: 900px; width: 90%; max-height: 85vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.3); margin: 2rem auto; position: relative; transition: all 0.3s ease;">
+<div id="modalEditarTest" class="modal-overlay" style="overflow-y: auto;">
+    <div id="modalEditarTestContent" class="modal-content modal-content-large">
         <!-- Botones de control del modal -->
-        <div style="position: sticky; top: 0; right: 0; float: right; display: flex; gap: 0.5rem; z-index: 10; background: white; padding: 0.5rem; margin: -0.5rem -0.5rem 0.5rem 0.5rem; border-radius: 6px;">
-            <button onclick="toggleMaximizeModal('modalEditarTest')" style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid #dee2e6; background: white; color: #6c757d; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; transition: all 0.2s;" onmouseover="this.style.background='#f8f9fa'; this.style.borderColor='#adb5bd'" onmouseout="this.style.background='white'; this.style.borderColor='#dee2e6'" title="Maximizar/Restaurar">
+        <div class="modal-controls">
+            <button onclick="toggleMaximizeModal('modalEditarTest')" class="modal-btn" title="Maximizar/Restaurar">
                 ⛶
             </button>
-            <button onclick="cerrarModalEditarTest()" style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid #dee2e6; background: white; color: #6c757d; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: bold; transition: all 0.2s;" onmouseover="this.style.background='#f8f9fa'; this.style.borderColor='#dc3545'; this.style.color='#dc3545'" onmouseout="this.style.background='white'; this.style.borderColor='#dee2e6'; this.style.color='#6c757d'" title="Cerrar">
+            <button onclick="cerrarModalEditarTest()" class="modal-btn modal-btn-close" title="Cerrar">
                 ✕
             </button>
         </div>
@@ -914,14 +995,14 @@ function toggleEstadisticas() {
 </div>
 
 <!-- Modal para EDITAR PREGUNTA -->
-<div id="modalEditarPregunta" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; overflow-y: auto;">
-    <div id="modalEditarPreguntaContent" style="background: white; border-radius: 12px; padding: 2rem; max-width: 800px; width: 90%; max-height: 85vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.3); margin: 2rem auto; position: relative; transition: all 0.3s ease;">
+<div id="modalEditarPregunta" class="modal-overlay" style="overflow-y: auto;">
+    <div id="modalEditarPreguntaContent" class="modal-content modal-content-large">
         <!-- Botones de control del modal -->
-        <div style="position: sticky; top: 0; right: 0; float: right; display: flex; gap: 0.5rem; z-index: 10; background: white; padding: 0.5rem; margin: -0.5rem -0.5rem 0.5rem 0.5rem; border-radius: 6px;">
-            <button onclick="toggleMaximizeModal('modalEditarPregunta')" style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid #dee2e6; background: white; color: #6c757d; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; transition: all 0.2s;" onmouseover="this.style.background='#f8f9fa'; this.style.borderColor='#adb5bd'" onmouseout="this.style.background='white'; this.style.borderColor='#dee2e6'" title="Maximizar/Restaurar">
+        <div class="modal-controls">
+            <button onclick="toggleMaximizeModal('modalEditarPregunta')" class="modal-btn" title="Maximizar/Restaurar">
                 ⛶
             </button>
-            <button onclick="cerrarModalEditarPregunta()" style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid #dee2e6; background: white; color: #6c757d; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: bold; transition: all 0.2s;" onmouseover="this.style.background='#f8f9fa'; this.style.borderColor='#dc3545'; this.style.color='#dc3545'" onmouseout="this.style.background='white'; this.style.borderColor='#dee2e6'; this.style.color='#6c757d'" title="Cerrar">
+            <button onclick="cerrarModalEditarPregunta()" class="modal-btn modal-btn-close" title="Cerrar">
                 ✕
             </button>
         </div>

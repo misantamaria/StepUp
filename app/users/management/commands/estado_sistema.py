@@ -146,21 +146,21 @@ class Command(BaseCommand):
         self.stdout.write(f"  ✓ Base de datos activa con {total_users} usuarios")
         
         # Información sobre Docker
-        self.stdout.write(f"  ℹ️ La persistencia está configurada con volumen Docker 'mysql_data'")
-        self.stdout.write(f"  ℹ️ Los datos se mantienen después de 'docker-compose down'")
+        self.stdout.write(f"La persistencia está configurada con volumen Docker 'mysql_data'")
+        self.stdout.write(f"Los datos se mantienen después de 'docker-compose down'")
         
         self.stdout.write()
         
         # Resumen final
         self.stdout.write(self.style.HTTP_INFO("=== RESUMEN FINAL ==="))
-        self.stdout.write(self.style.SUCCESS("✅ Sistema StepUp configurado correctamente"))
-        self.stdout.write("📋 Credenciales principales:")
+        self.stdout.write(self.style.SUCCESS("-- Sistema StepUp configurado correctamente --"))
+        self.stdout.write("Credenciales principales:")
         self.stdout.write("   • admin/admin (Administrador)")
         self.stdout.write("   • profesor/profesor (Profesor)")
         self.stdout.write("   • profesor_ayudante/ayudante (Profesor Ayudante)")
         self.stdout.write("   • Alumnos: [nombre_usuario]/alumno123")
         self.stdout.write()
-        self.stdout.write(self.style.HTTP_INFO("💡 Comandos útiles:"))
+        self.stdout.write(self.style.HTTP_INFO("-- Comandos útiles --"))
         self.stdout.write("   • python manage.py estado_sistema --detallado")
         self.stdout.write("   • python manage.py initusers (crear usuarios básicos)")
         self.stdout.write("   • python manage.py crear_alumnos_demo (crear alumnos de ejemplo)")

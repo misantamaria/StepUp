@@ -31,6 +31,9 @@ urlpatterns = [
     
     # Rutas para profesores
     path('profesor/', views.dashboard_profesor, name='dashboard_profesor'),
+    path('profesor/progreso-alumnos/', profesor.progreso_alumnos, name='progreso_alumnos'),
+    path('profesor/progreso-clase/', profesor.progreso_clase, name='progreso_clase'),
+    path('profesor/alumno/<int:alumno_id>/', profesor.detalle_alumno, name='detalle_alumno'),
     path('profesor/alumno/<int:alumno_id>/estadisticas/', views.estadisticas_alumno, name='estadisticas_alumno'),
     path('profesor/test/<int:test_id>/toggle-field/', views.toggle_test_field, name='toggle_test_field'),
     path('profesor/tema/<str:tema_id>/toggle-field/', views.toggle_tema_field, name='toggle_tema_field'),

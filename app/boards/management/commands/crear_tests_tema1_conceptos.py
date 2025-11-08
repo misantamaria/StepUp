@@ -406,7 +406,7 @@ class Command(BaseCommand):
                     test_previo_nivel = None
                     nivel_actual = nivel
                     nombre_nivel = {'Facil': 'FÁCIL', 'Media': 'INTERMEDIO', 'Dificil': 'DIFÍCIL'}[nivel]
-                    self.stdout.write(f'\n📚 Nivel {nombre_nivel}:')
+                    self.stdout.write(f'\nNivel {nombre_nivel}:')
                 
                 # Crear preguntas
                 ids_preguntas = []

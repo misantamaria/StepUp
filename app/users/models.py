@@ -14,6 +14,7 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     modo_preferido = models.CharField(max_length=10, choices=MODO_CHOICES, default='alumno')
     no_preguntar_modo = models.BooleanField(default=False, help_text='No volver a preguntar el modo al entrar')
+    grupo = models.CharField(max_length=50, blank=True, null=True, help_text='Grupo del alumno')
     
     class Meta:
         verbose_name = 'Perfil de Usuario'

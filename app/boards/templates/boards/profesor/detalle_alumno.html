@@ -1,0 +1,427 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - StepUp{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h1 style="color: {{ THEME_COLORS.primary }}; margin: 0;">{{ page_title }}</h1>
+        <a href="{% url 'boards:progreso_alumnos' %}" style="color: {{ THEME_COLORS.primary }}; text-decoration: none; font-weight: 500;">
+            ← Volver a Progreso Alumnos
+        </a>
+    </div>
+
+    <!-- Información del alumno y estado -->
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; margin-bottom: 2rem;">
+        <div class="card">
+            <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1rem;">Información del Alumno</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div>
+                    <strong>Usuario:</strong> {{ alumno.username }}<br>
+                    {% if alumno.first_name or alumno.last_name %}
+                        <strong>Nombre:</strong> {{ alumno.first_name }} {{ alumno.last_name }}<br>
+                    {% endif %}
+                    {% if alumno.email %}
+                        <strong>Email:</strong> {{ alumno.email }}<br>
+                    {% endif %}
+                    <strong>Fecha de registro:</strong> {{ alumno.date_joined|date:"d/m/Y" }}
+                </div>
+                <div>
+                    <strong>Total intentos:</strong> {{ total_intentos }}<br>
+                    <strong>Promedio general:</strong> 
+                    <span style="font-weight: bold; color: {% if promedio >= 8 %}#28a745{% elif promedio >= 6 %}#ffc107{% else %}#dc3545{% endif %};">
+                        {{ promedio|floatformat:1 }}/10
+                    </span><br>
+                    {% if posicion_ranking %}
+                        <strong>Posición en clase:</strong> {{ posicion_ranking }}/{{ total_alumnos }}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h3 style="margin-bottom: 1rem; color: {% if estado_alumno == 'top' %}#155724{% elif estado_alumno == 'riesgo' %}#721c24{% else %}{{ THEME_COLORS.primary }}{% endif %};">
+                Estado del Alumno
+            </h3>
+            {% if estado_alumno == 'top' %}
+                <div style="text-align: center; padding: 1rem; background: #d4edda; border-radius: 8px; color: #155724;">
+                    <div style="font-size: 2rem;">🌟</div>
+                    <strong>ALUMNO TOP</strong>
+                    <div style="font-size: 0.9rem; margin-top: 0.5rem;">
+                        Rendimiento excelente<br>
+                        Promedio ≥ 8.0
+                    </div>
+                </div>
+            {% elif estado_alumno == 'riesgo' %}
+                <div style="text-align: center; padding: 1rem; background: #f8d7da; border-radius: 8px; color: #721c24;">
+                    <div style="font-size: 2rem;">⚠️</div>
+                    <strong>EN RIESGO</strong>
+                    <div style="font-size: 0.9rem; margin-top: 0.5rem;">
+                        Necesita atención<br>
+                        Promedio < 6.0
+                    </div>
+                </div>
+            {% elif estado_alumno == 'inactivo' %}
+                <div style="text-align: center; padding: 1rem; background: #e2e3e5; border-radius: 8px; color: #6c757d;">
+                    <div style="font-size: 2rem;">😴</div>
+                    <strong>INACTIVO</strong>
+                    <div style="font-size: 0.9rem; margin-top: 0.5rem;">
+                        Sin actividad registrada
+                    </div>
+                </div>
+            {% else %}
+                <div style="text-align: center; padding: 1rem; background: #fff3cd; border-radius: 8px; color: #856404;">
+                    <div style="font-size: 2rem;">✅</div>
+                    <strong>PROGRESO NORMAL</strong>
+                    <div style="font-size: 0.9rem; margin-top: 0.5rem;">
+                        Rendimiento adecuado
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Navegación por tabs -->
+    <div class="tab-container">
+        <div class="tab-buttons">
+            <button class="tab-btn active" onclick="switchTab('estadisticas')">📊 Estadísticas Generales</button>
+            <button class="tab-btn" onclick="switchTab('temas')">Por Temas</button>
+            <button class="tab-btn" onclick="switchTab('timeline')">📈 Timeline de Actividad</button>
+            <button class="tab-btn" onclick="switchTab('comparacion')">👥 Comparación Grupal</button>
+        </div>
+
+        <!-- Tab: Estadísticas Generales -->
+        <div id="tab-estadisticas" class="tab-content active">
+            <div class="card">
+                <h3 style="color: {{ THEME_COLORS.primary }};">📊 Resumen de Rendimiento</h3>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                    <div style="text-align: center; padding: 1rem; background: #f8f9fa; border-radius: 6px;">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: {{ THEME_COLORS.primary }};">{{ total_intentos }}</div>
+                        <div style="font-size: 0.9rem; color: #666;">Tests Realizados</div>
+                    </div>
+                    <div style="text-align: center; padding: 1rem; background: {% if promedio >= 8 %}#d4edda{% elif promedio >= 6 %}#fff3cd{% else %}#f8d7da{% endif %}; border-radius: 6px;">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: {% if promedio >= 8 %}#155724{% elif promedio >= 6 %}#856404{% else %}#721c24{% endif %};">{{ promedio|floatformat:1 }}</div>
+                        <div style="font-size: 0.9rem; color: {% if promedio >= 8 %}#155724{% elif promedio >= 6 %}#856404{% else %}#721c24{% endif %};">Promedio General</div>
+                    </div>
+                    <div style="text-align: center; padding: 1rem; background: #e7f3ff; border-radius: 6px;">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: #0c5460;">{{ intentos|length }}</div>
+                        <div style="font-size: 0.9rem; color: #0c5460;">Histórico Total</div>
+                    </div>
+                </div>
+
+                {% if intentos %}
+                <h4 style="color: {{ THEME_COLORS.primary }};">Últimos 5 Resultados</h4>
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead style="background: #f8f9fa;">
+                            <tr>
+                                <th style="padding: 0.5rem; text-align: left;">Test</th>
+                                <th style="padding: 0.5rem; text-align: center;">Tema</th>
+                                <th style="padding: 0.5rem; text-align: center;">Fecha</th>
+                                <th style="padding: 0.5rem; text-align: center;">Puntuación</th>
+                                <th style="padding: 0.5rem; text-align: center;">Correctas</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for intento in intentos|slice:":5" %}
+                            <tr style="border-bottom: 1px solid #eee;">
+                                <td style="padding: 0.5rem;">{{ intento.test.nombre }}</td>
+                                <td style="padding: 0.5rem; text-align: center;">
+                                    {% if intento.test.tema %}{{ intento.test.tema.tema_id }}{% else %}-{% endif %}
+                                </td>
+                                <td style="padding: 0.5rem; text-align: center;">{{ intento.fecha_fin|date:"d/m/Y H:i" }}</td>
+                                <td style="padding: 0.5rem; text-align: center;">
+                                    <span style="font-weight: bold; color: {% if intento.puntuacion >= 7 %}#28a745{% elif intento.puntuacion >= 5 %}#ffc107{% else %}#dc3545{% endif %};">
+                                        {{ intento.puntuacion|floatformat:1 }}
+                                    </span>
+                                </td>
+                                <td style="padding: 0.5rem; text-align: center;">{{ intento.respuestas_correctas }}/{{ intento.total_preguntas }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div style="text-align: center; padding: 2rem; color: #999;">
+                    El alumno no ha realizado ningún test aún
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Tab: Por Temas -->
+        <div id="tab-temas" class="tab-content">
+            <div class="card">
+                <h3 style="color: {{ THEME_COLORS.primary }};">Rendimiento por Tema</h3>
+                
+                {% if estadisticas_por_tema %}
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead style="background: {{ THEME_COLORS.primary_light }}; color: white;">
+                            <tr>
+                                <th style="padding: 0.75rem; text-align: left;">Tema</th>
+                                <th style="padding: 0.75rem; text-align: center;">Intentos</th>
+                                <th style="padding: 0.75rem; text-align: center;">Nota Media</th>
+                                <th style="padding: 0.75rem; text-align: center;">Mejor Nota</th>
+                                <th style="padding: 0.75rem; text-align: center;">Último Intento</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for tema_stat in estadisticas_por_tema %}
+                            <tr style="border-bottom: 1px solid #eee;">
+                                <td style="padding: 0.75rem;">
+                                    <strong>{{ tema_stat.tema }}</strong>
+                                </td>
+                                <td style="padding: 0.75rem; text-align: center;">{{ tema_stat.total_intentos }}</td>
+                                <td style="padding: 0.75rem; text-align: center;">
+                                    <span style="font-weight: bold; color: {% if tema_stat.nota_media >= 7 %}#28a745{% elif tema_stat.nota_media >= 5 %}#ffc107{% else %}#dc3545{% endif %};">
+                                        {{ tema_stat.nota_media|floatformat:1 }}
+                                    </span>
+                                </td>
+                                <td style="padding: 0.75rem; text-align: center;">
+                                    <span style="color: #28a745; font-weight: 500;">{{ tema_stat.mejor_puntuacion|floatformat:1 }}</span>
+                                </td>
+                                <td style="padding: 0.75rem; text-align: center;">
+                                    {% if tema_stat.ultimo_intento %}
+                                        {{ tema_stat.ultimo_intento.fecha_fin|timesince }} ago
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div style="text-align: center; padding: 2rem; color: #999;">
+                    No hay datos por tema disponibles
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Tab: Timeline -->
+        <div id="tab-timeline" class="tab-content">
+            <div class="card">
+                <h3 style="color: {{ THEME_COLORS.primary }};">📈 Timeline de Actividad (Últimos 30 días)</h3>
+                
+                {% if intentos_recientes %}
+                <div class="timeline">
+                    {% for intento in intentos_recientes %}
+                    <div class="timeline-item">
+                        <div class="timeline-marker" style="background: {% if intento.puntuacion >= 7 %}#28a745{% elif intento.puntuacion >= 5 %}#ffc107{% else %}#dc3545{% endif %};"></div>
+                        <div class="timeline-content">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <strong>{{ intento.test.nombre }}</strong>
+                                    {% if intento.test.tema %} - {{ intento.test.tema.tema_id }}{% endif %}
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-weight: bold; color: {% if intento.puntuacion >= 7 %}#28a745{% elif intento.puntuacion >= 5 %}#ffc107{% else %}#dc3545{% endif %};">
+                                        {{ intento.puntuacion|floatformat:1 }}
+                                    </div>
+                                    <small style="color: #666;">{{ intento.fecha_fin|date:"d/m H:i" }}</small>
+                                </div>
+                            </div>
+                            <div style="font-size: 0.9rem; color: #666; margin-top: 0.25rem;">
+                                {{ intento.respuestas_correctas }}/{{ intento.total_preguntas }} correctas
+                                {% if intento.tiempo_total %}
+                                    • {{ intento.tiempo_total|floatformat:0 }} min
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div style="text-align: center; padding: 2rem; color: #999;">
+                    No hay actividad reciente en los últimos 30 días
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Tab: Comparación -->
+        <div id="tab-comparacion" class="tab-content">
+            <div class="card">
+                <h3 style="color: {{ THEME_COLORS.primary }};">👥 Comparación con la Clase</h3>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                    <div style="text-align: center; padding: 1.5rem; background: #f8f9fa; border-radius: 8px;">
+                        <div style="font-size: 1.2rem; font-weight: bold; color: {{ THEME_COLORS.primary }};">
+                            {% if posicion_ranking %}{{ posicion_ranking }}{% else %}-{% endif %}
+                        </div>
+                        <div style="font-size: 0.9rem; color: #666;">Posición en Ranking</div>
+                        <div style="font-size: 0.8rem; color: #999;">de {{ total_alumnos }} alumnos</div>
+                    </div>
+                    
+                    <div style="text-align: center; padding: 1.5rem; background: {% if estado_alumno == 'top' %}#d4edda{% elif estado_alumno == 'riesgo' %}#f8d7da{% else %}#fff3cd{% endif %}; border-radius: 8px;">
+                        <div style="font-size: 1.2rem; font-weight: bold; color: {% if estado_alumno == 'top' %}#155724{% elif estado_alumno == 'riesgo' %}#721c24{% else %}#856404{% endif %};">
+                            {{ estado_alumno|title }}
+                        </div>
+                        <div style="font-size: 0.9rem; color: {% if estado_alumno == 'top' %}#155724{% elif estado_alumno == 'riesgo' %}#721c24{% else %}#856404{% endif %};">Estado Grupal</div>
+                    </div>
+                    
+                    <div style="text-align: center; padding: 1.5rem; background: #e7f3ff; border-radius: 8px;">
+                        <div style="font-size: 1.2rem; font-weight: bold; color: #0c5460;">{{ promedio|floatformat:1 }}</div>
+                        <div style="font-size: 0.9rem; color: #0c5460;">Su Promedio</div>
+                        <div style="font-size: 0.8rem; color: #999;">vs clase</div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 2rem;">
+                    <h4>Recomendaciones</h4>
+                    {% if estado_alumno == 'top' %}
+                    <div style="background: #d4edda; padding: 1rem; border-radius: 6px; color: #155724;">
+                        <strong>¡Excelente trabajo!</strong><br>
+                        Este alumno está entre los mejores de la clase. Considera asignar ejercicios de mayor dificultad para mantener el desafío.
+                    </div>
+                    {% elif estado_alumno == 'riesgo' %}
+                    <div style="background: #f8d7da; padding: 1rem; border-radius: 6px; color: #721c24;">
+                        <strong>Requiere atención especial.</strong><br>
+                        Se recomienda revisar los temas con menor puntuación y proporcionar apoyo adicional.
+                    </div>
+                    {% elif estado_alumno == 'inactivo' %}
+                    <div style="background: #e2e3e5; padding: 1rem; border-radius: 6px; color: #6c757d;">
+                        <strong>Alumno inactivo.</strong><br>
+                        Es importante motivar al alumno a comenzar con los tests disponibles.
+                    </div>
+                    {% else %}
+                    <div style="background: #fff3cd; padding: 1rem; border-radius: 6px; color: #856404;">
+                        <strong>Progreso adecuado.</strong><br>
+                        El alumno mantiene un rendimiento estable. Continuar con el seguimiento regular.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 1rem;
+}
+
+.tab-container {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.tab-buttons {
+    display: flex;
+    background: #f8f9fa;
+    border-bottom: 1px solid #ddd;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 1rem;
+    border: none;
+    background: transparent;
+    color: #666;
+    font-weight: 500;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.tab-btn:hover {
+    background: #e9ecef;
+    color: {{ THEME_COLORS.primary }};
+}
+
+.tab-btn.active {
+    color: {{ THEME_COLORS.primary }};
+    border-bottom-color: {{ THEME_COLORS.primary }};
+    background: white;
+}
+
+.tab-content {
+    display: none;
+    padding: 1.5rem;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.timeline {
+    position: relative;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #ddd;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 1.5rem;
+    padding-left: 2rem;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: 0;
+    top: 0.25rem;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.timeline-content {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 6px;
+    border-left: 3px solid #ddd;
+}
+
+@media (max-width: 768px) {
+    .tab-buttons {
+        flex-wrap: wrap;
+    }
+    
+    .tab-btn {
+        font-size: 0.9rem;
+        padding: 0.75rem;
+    }
+}
+</style>
+
+<script>
+function switchTab(tabName) {
+    // Ocultar todos los tabs
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    // Remover active de todos los botones
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Mostrar el tab seleccionado
+    document.getElementById('tab-' + tabName).classList.add('active');
+    
+    // Activar el botón correspondiente
+    event.target.classList.add('active');
+}
+</script>
+{% endblock %}

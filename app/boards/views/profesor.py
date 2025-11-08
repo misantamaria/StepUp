@@ -5,19 +5,25 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
-from django.db.models import Count
+from django.db.models import Count, Avg, Max, Min
 from .decorators import es_profesor
 from core.profesor.services import get_dashboard_data as profesor_dashboard_data, get_student_stats
-from boards.models import Test, Tema
+from boards.models import Test, Tema, IntentTest, Pregunta
 
 
 @login_required
 @user_passes_test(es_profesor, login_url='/')
 def dashboard_profesor(request):
     """Dashboard para profesores - estadísticas y gestión"""
-    print(f" Accediendo a dashboard_profesor - Usuario: {request.user.username}")
+    print(f"Accediendo a dashboard_profesor - Usuario: {request.user.username}")
     context = profesor_dashboard_data()
-    print(f" Context generado: {list(context.keys())}")
+    print(f"Context generado: {list(context.keys())}")
+    
+    # Debug: verificar datos específicos para las nuevas secciones
+    print(f"Alumnos detallados: {len(context.get('alumnos_detallados', []))}")
+    print(f"Distribución: {context.get('distribucion', {})}")
+    print(f"Mejores alumnos: {len(context.get('mejores_alumnos', []))}")
+    
     return render(request, 'boards/profesor/dashboard.html', context)
 
 
@@ -598,6 +604,207 @@ def update_pregunta(request, pregunta_id):
         })
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+
+@login_required
+@user_passes_test(es_profesor, login_url='/')
+def progreso_alumnos(request):
+    """Vista de progreso individual de todos los alumnos no-staff"""
+    context = profesor_dashboard_data()
+    
+    # Filtrar solo datos de alumnos (no staff)
+    alumnos_detallados = context.get('alumnos_detallados', [])
+    
+    # Agregar estadísticas por tema para cada alumno
+    from boards.models import Tema, Pregunta
+    temas = Tema.objects.exclude(tema_id='Exámenes').order_by('tema_id')
+    
+    for alumno_data in alumnos_detallados:
+        alumno = alumno_data['alumno']
+        estadisticas_por_tema = []
+        
+        for tema in temas:
+            # Intentos del alumno en tests de este tema
+            intentos_tema = IntentTest.objects.filter(
+                alumno=alumno, 
+                completado=True, 
+                test__tema=tema
+            )
+            
+            if intentos_tema.exists():
+                nota_media_tema = intentos_tema.aggregate(Avg('puntuacion'))['puntuacion__avg'] or 0
+                total_intentos_tema = intentos_tema.count()
+                mejor_puntuacion = intentos_tema.aggregate(Max('puntuacion'))['puntuacion__max'] or 0
+                
+                estadisticas_por_tema.append({
+                    'tema': tema.tema_id,
+                    'nota_media': nota_media_tema,
+                    'total_intentos': total_intentos_tema,
+                    'mejor_puntuacion': mejor_puntuacion,
+                })
+        
+        alumno_data['estadisticas_por_tema'] = estadisticas_por_tema
+    
+    # Agregar estadísticas generales por temas para mostrar al final
+    estadisticas_temas = []
+    for tema in temas:
+        # Todos los intentos en tests de este tema (solo usuarios no-staff)
+        from django.contrib.auth.models import User
+        alumnos_no_staff = User.objects.filter(is_staff=False)
+        
+        intentos_tema = IntentTest.objects.filter(
+            completado=True,
+            test__tema=tema,
+            alumno__in=alumnos_no_staff
+        )
+        
+        if intentos_tema.exists():
+            nota_media_tema = intentos_tema.aggregate(Avg('puntuacion'))['puntuacion__avg'] or 0
+            total_intentos_tema = intentos_tema.count()
+            alumnos_participantes = intentos_tema.values('alumno').distinct().count()
+            
+            estadisticas_temas.append({
+                'tema': tema.tema_id,
+                'nota_media': nota_media_tema,
+                'total_intentos': total_intentos_tema,
+                'alumnos_participantes': alumnos_participantes,
+            })
+    
+    context.update({
+        'alumnos_detallados': alumnos_detallados,
+        'estadisticas_temas': estadisticas_temas,
+        'page_title': 'Progreso por Alumno'
+    })
+    
+    return render(request, 'boards/profesor/progreso_alumnos.html', context)
+
+
+@login_required
+@user_passes_test(es_profesor, login_url='/')
+def progreso_clase(request):
+    """Vista de progreso general de toda la clase"""
+    context = profesor_dashboard_data()
+    
+    # Agregar estadísticas por tema para toda la clase
+    from boards.models import Tema
+    temas = Tema.objects.exclude(tema_id='Exámenes').order_by('tema_id')
+    
+    estadisticas_temas = []
+    for tema in temas:
+        # Todos los intentos en tests de este tema (solo usuarios no-staff)
+        from django.contrib.auth.models import User
+        alumnos_no_staff = User.objects.filter(is_staff=False)
+        
+        intentos_tema = IntentTest.objects.filter(
+            completado=True,
+            test__tema=tema,
+            alumno__in=alumnos_no_staff
+        )
+        
+        if intentos_tema.exists():
+            nota_media_tema = intentos_tema.aggregate(Avg('puntuacion'))['puntuacion__avg'] or 0
+            total_intentos_tema = intentos_tema.count()
+            alumnos_participantes = intentos_tema.values('alumno').distinct().count()
+            mejor_puntuacion = intentos_tema.aggregate(Max('puntuacion'))['puntuacion__max'] or 0
+            peor_puntuacion = intentos_tema.aggregate(Min('puntuacion'))['puntuacion__min'] or 0
+            
+            # Total de preguntas en este tema
+            total_preguntas_tema = Pregunta.objects.filter(tema=tema.tema_id).count()
+            
+            estadisticas_temas.append({
+                'tema': tema.tema_id,
+                'nota_media': nota_media_tema,
+                'total_intentos': total_intentos_tema,
+                'alumnos_participantes': alumnos_participantes,
+                'mejor_puntuacion': mejor_puntuacion,
+                'peor_puntuacion': peor_puntuacion,
+                'total_preguntas': total_preguntas_tema,
+            })
+    
+    context.update({
+        'estadisticas_temas': estadisticas_temas,
+        'page_title': 'Progreso por Clase'
+    })
+    
+    return render(request, 'boards/profesor/progreso_clase.html', context)
+
+
+@login_required
+@user_passes_test(es_profesor, login_url='/')
+def detalle_alumno(request, alumno_id):
+    """Vista detallada individual de un alumno específico"""
+    from django.contrib.auth.models import User
+    from datetime import datetime, timedelta
+    
+    alumno = get_object_or_404(User, id=alumno_id, is_staff=False)
+    
+    # Estadísticas básicas del alumno
+    intentos, promedio = get_student_stats(alumno)
+    total_intentos = intentos.count()
+    
+    # Estadísticas por tema
+    from boards.models import Tema, Pregunta
+    temas = Tema.objects.exclude(tema_id='Exámenes').order_by('tema_id')
+    
+    estadisticas_por_tema = []
+    for tema in temas:
+        intentos_tema = intentos.filter(test__tema=tema)
+        
+        if intentos_tema.exists():
+            nota_media_tema = intentos_tema.aggregate(Avg('puntuacion'))['puntuacion__avg'] or 0
+            total_intentos_tema = intentos_tema.count()
+            mejor_puntuacion = intentos_tema.aggregate(Max('puntuacion'))['puntuacion__max'] or 0
+            ultimo_intento = intentos_tema.first()  # Ya están ordenados por fecha
+            
+            estadisticas_por_tema.append({
+                'tema': tema.tema_id,
+                'nota_media': nota_media_tema,
+                'total_intentos': total_intentos_tema,
+                'mejor_puntuacion': mejor_puntuacion,
+                'ultimo_intento': ultimo_intento,
+            })
+    
+    # Timeline de actividad (últimos 30 días)
+    hace_30_dias = datetime.now() - timedelta(days=30)
+    intentos_recientes = intentos.filter(fecha_inicio__gte=hace_30_dias).order_by('fecha_inicio')
+    
+    # Determinar estado del alumno (riesgo/top/normal)
+    estado_alumno = 'normal'
+    if promedio >= 8.0:
+        estado_alumno = 'top'
+    elif promedio < 6.0 and total_intentos > 0:
+        estado_alumno = 'riesgo'
+    elif total_intentos == 0:
+        estado_alumno = 'inactivo'
+    
+    # Posición en el ranking de la clase
+    todos_promedios = IntentTest.objects.filter(
+        completado=True, 
+        alumno__is_staff=False
+    ).values('alumno').annotate(
+        promedio=Avg('puntuacion')
+    ).order_by('-promedio')
+    
+    posicion_ranking = None
+    for i, datos in enumerate(todos_promedios, 1):
+        if datos['alumno'] == alumno.id:
+            posicion_ranking = i
+            break
+    
+    context = {
+        'alumno': alumno,
+        'intentos': intentos,
+        'promedio': promedio,
+        'total_intentos': total_intentos,
+        'estadisticas_por_tema': estadisticas_por_tema,
+        'intentos_recientes': intentos_recientes,
+        'estado_alumno': estado_alumno,
+        'posicion_ranking': posicion_ranking,
+        'total_alumnos': User.objects.filter(is_staff=False).count(),
+        'page_title': f'Detalle de {alumno.username}'
+    }
+    
+    return render(request, 'boards/profesor/detalle_alumno.html', context)
 
 
 @login_required

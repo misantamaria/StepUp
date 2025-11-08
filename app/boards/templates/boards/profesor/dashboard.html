@@ -138,10 +138,48 @@ function switchTab(tab) {
 
 function toggleEstadisticas() {
     const estadisticas = document.getElementById('estadisticas');
-    if (estadisticas.style.display === 'none') {
-        estadisticas.style.display = 'block';
+    if (!estadisticas) {
+        console.error('toggleEstadisticas: elemento #estadisticas no encontrado');
+        return;
+    }
+
+    const current = window.getComputedStyle(estadisticas).display;
+    estadisticas.style.display = (current === 'none') ? 'block' : 'none';
+}
+
+function toggleProgresoAlumnos() {
+    const progresoAlumnos = document.getElementById('progreso-alumnos');
+    const progresoClase = document.getElementById('progreso-clase');
+
+    if (!progresoAlumnos) {
+        console.error('toggleProgresoAlumnos: elemento #progreso-alumnos no encontrado');
+        return;
+    }
+
+    const current = window.getComputedStyle(progresoAlumnos).display;
+    if (current === 'none') {
+        progresoAlumnos.style.display = 'block';
+        if (progresoClase) progresoClase.style.display = 'none';
     } else {
-        estadisticas.style.display = 'none';
+        progresoAlumnos.style.display = 'none';
+    }
+}
+
+function toggleProgresoClase() {
+    const progresoClase = document.getElementById('progreso-clase');
+    const progresoAlumnos = document.getElementById('progreso-alumnos');
+
+    if (!progresoClase) {
+        console.error('toggleProgresoClase: elemento #progreso-clase no encontrado');
+        return;
+    }
+
+    const current = window.getComputedStyle(progresoClase).display;
+    if (current === 'none') {
+        progresoClase.style.display = 'block';
+        if (progresoAlumnos) progresoAlumnos.style.display = 'none';
+    } else {
+        progresoClase.style.display = 'none';
     }
 }
 </script>
@@ -169,13 +207,13 @@ function toggleEstadisticas() {
 
     <!-- Botones de Gestión Rápida -->
     <div style="margin-bottom: 2rem; padding: 1.5rem; background: #f8f9fa; border-radius: 8px;">
-        <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1rem; font-size: 1.1rem;">Gestión de progreso</h3>
+        <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1rem; font-size: 1.1rem;">Análisis de Progreso</h3>
         <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-            <a href="/admin/boards/progresotema/" style="background: {{ THEME_COLORS.success }}; color: white; padding: 0.6rem 1.2rem; text-decoration: none; border-radius: 6px; font-weight: 500; font-size: 0.9rem;">
-                 Ver Progreso Alumnos
+            <a href="{% url 'boards:progreso_alumnos' %}" style="background: {{ THEME_COLORS.primary }}; color: white; padding: 0.6rem 1.2rem; text-decoration: none; border-radius: 6px; font-weight: 500; font-size: 0.9rem;">
+                 Progreso por Alumno
             </a>
-            <a href="#estadisticas" onclick="toggleEstadisticas(); return false;" style="background: {{ THEME_COLORS.warning }}; color: white; padding: 0.6rem 1.2rem; text-decoration: none; border-radius: 6px; font-weight: 500; font-size: 0.9rem;">
-                 Ver Estadísticas Detalladas
+            <a href="{% url 'boards:progreso_clase' %}" style="background: {{ THEME_COLORS.primary }}; color: white; padding: 0.6rem 1.2rem; text-decoration: none; border-radius: 6px; font-weight: 500; font-size: 0.9rem;">
+                Progreso por Clase
             </a>
         </div>
     </div>
@@ -1187,172 +1225,66 @@ function toggleEstadisticas() {
     </div>
 </div>
 
-<!-- Sección de estadísticas detalladas (colapsable) -->
-<div id="estadisticas" class="card" style="display: none;">
-    <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem;">Estadísticas Detalladas</h3>
+<!-- Sección de Progreso por Alumno (colapsable) -->
+<div id="progreso-alumnos" class="card" style="display: none;">
+    <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem;"> Progreso por Alumno</h3>
 
-    <!-- Resumen de estadísticas agregadas en tabla compacta -->
-    <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
-        <h4 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1rem; font-size: 1.1rem;">Resumen Global</h4>
-        <table style="margin: 0;">
-            <thead>
-                <tr>
-                    <th>Promedio</th>
-                    <th>Máxima</th>
-                    <th>Mínima</th>
-                    <th>Tasa Acierto</th>
-                    <th>Correctas</th>
-                    <th>Total Preguntas</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td style="text-align: center; font-weight: bold; color: {{ THEME_COLORS.success }};">
-                        {{ estadisticas_intentos.promedio|floatformat:1 }}%
-                    </td>
-                    <td style="text-align: center; font-weight: bold; color: #28a745;">
-                        {{ estadisticas_intentos.puntuacion_maxima|floatformat:1 }}%
-                    </td>
-                    <td style="text-align: center; font-weight: bold; color: #ffc107;">
-                        {{ estadisticas_intentos.puntuacion_minima|floatformat:1 }}%
-                    </td>
-                    <td style="text-align: center; font-weight: bold; color: {{ THEME_COLORS.primary }};">
-                        {{ tasa_acierto_global|floatformat:1 }}%
-                    </td>
-                    <td style="text-align: center;">
-                        {{ estadisticas_intentos.total_respuestas_correctas|default:0 }}
-                    </td>
-                    <td style="text-align: center;">
-                        {{ estadisticas_intentos.total_preguntas_respondidas|default:0 }}
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Filtros con selectores -->
-        <!-- Filtros con selectores -->
-    <div style="background: #f8f9fa; padding: 1.25rem; border-radius: 8px; margin-bottom: 1.5rem;">
-        <h4 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1rem; font-size: 1rem;"> Filtros</h4>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-            <div>
-                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 0.9rem;">Alumno:</label>
-                <select id="filtroAlumno" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem;">
-                    <option value="">Todos los alumnos</option>
-                    {% for alumno in alumnos_unicos %}
-                        <option value="{{ alumno|lower }}">{{ alumno }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div>
-                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 0.9rem;">Test:</label>
-                <select id="filtroTest" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem;">
-                    <option value="">Todos los tests</option>
-                    {% for test in tests_unicos %}
-                        <option value="{{ test|lower }}">{{ test }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div>
-                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 0.9rem;">Tema:</label>
-                <select id="filtroTema" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem;">
-                    <option value="">Todos los temas</option>
-                    {% for tema in temas_unicos %}
-                        <option value="{{ tema.tema_id|lower }}">{{ tema.tema_id }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div>
-                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 0.9rem;">Puntuación mínima:</label>
-                <select id="filtroPuntuacion" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem;">
-                    <option value="0">Todas</option>
-                    <option value="50">≥ 50%</option>
-                    <option value="60">≥ 60%</option>
-                    <option value="70">≥ 70%</option>
-                    <option value="80">≥ 80%</option>
-                    <option value="90">≥ 90%</option>
-                </select>
-            </div>
-        </div>
-        <div style="margin-top: 1rem; text-align: right;">
-            <button onclick="limpiarFiltros()" style="background: #6c757d; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">
-                Limpiar Filtros
-            </button>
-        </div>
-    </div>
-
-    <!-- Contador de resultados filtrados -->
-    <div id="contadorResultados" style="margin-bottom: 1rem; padding: 0.75rem; background: #e7f3ff; border-left: 4px solid {{ THEME_COLORS.primary }}; border-radius: 4px;">
-        <span style="font-weight: 500;">Mostrando <span id="numResultados">{{ todos_intentos.count }}</span> de {{ todos_intentos.count }} intentos</span>
-    </div>
-
-    <!-- Estadísticas acumuladas de resultados filtrados -->
-    <div id="estadisticasFiltradas" style="background: #f8f9fa; padding: 1.25rem; border-radius: 8px; margin-bottom: 1.5rem;">
-        <h4 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1rem; font-size: 1rem;">Estadísticas de Resultados Actuales</h4>
-        <table style="margin: 0;">
-            <thead>
-                <tr>
-                    <th>Última Fecha</th>
-                    <th>Promedio</th>
-                    <th>Correctas</th>
-                    <th>Total Preguntas</th>
-                    <th>Tasa Acierto</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td id="filtro-ultima-fecha" style="text-align: center; font-weight: 500;">-</td>
-                    <td id="filtro-promedio" style="text-align: center; font-weight: bold; color: {{ THEME_COLORS.success }};">-</td>
-                    <td id="filtro-correctas" style="text-align: center;">-</td>
-                    <td id="filtro-total" style="text-align: center;">-</td>
-                    <td id="filtro-tasa" style="text-align: center; font-weight: bold; color: {{ THEME_COLORS.primary }};">-</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-
-    <h4 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1rem;">Todos los Intentos</h4>
+    <!-- Lista de alumnos con progreso individual -->
     <div style="overflow-x: auto;">
-        <table id="tablaIntentos">
-            <thead>
+        <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 6px; overflow: hidden;">
+            <thead style="background: {{ THEME_COLORS.primary_light }}; color: white;">
                 <tr>
-                    <th style="cursor: pointer;" onclick="ordenarTabla('alumno')">Alumno ↕</th>
-                    <th style="cursor: pointer;" onclick="ordenarTabla('test')">Test ↕</th>
-                    <th style="cursor: pointer;" onclick="ordenarTabla('tema')">Tema ↕</th>
-                    <th style="cursor: pointer;" onclick="ordenarTabla('fecha')">Fecha ↕</th>
-                    <th style="cursor: pointer;" onclick="ordenarTabla('puntuacion')">Puntuación ↕</th>
-                    <th>Correctas</th>
-                    <th>Acciones</th>
+                    <th style="padding: 0.75rem; text-align: left; font-weight: 500;">Alumno</th>
+                    <th style="padding: 0.75rem; text-align: center; font-weight: 500;">Nota Media</th>
+                    <th style="padding: 0.75rem; text-align: center; font-weight: 500;">Progreso</th>
+                    <th style="padding: 0.75rem; text-align: center; font-weight: 500;">Tests</th>
+                    <th style="padding: 0.75rem; text-align: center; font-weight: 500;">Último Acceso</th>
+                    <th style="padding: 0.75rem; text-align: center; font-weight: 500;">Estado</th>
                 </tr>
             </thead>
-            <tbody id="tbodyIntentos">
-                {% for intento in todos_intentos %}
-                <tr class="fila-intento" 
-                    data-alumno="{{ intento.alumno.username|lower }}"
-                    data-test="{{ intento.test.nombre|lower }}"
-                    data-tema="{% if intento.test.tema %}{{ intento.test.tema.tema_id|lower }}{% endif %}"
-                    data-fecha="{{ intento.fecha_fin|date:'Y-m-d H:i' }}"
-                    data-puntuacion="{{ intento.puntuacion }}">
-                    <td><strong>{{ intento.alumno.username }}</strong></td>
-                    <td>{{ intento.test.nombre }}</td>
-                    <td>{% if intento.test.tema %}{{ intento.test.tema.tema_id }}{% else %}-{% endif %}</td>
-                    <td>{{ intento.fecha_fin|date:"d/m/Y H:i" }}</td>
-                    <td>
-                        <span style="font-weight: bold; color: {% if intento.puntuacion >= 70 %}{{ THEME_COLORS.success }}{% elif intento.puntuacion >= 50 %}{{ THEME_COLORS.warning }}{% else %}{{ THEME_COLORS.danger }}{% endif %};">
-                            {{ intento.puntuacion|floatformat:1 }}%
+            <tbody>
+                {% for alumno_data in alumnos_detallados %}
+                <tr style="{% if alumno_data.nota_media < 6 and alumno_data.total_intentos > 0 %}background: #fff5f5;{% elif alumno_data.nota_media >= 8 %}background: #f0fff4;{% endif %}">
+                    <td style="padding: 0.75rem; border-bottom: 1px solid #eee;">
+                        <strong>{{ alumno_data.alumno.username }}</strong>
+                    </td>
+                    <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #eee;">
+                        <span style="font-weight: 500; color: {% if alumno_data.nota_media >= 8 %}#28a745{% elif alumno_data.nota_media >= 6 %}#ffc107{% else %}#dc3545{% endif %};">
+                            {{ alumno_data.nota_media|floatformat:1 }}/10
                         </span>
                     </td>
-                    <td>{{ intento.respuestas_correctas }}/{{ intento.total_preguntas }}</td>
-                    <td>
-                        <a href="{% url 'boards:estadisticas_alumno' intento.alumno.id %}" style="color: {{ THEME_COLORS.primary }}; text-decoration: none; font-weight: 500; font-size: 0.9rem;">
-                            Ver detalles
-                        </a>
+                    <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #eee;">
+                        <div style="background: #e9ecef; border-radius: 10px; height: 8px; margin-bottom: 0.25rem;">
+                            <div style="background: {% if alumno_data.progreso_porcentaje >= 75 %}#28a745{% elif alumno_data.progreso_porcentaje >= 25 %}#ffc107{% else %}#dc3545{% endif %}; height: 100%; border-radius: 10px; width: {{ alumno_data.progreso_porcentaje }}%;"></div>
+                        </div>
+                        <small>{{ alumno_data.progreso_porcentaje|floatformat:0 }}%</small>
+                    </td>
+                    <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #eee;">
+                        {{ alumno_data.total_intentos }}
+                    </td>
+                    <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #eee;">
+                        {% if alumno_data.ultimo_acceso %}
+                            {{ alumno_data.ultimo_acceso|timesince }} ago
+                        {% else %}
+                            <span style="color: #999;">Nunca</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #eee;">
+                        {% if alumno_data.nota_media >= 8 %}
+                            <span style="background: #d4edda; color: #155724; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">🌟 TOP</span>
+                        {% elif alumno_data.nota_media >= 6 %}
+                            <span style="background: #fff3cd; color: #856404; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">✅ OK</span>
+                        {% elif alumno_data.total_intentos > 0 %}
+                            <span style="background: #f8d7da; color: #721c24; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">⚠️ RIESGO</span>
+                        {% else %}
+                            <span style="background: #e2e3e5; color: #6c757d; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">😴 SIN DATOS</span>
+                        {% endif %}
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="7" style="text-align: center; color: {{ THEME_COLORS.text_inactive }}; padding: 2rem;">
-                        No hay intentos registrados aún.
+                    <td colspan="6" style="text-align: center; padding: 2rem; color: #999;">
+                        No hay alumnos registrados
                     </td>
                 </tr>
                 {% endfor %}
@@ -1361,8 +1293,91 @@ function toggleEstadisticas() {
     </div>
 
     <div style="text-align: center; margin-top: 2rem;">
-        <button onclick="toggleEstadisticas()" class="btn-secondary" style="width: auto; padding: 0.6rem 1.5rem;">
-            Ocultar Estadísticas
+        <button onclick="toggleProgresoAlumnos()" class="btn-secondary" style="width: auto; padding: 0.6rem 1.5rem;">
+            Ocultar Progreso de Alumnos
+        </button>
+    </div>
+</div>
+
+<!-- Sección de Progreso por Clase (colapsable) -->
+<div id="progreso-clase" class="card" style="display: none;">
+    <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem;">Progreso por Clase</h3>
+
+    <!-- Resumen general de la clase -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+        <div style="text-align: center; padding: 1.5rem; background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: white; border-radius: 8px;">
+            <div style="font-size: 2rem; font-weight: bold;">{{ total_alumnos }}</div>
+            <div style="font-size: 0.9rem; opacity: 0.9;">Alumnos Totales</div>
+        </div>
+        <div style="text-align: center; padding: 1.5rem; background: linear-gradient(135deg, {% if promedio_general >= 70 %}#28a745{% elif promedio_general >= 50 %}#ffc107{% else %}#dc3545{% endif %} 0%, {% if promedio_general >= 70 %}#155724{% elif promedio_general >= 50 %}#856404{% else %}#721c24{% endif %} 100%); color: white; border-radius: 8px;">
+            <div style="font-size: 2rem; font-weight: bold;">{{ promedio_general|floatformat:1 }}%</div>
+            <div style="font-size: 0.9rem; opacity: 0.9;">Promedio de Clase</div>
+        </div>
+        <div style="text-align: center; padding: 1.5rem; background: linear-gradient(135deg, #17a2b8 0%, #0c5460 100%); color: white; border-radius: 8px;">
+            <div style="font-size: 2rem; font-weight: bold;">{{ alumnos_activos }}</div>
+            <div style="font-size: 0.9rem; opacity: 0.9;">Activos (7 días)</div>
+        </div>
+        <div style="text-align: center; padding: 1.5rem; background: linear-gradient(135deg, #dc3545 0%, #721c24 100%); color: white; border-radius: 8px;">
+            <div style="font-size: 2rem; font-weight: bold;">{{ alumnos_en_riesgo }}</div>
+            <div style="font-size: 0.9rem; opacity: 0.9;">En Riesgo</div>
+        </div>
+    </div>
+
+    <!-- Distribución de rendimiento -->
+    <div style="margin-bottom: 2rem; padding: 1.5rem; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <h4 style="margin-bottom: 1rem; color: {{ THEME_COLORS.primary }};">📊 Distribución de Rendimiento</h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem;">
+            <div style="text-align: center; padding: 1rem; background: #d4edda; border-radius: 6px;">
+                <div style="font-size: 1.5rem; font-weight: bold; color: #155724;">{{ distribucion.excelente }}</div>
+                <div style="font-size: 0.85rem; color: #155724;">Excelente (8-10)</div>
+            </div>
+            <div style="text-align: center; padding: 1rem; background: #fff3cd; border-radius: 6px;">
+                <div style="font-size: 1.5rem; font-weight: bold; color: #856404;">{{ distribucion.bien }}</div>
+                <div style="font-size: 0.85rem; color: #856404;">Bien (6-8)</div>
+            </div>
+            <div style="text-align: center; padding: 1rem; background: #ffeaa7; border-radius: 6px;">
+                <div style="font-size: 1.5rem; font-weight: bold; color: #856404;">{{ distribucion.regular }}</div>
+                <div style="font-size: 0.85rem; color: #856404;">Regular (4-6)</div>
+            </div>
+            <div style="text-align: center; padding: 1rem; background: #f8d7da; border-radius: 6px;">
+                <div style="font-size: 1.5rem; font-weight: bold; color: #721c24;">{{ distribucion.mal }}</div>
+                <div style="font-size: 0.85rem; color: #721c24;">Insuf. (<4)</div>
+            </div>
+            <div style="text-align: center; padding: 1rem; background: #e2e3e5; border-radius: 6px;">
+                <div style="font-size: 1.5rem; font-weight: bold; color: #6c757d;">{{ distribucion.sin_actividad }}</div>
+                <div style="font-size: 0.85rem; color: #6c757d;">Sin Actividad</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Outliers destacados -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
+        <div style="padding: 1rem; background: #d4edda; border-radius: 6px; border-left: 4px solid #28a745;">
+            <h5 style="margin: 0 0 0.5rem 0; color: #155724;">🏆 Mejores Alumnos</h5>
+            {% for alumno in mejores_alumnos|slice:":5" %}
+            <div style="font-size: 0.9rem; color: #155724; margin-bottom: 0.25rem;">
+                {{ forloop.counter }}. {{ alumno.alumno.username }} ({{ alumno.nota_media|floatformat:1 }}/10)
+            </div>
+            {% empty %}
+            <div style="font-size: 0.9rem; color: #155724; font-style: italic;">Sin datos suficientes</div>
+            {% endfor %}
+        </div>
+        
+        <div style="padding: 1rem; background: #f8d7da; border-radius: 6px; border-left: 4px solid #dc3545;">
+            <h5 style="margin: 0 0 0.5rem 0; color: #721c24;">⚠️ Alumnos en Riesgo</h5>
+            {% for alumno in alumnos_riesgo|slice:":5" %}
+            <div style="font-size: 0.9rem; color: #721c24; margin-bottom: 0.25rem;">
+                {{ alumno.alumno.username }} ({{ alumno.nota_media|floatformat:1 }}/10)
+            </div>
+            {% empty %}
+            <div style="font-size: 0.9rem; color: #721c24; font-style: italic;">¡Todos bien!</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 2rem;">
+        <button onclick="toggleProgresoClase()" class="btn-secondary" style="width: auto; padding: 0.6rem 1.5rem;">
+            Ocultar Progreso de Clase
         </button>
     </div>
 </div>

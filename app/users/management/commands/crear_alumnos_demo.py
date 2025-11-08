@@ -88,7 +88,10 @@ class Command(BaseCommand):
                 
                 self.stdout.write(f"  {action}: {user.first_name} {user.last_name} ({username}) - {clase_nombre} - Perfil: {alumno_data['perfil']}")
         
-        # Generar datos simulados de rendimiento (opcional para demo)
+        # Crear tests y temas básicos si no existen
+        self._crear_tests_basicos()
+        
+        # Generar datos simulados de rendimiento con fechas recientes
         self._generar_datos_rendimiento()
         
         # Resumen
@@ -109,8 +112,11 @@ class Command(BaseCommand):
         self.stdout.write(self.style.HTTP_INFO("Contraseña para todos los alumnos: alumno123"))
 
     def _generar_datos_rendimiento(self):
-        """Genera algunos intentos de test simulados para demo (opcional)"""
+        """Genera algunos intentos de test simulados para demo con fechas recientes"""
         from boards.models import Test, IntentTest
+        from django.utils import timezone
+        from django.contrib.auth.models import User
+        import datetime
         
         # Solo si existen tests en el sistema
         tests_disponibles = Test.objects.filter(activo=True, visible_alumnos=True)
@@ -149,52 +155,300 @@ class Command(BaseCommand):
             ("sergio_blanco", "bajo"),
         ]
         
-        self.stdout.write("\nGenerando datos de rendimiento demo...")
+        self.stdout.write("\nGenerando datos de rendimiento demo con actividad reciente...")
         
-        # Tomar solo algunos tests para la demo
-        tests_demo = list(tests_disponibles[:3])  # Primeros 3 tests
+        # Obtener tests visibles para los alumnos
+        tests_tema1 = Test.objects.filter(tema__tema_id='Tema 1 - Conceptos básicos', visible_alumnos=True, activo=True)
+        examenes = Test.objects.filter(tema__tema_id='Exámenes', visible_alumnos=True, disponible_alumno=True, activo=True)
+        todos_tests = list(tests_tema1) + list(examenes)
+        
+        if not todos_tests:
+            self.stdout.write(self.style.WARNING("No hay tests visibles disponibles"))
+            return
+            
+        # Limpiar intentos anteriores del demo
+        IntentTest.objects.filter(alumno__username__in=[u[0] for u in alumnos_con_perfil]).delete()
+        
+        ahora = timezone.now()
         
         for username, perfil in alumnos_con_perfil:
             try:
                 user = User.objects.get(username=username)
                 config = perfiles_rendimiento[perfil]
                 
-                # Determinar cuántos tests completará este alumno
-                num_tests = int(len(tests_demo) * config["completados"])
-                tests_a_completar = random.sample(tests_demo, min(num_tests, len(tests_demo)))
+                # Cada alumno tendrá entre 2 y 5 intentos en la última semana
+                num_intentos = random.randint(2, 5)
+                tests_seleccionados = random.sample(todos_tests, min(num_intentos, len(todos_tests)))
                 
-                for test in tests_a_completar:
+                for i, test in enumerate(tests_seleccionados):
                     # Verificar si ya existe un intento para este test
-                    if IntentTest.objects.filter(alumno=user, test=test, completado=True).exists():
+                    if IntentTest.objects.filter(alumno=user, test=test).exists():
                         continue
-                        
+                    
                     # Generar puntuación según el perfil
                     puntuacion = random.randint(config["min"], config["max"])
-                    total_preguntas = test.preguntas.count() or 10  # Default 10 si no hay preguntas
+                    total_preguntas = max(test.preguntas.count(), 3)  # Mínimo 3 preguntas
                     respuestas_correctas = int((puntuacion / 100) * total_preguntas)
                     
-                    # Crear intento
-                    from django.utils import timezone
-                    import datetime
+                    # Generar fecha en la última semana (más actividad reciente)
+                    dias_atras = random.randint(0, 6)  # Últimos 7 días
+                    horas_atras = random.randint(1, 23)
+                    minutos_atras = random.randint(1, 59)
                     
-                    fecha_inicio = timezone.now() - datetime.timedelta(
-                        days=random.randint(1, 30),
-                        hours=random.randint(1, 23),
-                        minutes=random.randint(1, 59)
+                    fecha_inicio = ahora - datetime.timedelta(
+                        days=dias_atras,
+                        hours=horas_atras,
+                        minutes=minutos_atras
                     )
                     
+                    duracion = random.randint(10, min(test.tiempo_limite, 45))  # Duración realista
+                    fecha_fin = fecha_inicio + datetime.timedelta(minutes=duracion)
+                    
+                    # Crear intento
                     IntentTest.objects.create(
                         alumno=user,
                         test=test,
                         fecha_inicio=fecha_inicio,
-                        fecha_fin=fecha_inicio + datetime.timedelta(minutes=random.randint(15, 45)),
+                        fecha_fin=fecha_fin,
                         completado=True,
                         puntuacion=puntuacion,
                         total_preguntas=total_preguntas,
-                        respuestas_correctas=respuestas_correctas
+                        respuestas_correctas=respuestas_correctas,
+                        es_examen=test.es_aleatorio
                     )
                     
             except User.DoesNotExist:
                 continue
         
+        # Mostrar resumen de actividad generada
+        total_intentos = IntentTest.objects.filter(
+            alumno__username__in=[u[0] for u in alumnos_con_perfil],
+            completado=True
+        ).count()
+        
+        # Intentos en la última semana
+        hace_7_dias = ahora - datetime.timedelta(days=7)
+        intentos_semana = IntentTest.objects.filter(
+            alumno__username__in=[u[0] for u in alumnos_con_perfil],
+            fecha_inicio__gte=hace_7_dias,
+            completado=True
+        ).count()
+        
+        self.stdout.write(f"✓ {total_intentos} intentos generados ({intentos_semana} en la última semana)")
         self.stdout.write("✓ Datos de rendimiento demo generados")
+
+    def _crear_tests_basicos(self):
+        """Crea tests básicos y examenes aleatorios"""
+        from boards.models import Test, Tema, Pregunta
+        from django.utils import timezone
+        from django.contrib.auth.models import User
+        
+        # Limpiar tema duplicado
+        tema_pilas_duplicado = Tema.objects.filter(tema_id='Tema 1 - Pilas').first()
+        if tema_pilas_duplicado:
+            self.stdout.write("🗑️ Eliminando tema duplicado 'Tema 1 - Pilas'...")
+            tema_pilas_duplicado.delete()
+        
+        # Obtener temas principales
+        try:
+            tema1 = Tema.objects.get(tema_id='Tema 1 - Conceptos básicos')
+            tema2 = Tema.objects.get(tema_id='Tema 2 - Pilas y colas')
+            tema3 = Tema.objects.get(tema_id='Tema 3 - Listas')
+        except Tema.DoesNotExist:
+            self.stdout.write(self.style.ERROR("Error: Los temas no existen. Ejecuta primero 'crear_estructura_completa'"))
+            return
+        
+        # Crear tests básicos para temas 2 y 3 si no existen
+        self._crear_tests_tema2(tema2)
+        self._crear_tests_tema3(tema3)
+        
+        # Crear tema especial para exámenes
+        tema_examenes, created = Tema.objects.get_or_create(
+            tema_id='Exámenes',
+            defaults={
+                'visible_alumnos': True,
+                'disponible_alumno': True,
+                'activo': True
+            }
+        )
+        if created:
+            self.stdout.write("✓ Tema 'Exámenes' creado")
+        
+        # Crear exámenes aleatorios
+        self._crear_examenes_aleatorios(tema_examenes)
+        
+        self.stdout.write("✓ Tests básicos y exámenes creados")
+        
+    def _crear_tests_tema2(self, tema):
+        """Crea tests básicos para el Tema 2 - Pilas y colas"""
+        from boards.models import Test, Pregunta
+        
+        tests_info = [
+            {
+                'nombre': 'Test 2.1 - Pilas básicas',
+                'nivel': 'Facil',
+                'tiempo': 15,
+                'preguntas': [
+                    {'enunciado': '¿Qué significa LIFO en el contexto de pilas?', 'dificultad': 'Facil', 'puntuacion': 10},
+                    {'enunciado': '¿Cuál es la operación que añade un elemento a una pila?', 'dificultad': 'Facil', 'puntuacion': 10},
+                ]
+            },
+            {
+                'nombre': 'Test 2.2 - Colas básicas', 
+                'nivel': 'Facil',
+                'tiempo': 15,
+                'preguntas': [
+                    {'enunciado': '¿Qué significa FIFO en el contexto de colas?', 'dificultad': 'Facil', 'puntuacion': 10},
+                    {'enunciado': '¿Cuál es la operación que añade un elemento a una cola?', 'dificultad': 'Facil', 'puntuacion': 10},
+                ]
+            },
+            {
+                'nombre': 'Test 2.3 - Pilas y colas intermedias',
+                'nivel': 'Media', 
+                'tiempo': 20,
+                'preguntas': [
+                    {'enunciado': '¿Cuál es la complejidad temporal de push en una pila?', 'dificultad': 'Media', 'puntuacion': 15},
+                    {'enunciado': '¿Cómo implementar una cola con dos pilas?', 'dificultad': 'Media', 'puntuacion': 15},
+                ]
+            }
+        ]
+        
+        for test_info in tests_info:
+            test, created = Test.objects.get_or_create(
+                nombre=test_info['nombre'],
+                tema=tema,
+                defaults={
+                    'nivel': test_info['nivel'],
+                    'tiempo_limite': test_info['tiempo'],
+                    'visible_alumnos': False,  # No visible hasta completar tema 1
+                    'disponible_alumno': False,
+                    'activo': True
+                }
+            )
+            
+            if created:
+                self.stdout.write(f"  ✓ {test_info['nombre']} creado")
+                # Crear preguntas básicas
+                for i, pregunta_info in enumerate(test_info['preguntas']):
+                    Pregunta.objects.get_or_create(
+                        pregunta_id=f"{test.id}{i+1:03d}",
+                        defaults={
+                            'tema': tema.tema_id,
+                            'enunciado': pregunta_info['enunciado'],
+                            'dificultad': pregunta_info['dificultad'],
+                            'puntuacion': pregunta_info['puntuacion']
+                        }
+                    )
+
+    def _crear_tests_tema3(self, tema):
+        """Crea tests básicos para el Tema 3 - Listas"""
+        from boards.models import Test, Pregunta
+        
+        tests_info = [
+            {
+                'nombre': 'Test 3.1 - Arrays básicos',
+                'nivel': 'Facil',
+                'tiempo': 15, 
+                'preguntas': [
+                    {'enunciado': '¿Qué es un array o arreglo?', 'dificultad': 'Facil', 'puntuacion': 10},
+                    {'enunciado': '¿Cuál es la complejidad de acceso a un elemento en un array?', 'dificultad': 'Facil', 'puntuacion': 10},
+                ]
+            },
+            {
+                'nombre': 'Test 3.2 - Listas enlazadas',
+                'nivel': 'Facil', 
+                'tiempo': 15,
+                'preguntas': [
+                    {'enunciado': '¿Qué es una lista enlazada?', 'dificultad': 'Facil', 'puntuacion': 10},
+                    {'enunciado': '¿Cuál es la ventaja principal de las listas enlazadas sobre los arrays?', 'dificultad': 'Facil', 'puntuacion': 10},
+                ]
+            },
+            {
+                'nombre': 'Test 3.3 - Listas avanzadas',
+                'nivel': 'Media',
+                'tiempo': 20,
+                'preguntas': [
+                    {'enunciado': '¿Qué es una lista doblemente enlazada?', 'dificultad': 'Media', 'puntuacion': 15},
+                    {'enunciado': '¿Cuándo usar arrays vs listas enlazadas?', 'dificultad': 'Media', 'puntuacion': 15},
+                ]
+            }
+        ]
+        
+        for test_info in tests_info:
+            test, created = Test.objects.get_or_create(
+                nombre=test_info['nombre'],
+                tema=tema,
+                defaults={
+                    'nivel': test_info['nivel'],
+                    'tiempo_limite': test_info['tiempo'],
+                    'visible_alumnos': False,  # No visible hasta completar tema anterior
+                    'disponible_alumno': False,
+                    'activo': True
+                }
+            )
+            
+            if created:
+                self.stdout.write(f"  ✓ {test_info['nombre']} creado")
+                # Crear preguntas básicas
+                for i, pregunta_info in enumerate(test_info['preguntas']):
+                    Pregunta.objects.get_or_create(
+                        pregunta_id=f"{test.id}{i+1:03d}",
+                        defaults={
+                            'tema': tema.tema_id,
+                            'enunciado': pregunta_info['enunciado'],
+                            'dificultad': pregunta_info['dificultad'],
+                            'puntuacion': pregunta_info['puntuacion']
+                        }
+                    )
+
+    def _crear_examenes_aleatorios(self, tema_examenes):
+        """Crea exámenes aleatorios con preguntas de múltiples temas"""
+        from boards.models import Test
+        
+        examenes_info = [
+            {
+                'nombre': 'Examen Parcial 1',
+                'descripcion': 'Examen parcial de los 3 primeros temas',
+                'tiempo': 60,
+                'visible': True,
+                'disponible': True,
+                'configuracion': {
+                    'Tema 1 - Conceptos básicos': 6,
+                    'Tema 2 - Pilas y colas': 4,
+                    'Tema 3 - Listas': 4,
+                }
+            },
+            {
+                'nombre': 'Examen Final',
+                'descripcion': 'Examen final de todos los temas',
+                'tiempo': 90,
+                'visible': True,
+                'disponible': False,  # Se desbloqueará después
+                'configuracion': {
+                    'Tema 1 - Conceptos básicos': 8,
+                    'Tema 2 - Pilas y colas': 6,
+                    'Tema 3 - Listas': 6,
+                }
+            }
+        ]
+        
+        for examen_info in examenes_info:
+            examen, created = Test.objects.get_or_create(
+                nombre=examen_info['nombre'],
+                tema=tema_examenes,
+                defaults={
+                    'descripcion': examen_info['descripcion'],
+                    'tiempo_limite': examen_info['tiempo'],
+                    'es_aleatorio': True,
+                    'configuracion_aleatoria': examen_info['configuracion'],
+                    'visible_alumnos': examen_info['visible'],
+                    'disponible_alumno': examen_info['disponible'],
+                    'activo': True,
+                    'nivel': 'Media'  # Nivel intermedio para exámenes
+                }
+            )
+            
+            if created:
+                self.stdout.write(f"  ✓ {examen_info['nombre']} - {'Disponible' if examen_info['disponible'] else 'Bloqueado'}")
+                
+        self.stdout.write("✓ Exámenes aleatorios creados")

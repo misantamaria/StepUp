@@ -59,17 +59,19 @@
                         <th style="padding: 0.75rem;">ID</th>
                         <th style="padding: 0.75rem;">Alumno</th>
                         <th style="padding: 0.75rem;">Grupo</th>
-                        <th style="padding: 0.75rem;">Nota Media</th>
+                        <th style="padding: 0.75rem;">Nota General</th>
+                        <th style="padding: 0.75rem;">Nota Temas</th>
+                        <th style="padding: 0.75rem;">Nota Examenes</th>
                         <th style="padding: 0.75rem;">Tests Realizados</th>
                         <th style="padding: 0.75rem;">Progreso</th>
-                        <th style="padding: 0.75rem;">Último Acceso</th>
+                        <th style="padding: 0.75rem;">Ultimo Acceso</th>
                         <th style="padding: 0.75rem;">Estado</th>
                         <th style="padding: 0.75rem;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for alumno_data in alumnos_detallados %}
-                    <tr style="{% if alumno_data.nota_media < 5 and alumno_data.total_intentos > 0 %}background: #fff5f5;{% elif alumno_data.nota_media >= 8 %}background: #f0fff4;{% endif %} border-bottom: 1px solid #eee;">
+                    <tr style="{% if alumno_data.nota_media_general < 5 and alumno_data.total_intentos > 0 %}background: #fff5f5;{% elif alumno_data.nota_media_general >= 8 %}background: #f0fff4;{% endif %} border-bottom: 1px solid #eee;">
                         <td style="padding: 0.75rem; text-align: center;">
                             <strong style="color: {{ THEME_COLORS.primary }};">{{ alumno_data.alumno.id }}</strong>
                         </td>
@@ -98,11 +100,31 @@
                         </td>
                         <td style="padding: 0.75rem; text-align: center;">
                             {% if alumno_data.total_intentos > 0 %}
-                                <span style="font-weight: 500; color: {% if alumno_data.nota_media >= 8 %}#28a745{% elif alumno_data.nota_media >= 6 %}#ffc107{% else %}#dc3545{% endif %};">
-                                    {{ alumno_data.nota_media|floatformat:1 }}/10
+                                <span style="font-weight: 500; color: {% if alumno_data.nota_media_general >= 8 %}#28a745{% elif alumno_data.nota_media_general >= 6 %}#ffc107{% else %}#dc3545{% endif %};">
+                                    {{ alumno_data.nota_media_general|floatformat:1 }}/10
                                 </span>
                             {% else %}
                                 <span style="color: #999;">Sin datos</span>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 0.75rem; text-align: center;">
+                            {% if alumno_data.intentos_temas > 0 %}
+                                <span style="font-weight: 500; color: {% if alumno_data.nota_media_temas >= 8 %}#28a745{% elif alumno_data.nota_media_temas >= 6 %}#ffc107{% else %}#dc3545{% endif %};">
+                                    {{ alumno_data.nota_media_temas|floatformat:1 }}/10
+                                </span>
+                                <small style="color: #666;">({{ alumno_data.intentos_temas }})</small>
+                            {% else %}
+                                <span style="color: #999;">Sin tests</span>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 0.75rem; text-align: center;">
+                            {% if alumno_data.intentos_examenes > 0 %}
+                                <span style="font-weight: 500; color: {% if alumno_data.nota_media_examenes >= 8 %}#28a745{% elif alumno_data.nota_media_examenes >= 6 %}#ffc107{% else %}#dc3545{% endif %};">
+                                    {{ alumno_data.nota_media_examenes|floatformat:1 }}/10
+                                </span>
+                                <small style="color: #666;">({{ alumno_data.intentos_examenes }})</small>
+                            {% else %}
+                                <span style="color: #999;">Sin examenes</span>
                             {% endif %}
                         </td>
                         <td style="padding: 0.75rem; text-align: center;">
@@ -122,9 +144,9 @@
                             {% endif %}
                         </td>
                         <td style="padding: 0.75rem; text-align: center;">
-                            {% if alumno_data.nota_media >= 8 and alumno_data.total_intentos > 0 %}
-                                <span style="background: #d4edda; color: #155724; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">🌟 TOP</span>
-                            {% elif alumno_data.nota_media >= 6 and alumno_data.total_intentos > 0 %}
+                                                        {% if alumno_data.nota_media_general >= 8 and alumno_data.total_intentos > 0 %}
+                                <span style="color: #28a745; font-weight: 500;">Excelente</span>
+                            {% elif alumno_data.nota_media_general >= 6 and alumno_data.total_intentos > 0 %}
                                 <span style="background: #fff3cd; color: #856404; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">✅ OK</span>
                             {% elif alumno_data.total_intentos > 0 %}
                                 <span style="background: #f8d7da; color: #721c24; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">⚠️ RIESGO</span>

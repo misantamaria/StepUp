@@ -41,7 +41,7 @@ def get_dashboard_data(user, modo_test=False) -> Dict[str, Any]:
     temas_disponibles = []
     
     if not es_profesor:
-        # Para alumnos, aplicar lógica secuencial estricta
+        # Para alumnos, aplicar lógica secuencial estricta (solo mostrar temas desbloqueados)
         for i, tema in enumerate(temas_base):
             if i == 0:
                 # El primer tema siempre está disponible
@@ -63,7 +63,7 @@ def get_dashboard_data(user, modo_test=False) -> Dict[str, Any]:
                     # No agregar más temas después de encontrar uno bloqueado
                     break
     else:
-        # Para profesores, mostrar todos pero indicar cuáles están bloqueados
+        # Para profesores, mostrar TODOS los temas pero marcar cuáles están bloqueados
         temas_disponibles = list(temas_base)
     
     # Organizar tests por tema
@@ -121,25 +121,26 @@ def get_dashboard_data(user, modo_test=False) -> Dict[str, Any]:
         bloqueado_secuencial = False
         motivo_bloqueo = None
         
-        if not es_profesor:
-            # Para alumnos, verificar si este tema debería estar bloqueado por secuencialidad
-            tema_index = list(temas_base).index(tema)
-            if tema_index > 0:
-                # Verificar si el tema anterior está completado
-                tema_anterior = list(temas_base)[tema_index - 1]
-                progreso_anterior, _ = ProgresoTema.objects.get_or_create(
-                    alumno=user,
-                    tema=tema_anterior,
-                    defaults={'total_preguntas': Pregunta.objects.filter(tema=tema_anterior.tema_id).count()}
-                )
-                progreso_anterior.actualizar_progreso()
-                
-                if not progreso_anterior.completado:
-                    bloqueado_secuencial = True
-                    motivo_bloqueo = f"Completa el tema '{tema_anterior.tema_id}' primero"
+        # Verificar bloqueo secuencial tanto para alumnos como profesores (para indicador visual)
+        tema_index = list(temas_base).index(tema)
+        if tema_index > 0:
+            # Verificar si el tema anterior está completado
+            tema_anterior = list(temas_base)[tema_index - 1]
+            progreso_anterior, _ = ProgresoTema.objects.get_or_create(
+                alumno=user,
+                tema=tema_anterior,
+                defaults={'total_preguntas': Pregunta.objects.filter(tema=tema_anterior.tema_id).count()}
+            )
+            progreso_anterior.actualizar_progreso()
+            
+            if not progreso_anterior.completado:
+                bloqueado_secuencial = True
+                motivo_bloqueo = f"Completa el tema '{tema_anterior.tema_id}' primero"
         
-        # En modo test, marcar como bloqueado si el tema NO es visible (aunque sea disponible)
+        # Determinar bloqueo final
         bloqueado = not tiene_tests_visibles or bloqueado_secuencial
+        
+        # En modo test para profesores, marcar como bloqueado si el tema NO es visible (aunque sea disponible)
         if es_profesor and modo_test and not tema_visible:
             bloqueado = True
         

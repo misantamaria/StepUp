@@ -27,44 +27,17 @@ def get_dashboard_data(user, modo_test=False) -> Dict[str, Any]:
             disponible_profesor=True
         ).exclude(tema_id="Exámenes").prefetch_related('tests').order_by('tema_id')
     else:
-        # MODO ALUMNO NORMAL: Solo temas visibles Y disponibles
-        # Esto aplica tanto a alumnos reales como a profesores en modo normal
+        # MODO ALUMNO NORMAL: Mostrar TODOS los temas disponibles (incluidos no visibles)
+        # Esto permite mostrar temas bloqueados secuencialmente con indicadores visuales
         # EXCLUIR siempre el tema "Exámenes" que es solo para modo examen
         temas_base = Tema.objects.filter(
             activo=True, 
-            visible_alumnos=True, 
             disponible_alumno=True
         ).exclude(tema_id="Exámenes").prefetch_related('tests').order_by('tema_id')
     
-    # APLICAR LÓGICA SECUENCIAL: Solo mostrar temas que el usuario puede acceder
-    # El primer tema siempre está disponible, los siguientes solo si el anterior está completado
-    temas_disponibles = []
-    
-    if not es_profesor:
-        # Para alumnos, aplicar lógica secuencial estricta (solo mostrar temas desbloqueados)
-        for i, tema in enumerate(temas_base):
-            if i == 0:
-                # El primer tema siempre está disponible
-                temas_disponibles.append(tema)
-            else:
-                # Verificar si el tema anterior está completado
-                tema_anterior = temas_base[i-1]
-                progreso_anterior, _ = ProgresoTema.objects.get_or_create(
-                    alumno=user,
-                    tema=tema_anterior,
-                    defaults={'total_preguntas': Pregunta.objects.filter(tema=tema_anterior.tema_id).count()}
-                )
-                progreso_anterior.actualizar_progreso()
-                
-                if progreso_anterior.completado:
-                    # Solo agregar si el anterior está completado
-                    temas_disponibles.append(tema)
-                else:
-                    # No agregar más temas después de encontrar uno bloqueado
-                    break
-    else:
-        # Para profesores, mostrar TODOS los temas pero marcar cuáles están bloqueados
-        temas_disponibles = list(temas_base)
+    # APLICAR LÓGICA SECUENCIAL: Mostrar TODOS los temas con indicadores de bloqueo
+    # Tanto alumnos como profesores pueden ver todos los temas para progreso visual
+    temas_disponibles = list(temas_base)
     
     # Organizar tests por tema
     tests_por_tema = []
@@ -139,6 +112,12 @@ def get_dashboard_data(user, modo_test=False) -> Dict[str, Any]:
         
         # Determinar bloqueo final
         bloqueado = not tiene_tests_visibles or bloqueado_secuencial
+        
+        # Para ALUMNOS: Si el tema no es visible (temas 4, 5, 6), bloquearlo
+        if not es_profesor and not tema.visible_alumnos:
+            bloqueado = True
+            if not motivo_bloqueo:
+                motivo_bloqueo = f"Tema no disponible aún"
         
         # En modo test para profesores, marcar como bloqueado si el tema NO es visible (aunque sea disponible)
         if es_profesor and modo_test and not tema_visible:

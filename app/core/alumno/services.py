@@ -21,18 +21,20 @@ def get_dashboard_data(user, modo_test=False) -> Dict[str, Any]:
     if es_profesor and modo_test:
         # MODO TEST: Mostrar TODOS los temas disponibles para profesor (visibles o no)
         # Esto permite ver qué hay en borrador vs qué está publicado
+        # EXCLUIR siempre el tema "Exámenes" que es solo para modo examen
         temas_disponibles = Tema.objects.filter(
             activo=True,
             disponible_profesor=True
-        ).prefetch_related('tests').order_by('tema_id')
+        ).exclude(tema_id="Exámenes").prefetch_related('tests').order_by('tema_id')
     else:
         # MODO ALUMNO NORMAL: Solo temas visibles Y disponibles
         # Esto aplica tanto a alumnos reales como a profesores en modo normal
+        # EXCLUIR siempre el tema "Exámenes" que es solo para modo examen
         temas_disponibles = Tema.objects.filter(
             activo=True, 
             visible_alumnos=True, 
             disponible_alumno=True
-        ).prefetch_related('tests').order_by('tema_id')
+        ).exclude(tema_id="Exámenes").prefetch_related('tests').order_by('tema_id')
     
     # Organizar tests por tema
     tests_por_tema = []

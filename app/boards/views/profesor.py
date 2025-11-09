@@ -658,17 +658,22 @@ def progreso_alumnos(request):
             alumno__in=alumnos_no_staff
         )
         
+        # Mostrar todos los temas, incluso si no hay intentos
         if intentos_tema.exists():
-            nota_media_tema = intentos_tema.aggregate(Avg('puntuacion'))['puntuacion__avg'] or 0
+            nota_media_tema = (intentos_tema.aggregate(Avg('puntuacion'))['puntuacion__avg'] or 0) / 10
             total_intentos_tema = intentos_tema.count()
             alumnos_participantes = intentos_tema.values('alumno').distinct().count()
+        else:
+            nota_media_tema = 0
+            total_intentos_tema = 0
+            alumnos_participantes = 0
             
-            estadisticas_temas.append({
-                'tema': tema.tema_id,
-                'nota_media': nota_media_tema,
-                'total_intentos': total_intentos_tema,
-                'alumnos_participantes': alumnos_participantes,
-            })
+        estadisticas_temas.append({
+            'tema': tema.tema_id,
+            'nota_media': nota_media_tema,
+            'total_intentos': total_intentos_tema,
+            'alumnos_participantes': alumnos_participantes,
+        })
     
     context.update({
         'alumnos_detallados': alumnos_detallados,

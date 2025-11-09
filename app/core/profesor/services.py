@@ -16,7 +16,21 @@ def get_dashboard_data() -> Dict[str, Any]:
     promedio_general = (
         IntentTest.objects.filter(completado=True, alumno__is_staff=False)
         .aggregate(Avg('puntuacion'))['puntuacion__avg'] or 0
-    )
+    )  # Mantener en escala 0-100 para dashboard
+    
+    # Promedio de temas (excluyendo exámenes) 
+    promedio_temas = (
+        IntentTest.objects.filter(completado=True, alumno__is_staff=False)
+        .exclude(test__tema__tema_id='Exámenes')
+        .aggregate(Avg('puntuacion'))['puntuacion__avg'] or 0
+    )  # Mantener en escala 0-100 para dashboard
+    
+    # Promedio de exámenes
+    promedio_examenes = (
+        IntentTest.objects.filter(completado=True, alumno__is_staff=False)
+        .filter(test__tema__tema_id='Exámenes')
+        .aggregate(Avg('puntuacion'))['puntuacion__avg'] or 0
+    )  # Mantener en escala 0-100 para dashboard
 
     # Todos los intentos (ordenados por fecha, solo alumnos no-staff)
     todos_intentos = (
@@ -28,7 +42,11 @@ def get_dashboard_data() -> Dict[str, Any]:
     # Obtener listas únicas para filtros (excluyendo tema especial "Exámenes")
     alumnos_unicos = todos_intentos.values_list('alumno__username', flat=True).distinct().order_by('alumno__username')
     tests_unicos = todos_intentos.values_list('test__nombre', flat=True).distinct().order_by('test__nombre')
-    temas_unicos = Tema.objects.exclude(tema_id='Exámenes').order_by('tema_id')
+    temas_unicos = Tema.objects.filter(
+        visible_alumnos=True, 
+        disponible_alumno=True, 
+        activo=True
+    ).exclude(tema_id='Exámenes').order_by('tema_id')
     
     # Estadísticas agregadas de los intentos
     estadisticas_intentos = todos_intentos.aggregate(
@@ -93,10 +111,32 @@ def get_dashboard_data() -> Dict[str, Any]:
                 intentos_temas = intentos_alumno.exclude(test__tema__tema_id='Exámenes')
                 intentos_examenes = intentos_alumno.filter(test__tema__tema_id='Exámenes')
                 
-                # Calcular notas medias separadas
-                nota_media_temas = intentos_temas.aggregate(Avg('puntuacion'))['puntuacion__avg'] or 0
-                nota_media_examenes = intentos_examenes.aggregate(Avg('puntuacion'))['puntuacion__avg'] or 0
-                nota_media_general = intentos_alumno.aggregate(Avg('puntuacion'))['puntuacion__avg'] or 0
+                # Calcular notas medias separadas SOBRE 10
+                nota_media_temas = (intentos_temas.aggregate(Avg('puntuacion'))['puntuacion__avg'] or 0) / 10
+                nota_media_examenes = (intentos_examenes.aggregate(Avg('puntuacion'))['puntuacion__avg'] or 0) / 10
+                nota_media_general = (intentos_alumno.aggregate(Avg('puntuacion'))['puntuacion__avg'] or 0) / 10
+                
+                # Calcular promedios por cada tema visible/disponible
+                promedios_por_tema = {}
+                temas_disponibles = Tema.objects.filter(
+                    visible_alumnos=True, 
+                    disponible_alumno=True,
+                    activo=True
+                ).exclude(tema_id='Exámenes')
+                
+                for tema in temas_disponibles:
+                    intentos_tema = intentos_alumno.filter(test__tema=tema)
+                    if intentos_tema.exists():
+                        promedio_tema = (intentos_tema.aggregate(Avg('puntuacion'))['puntuacion__avg'] or 0) / 10
+                        promedios_por_tema[tema.tema_id] = {
+                            'promedio': promedio_tema,
+                            'intentos': intentos_tema.count()
+                        }
+                    else:
+                        promedios_por_tema[tema.tema_id] = {
+                            'promedio': 0,
+                            'intentos': 0
+                        }
                 
                 # Calcular progreso como % de tests únicos completados
                 tests_completados = intentos_alumno.values('test').distinct().count()
@@ -106,6 +146,15 @@ def get_dashboard_data() -> Dict[str, Any]:
                 # Último acceso
                 ultimo_intento = intentos_alumno.order_by('-fecha_inicio').first()
                 ultimo_acceso = ultimo_intento.fecha_inicio if ultimo_intento else None
+                
+                # Determinar estado del alumno
+                estado_alumno = "EXCELENTE"
+                if nota_media_general < 5.0:
+                    estado_alumno = "EN RIESGO"
+                elif nota_media_general < 6.0:
+                    estado_alumno = "REGULAR"
+                elif nota_media_general < 8.0:
+                    estado_alumno = "BUENO"
                 
                 # Obtener grupo del alumno (manejo seguro de profile)
                 grupo = 'Sin grupo'
@@ -123,6 +172,8 @@ def get_dashboard_data() -> Dict[str, Any]:
                     'nota_media_general': nota_media_general,
                     'nota_media_temas': nota_media_temas,
                     'nota_media_examenes': nota_media_examenes,
+                    'promedios_por_tema': promedios_por_tema,
+                    'estado_alumno': estado_alumno,
                     'intentos_temas': intentos_temas.count(),
                     'intentos_examenes': intentos_examenes.count(),
                     'progreso_porcentaje': progreso_porcentaje,
@@ -149,6 +200,16 @@ def get_dashboard_data() -> Dict[str, Any]:
     
     # Clasificación de alumnos por rendimiento (incluir alumnos en riesgo por suspenso)
     alumnos_con_notas = [a for a in alumnos_detallados if a['total_intentos'] > 0]
+    
+    # Ordenar por estado: EN RIESGO primero, luego por nota
+    def ordenar_alumnos(alumno):
+        if alumno['estado_alumno'] == 'EN RIESGO':
+            return (0, -alumno['nota_media_general'])  # EN RIESGO primero, luego por nota descendente
+        else:
+            return (1, -alumno['nota_media_general'])  # Otros después, por nota descendente
+    
+    alumnos_con_notas_ordenados = sorted(alumnos_con_notas, key=ordenar_alumnos)
+    
     mejores_alumnos = sorted(alumnos_con_notas, key=lambda x: x['nota_media_general'], reverse=True)
     # En riesgo: nota general < 5 o sin intentos
     alumnos_riesgo = [a for a in alumnos_con_notas if a['nota_media_general'] < 5.0]
@@ -197,6 +258,8 @@ def get_dashboard_data() -> Dict[str, Any]:
         'total_alumnos': total_alumnos,
         'total_intentos': total_intentos,
         'promedio_general': promedio_general,
+        'promedio_temas': promedio_temas,
+        'promedio_examenes': promedio_examenes,
         'todos_intentos': todos_intentos,
         'estadisticas_intentos': estadisticas_intentos,
         'tasa_acierto_global': tasa_acierto_global,
@@ -210,7 +273,7 @@ def get_dashboard_data() -> Dict[str, Any]:
         'tests_unicos': tests_unicos,
         'temas_unicos': temas_unicos,
         # Datos para las nuevas vistas de progreso
-        'alumnos_detallados': alumnos_detallados,
+        'alumnos_detallados': alumnos_con_notas_ordenados,  # Ordenados con EN RIESGO primero
         'alumnos_activos': alumnos_activos,
         'alumnos_en_riesgo': alumnos_en_riesgo_count,
         'distribucion': distribucion,

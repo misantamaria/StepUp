@@ -195,13 +195,25 @@ function toggleProgresoClase() {
             <div style="font-size: 2.5rem; font-weight: bold;">{{ total_alumnos }}</div>
             <div>Alumnos Activos</div>
         </div>
-        <div style="background: linear-gradient(135deg, {{ THEME_COLORS.primary_light }} 0%, #00a8e8 100%); color: white; padding: 1.5rem; border-radius: 8px;">
-            <div style="font-size: 2.5rem; font-weight: bold;">{{ total_intentos }}</div>
-            <div>Tests Realizados</div>
-        </div>
-        <div style="background: linear-gradient(135deg, {{ THEME_COLORS.success }} 0%, #20c997 100%); color: white; padding: 1.5rem; border-radius: 8px;">
+        <div style="background: linear-gradient(135deg, {% if promedio_general >= 80 %}#28a745{% elif promedio_general >= 60 %}#ffc107{% else %}#dc3545{% endif %} 0%, {% if promedio_general >= 80 %}#155724{% elif promedio_general >= 60 %}#856404{% else %}#721c24{% endif %} 100%); color: white; padding: 1.5rem; border-radius: 8px;">
             <div style="font-size: 2.5rem; font-weight: bold;">{{ promedio_general|floatformat:1 }}%</div>
             <div>Promedio General</div>
+        </div>
+        <div style="background: linear-gradient(135deg, {% if promedio_temas >= 80 %}#28a745{% elif promedio_temas >= 60 %}#ffc107{% else %}#dc3545{% endif %} 0%, {% if promedio_temas >= 80 %}#155724{% elif promedio_temas >= 60 %}#856404{% else %}#721c24{% endif %} 100%); color: white; padding: 1.5rem; border-radius: 8px;">
+            <div style="font-size: 2.5rem; font-weight: bold;">{{ promedio_temas|floatformat:1 }}%</div>
+            <div>Promedio Temas</div>
+        </div>
+        <div style="background: linear-gradient(135deg, {% if promedio_examenes >= 80 %}#28a745{% elif promedio_examenes >= 60 %}#ffc107{% else %}#dc3545{% endif %} 0%, {% if promedio_examenes >= 80 %}#155724{% elif promedio_examenes >= 60 %}#856404{% else %}#721c24{% endif %} 100%); color: white; padding: 1.5rem; border-radius: 8px;">
+            <div style="font-size: 2.5rem; font-weight: bold;">{{ promedio_examenes|floatformat:1 }}%</div>
+            <div>Promedio Exámenes</div>
+        </div>
+        <div style="background: linear-gradient(135deg, {{ THEME_COLORS.primary_light }} 0%, #00a8e8 100%); color: white; padding: 1.5rem; border-radius: 8px;">
+            <div style="font-size: 2.5rem; font-weight: bold;">{{ alumnos_activos|default:0 }}</div>
+            <div>Activos (7 días)</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #dc3545 0%, #721c24 100%); color: white; padding: 1.5rem; border-radius: 8px;">
+            <div style="font-size: 2.5rem; font-weight: bold;">{{ alumnos_en_riesgo|default:0 }}</div>
+            <div>En Riesgo</div>
         </div>
     </div>
 

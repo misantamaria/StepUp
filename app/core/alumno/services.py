@@ -22,7 +22,7 @@ def get_dashboard_data(user, modo_test=False) -> Dict[str, Any]:
         # MODO TEST: Mostrar TODOS los temas disponibles para profesor (visibles o no)
         # Esto permite ver qué hay en borrador vs qué está publicado
         # EXCLUIR siempre el tema "Exámenes" que es solo para modo examen
-        temas_disponibles = Tema.objects.filter(
+        temas_base = Tema.objects.filter(
             activo=True,
             disponible_profesor=True
         ).exclude(tema_id="Exámenes").prefetch_related('tests').order_by('tema_id')
@@ -30,11 +30,41 @@ def get_dashboard_data(user, modo_test=False) -> Dict[str, Any]:
         # MODO ALUMNO NORMAL: Solo temas visibles Y disponibles
         # Esto aplica tanto a alumnos reales como a profesores en modo normal
         # EXCLUIR siempre el tema "Exámenes" que es solo para modo examen
-        temas_disponibles = Tema.objects.filter(
+        temas_base = Tema.objects.filter(
             activo=True, 
             visible_alumnos=True, 
             disponible_alumno=True
         ).exclude(tema_id="Exámenes").prefetch_related('tests').order_by('tema_id')
+    
+    # APLICAR LÓGICA SECUENCIAL: Solo mostrar temas que el usuario puede acceder
+    # El primer tema siempre está disponible, los siguientes solo si el anterior está completado
+    temas_disponibles = []
+    
+    if not es_profesor:
+        # Para alumnos, aplicar lógica secuencial estricta
+        for i, tema in enumerate(temas_base):
+            if i == 0:
+                # El primer tema siempre está disponible
+                temas_disponibles.append(tema)
+            else:
+                # Verificar si el tema anterior está completado
+                tema_anterior = temas_base[i-1]
+                progreso_anterior, _ = ProgresoTema.objects.get_or_create(
+                    alumno=user,
+                    tema=tema_anterior,
+                    defaults={'total_preguntas': Pregunta.objects.filter(tema=tema_anterior.tema_id).count()}
+                )
+                progreso_anterior.actualizar_progreso()
+                
+                if progreso_anterior.completado:
+                    # Solo agregar si el anterior está completado
+                    temas_disponibles.append(tema)
+                else:
+                    # No agregar más temas después de encontrar uno bloqueado
+                    break
+    else:
+        # Para profesores, mostrar todos pero indicar cuáles están bloqueados
+        temas_disponibles = list(temas_base)
     
     # Organizar tests por tema
     tests_por_tema = []
@@ -87,8 +117,29 @@ def get_dashboard_data(user, modo_test=False) -> Dict[str, Any]:
         
         tiene_tests_visibles = len(tests_disponibles) > 0
         
+        # Determinar si el tema está bloqueado secuencialmente
+        bloqueado_secuencial = False
+        motivo_bloqueo = None
+        
+        if not es_profesor:
+            # Para alumnos, verificar si este tema debería estar bloqueado por secuencialidad
+            tema_index = list(temas_base).index(tema)
+            if tema_index > 0:
+                # Verificar si el tema anterior está completado
+                tema_anterior = list(temas_base)[tema_index - 1]
+                progreso_anterior, _ = ProgresoTema.objects.get_or_create(
+                    alumno=user,
+                    tema=tema_anterior,
+                    defaults={'total_preguntas': Pregunta.objects.filter(tema=tema_anterior.tema_id).count()}
+                )
+                progreso_anterior.actualizar_progreso()
+                
+                if not progreso_anterior.completado:
+                    bloqueado_secuencial = True
+                    motivo_bloqueo = f"Completa el tema '{tema_anterior.tema_id}' primero"
+        
         # En modo test, marcar como bloqueado si el tema NO es visible (aunque sea disponible)
-        bloqueado = not tiene_tests_visibles
+        bloqueado = not tiene_tests_visibles or bloqueado_secuencial
         if es_profesor and modo_test and not tema_visible:
             bloqueado = True
         
@@ -99,6 +150,8 @@ def get_dashboard_data(user, modo_test=False) -> Dict[str, Any]:
             'tests_por_nivel': tests_por_nivel,
             'tiene_tests_visibles': tiene_tests_visibles,
             'bloqueado': bloqueado,
+            'bloqueado_secuencial': bloqueado_secuencial,
+            'motivo_bloqueo': motivo_bloqueo,
             'tema_visible': tema_visible,  # Nuevo: indica si el tema está visible o solo disponible
         })
     

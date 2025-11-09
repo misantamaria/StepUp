@@ -108,16 +108,17 @@ def get_dashboard_data(user, modo_test=False) -> Dict[str, Any]:
             
             if not progreso_anterior.completado:
                 bloqueado_secuencial = True
-                motivo_bloqueo = f"Completa el tema '{tema_anterior.tema_id}' primero"
+                # Solo asignar motivo secuencial si el tema ES visible para alumnos
+                if tema.visible_alumnos:
+                    motivo_bloqueo = f"Completa el tema '{tema_anterior.tema_id}' primero"
         
         # Determinar bloqueo final
         bloqueado = not tiene_tests_visibles or bloqueado_secuencial
         
-        # Para ALUMNOS: Si el tema no es visible (temas 4, 5, 6), bloquearlo
+        # Para ALUMNOS: Si el tema no es visible (temas 4, 5, 6), usar mensaje docente
         if not es_profesor and not tema.visible_alumnos:
             bloqueado = True
-            if not motivo_bloqueo:
-                motivo_bloqueo = f"Tema no disponible aún"
+            motivo_bloqueo = "Próximamente disponible"
         
         # En modo test para profesores, marcar como bloqueado si el tema NO es visible (aunque sea disponible)
         if es_profesor and modo_test and not tema_visible:

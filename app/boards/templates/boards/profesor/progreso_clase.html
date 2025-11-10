@@ -130,7 +130,7 @@
                         </div>
                     {% endif %}
                 </div>
-                <span style="font-weight: bold; color: #28a745;">{{ alumno.nota_media|floatformat:1 }}/10</span>
+                <span style="font-weight: bold; color: #28a745;">{{ alumno.nota_media_general|floatformat:1 }}/10</span>
             </div>
             {% empty %}
             <div style="color: #999; font-style: italic; text-align: center; padding: 1rem;">
@@ -159,7 +159,7 @@
                         </div>
                     {% endif %}
                 </div>
-                <span style="font-weight: bold; color: #dc3545;">{{ alumno.nota_media|floatformat:1 }}/10</span>
+                <span style="font-weight: bold; color: #dc3545;">{{ alumno.nota_media_general|floatformat:1 }}/10</span>
             </div>
             {% empty %}
             <div style="color: #28a745; font-style: italic; text-align: center; padding: 1rem;">

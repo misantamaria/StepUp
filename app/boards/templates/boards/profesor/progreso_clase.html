@@ -209,14 +209,14 @@
                         </td>
                         <td style="padding: 0.75rem; text-align: center;">
                             <span style="font-weight: bold; color: {% if tema_stats.nota_media >= 7 %}#28a745{% elif tema_stats.nota_media >= 5 %}#ffc107{% else %}#dc3545{% endif %};">
-                                {{ tema_stats.nota_media|floatformat:1 }}%
+                                {{ tema_stats.nota_media|floatformat:1 }}
                             </span>
                         </td>
                         <td style="padding: 0.75rem; text-align: center;">
-                            <span style="color: #28a745; font-weight: 500;">{{ tema_stats.mejor_puntuacion|floatformat:1 }}%</span>
+                            <span style="color: #28a745; font-weight: 500;">{{ tema_stats.mejor_puntuacion|floatformat:1 }}</span>
                         </td>
                         <td style="padding: 0.75rem; text-align: center;">
-                            <span style="color: #dc3545; font-weight: 500;">{{ tema_stats.peor_puntuacion|floatformat:1 }}%</span>
+                            <span style="color: #dc3545; font-weight: 500;">{{ tema_stats.peor_puntuacion|floatformat:1 }}</span>
                         </td>
                         <td style="padding: 0.75rem; text-align: center;">
                             <strong>{{ tema_stats.total_intentos }}</strong>

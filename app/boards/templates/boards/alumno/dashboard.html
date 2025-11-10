@@ -34,15 +34,15 @@
     {% if tests_por_tema %}
         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; margin-top: 1.5rem;">
             {% for item in tests_por_tema %}
-            <a href="{% if (item.tiene_tests_visibles and item.tema_visible) or (modo_test and not item.tiene_tests_visibles) %}{% url 'boards:detalle_tema' item.tema.tema_id %}{% else %}#{% endif %}" 
-               style="text-decoration: none; display: block; {% if not ((item.tiene_tests_visibles and item.tema_visible) or (modo_test and not item.tiene_tests_visibles)) %}cursor: not-allowed; opacity: 0.6;{% endif %}">>
-                <div style="background: {% if item.bloqueado and not (modo_test and not item.tiene_tests_visibles) %}linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%){% else %}linear-gradient(135deg, {{ THEME_COLORS.primary }} 0%, {{ THEME_COLORS.bg_medium }} 100%){% endif %}; 
+            <a href="{% if item.tiene_tests_visibles and item.tema_visible %}{% url 'boards:detalle_tema' item.tema.tema_id %}{% else %}#{% endif %}" 
+               style="text-decoration: none; display: block; {% if not item.tiene_tests_visibles or not item.tema_visible %}cursor: not-allowed; opacity: 0.6;{% endif %}">
+                <div style="background: {% if item.bloqueado or not item.tema_visible %}linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%){% else %}linear-gradient(135deg, {{ THEME_COLORS.primary }} 0%, {{ THEME_COLORS.bg_medium }} 100%){% endif %}; 
                             color: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); 
                             transition: transform 0.2s, box-shadow 0.2s; 
-                            {% if (item.tiene_tests_visibles and item.tema_visible) or (modo_test and not item.tiene_tests_visibles) %}cursor: pointer;{% endif %}
-                            position: relative;">>
+                            {% if item.tiene_tests_visibles and item.tema_visible %}cursor: pointer;{% endif %}
+                            position: relative;">
                     
-                    {% if item.bloqueado and not (modo_test and not item.tiene_tests_visibles) %}
+                    {% if item.bloqueado or not item.tema_visible %}
                         <div style="position: absolute; top: 1rem; right: 1rem; font-size: 2rem;">🔒</div>
                     {% endif %}
                     
@@ -51,10 +51,6 @@
                     {% if modo_test and not item.tema_visible %}
                         <p style="margin: 0.5rem 0; opacity: 0.9; font-size: 0.85rem; background: rgba(255,255,255,0.2); padding: 0.25rem 0.5rem; border-radius: 4px; display: inline-block;">
                             📝 Borrador - No visible para alumnos
-                        </p>
-                    {% elif modo_test and not item.tiene_tests_visibles %}
-                        <p style="margin: 0.5rem 0; opacity: 0.9; font-size: 0.85rem; background: rgba(255,255,255,0.2); padding: 0.25rem 0.5rem; border-radius: 4px; display: inline-block;">
-                            ⚙️ Sin tests - Hacer clic para configurar
                         </p>
                     {% elif item.bloqueado_secuencial and item.motivo_bloqueo %}
                         <p style="margin: 0.5rem 0; opacity: 0.9; font-size: 0.85rem; background: rgba(255,255,255,0.2); padding: 0.25rem 0.5rem; border-radius: 4px; display: inline-block;">

@@ -46,7 +46,6 @@
             </h3>
             {% if estado_alumno == 'top' %}
                 <div style="text-align: center; padding: 1rem; background: #d4edda; border-radius: 8px; color: #155724;">
-                    <div style="font-size: 2rem;">🌟</div>
                     <strong>ALUMNO TOP</strong>
                     <div style="font-size: 0.9rem; margin-top: 0.5rem;">
                         Rendimiento excelente<br>
@@ -83,17 +82,17 @@
 
     <!-- Navegación por tabs -->
     <div class="tab-container">
-        <div class="tab-buttons">
-            <button class="tab-btn active" onclick="switchTab('estadisticas')">📊 Estadísticas Generales</button>
-            <button class="tab-btn" onclick="switchTab('temas')">Por Temas</button>
-            <button class="tab-btn" onclick="switchTab('timeline')">📈 Timeline de Actividad</button>
-            <button class="tab-btn" onclick="switchTab('comparacion')">👥 Comparación Grupal</button>
+                <div class="tab-buttons" style="display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 2px solid #e0e0e0;">
+            <button class="tab-btn active" onclick="switchTab('estadisticas')">Estadísticas Generales</button>
+            <button class="tab-btn" onclick="switchTab('detalle')">Detalle por Test</button>
+            <button class="tab-btn" onclick="switchTab('timeline')">Timeline de Actividad</button>
+            <button class="tab-btn" onclick="switchTab('comparacion')">Comparación Grupal</button>
         </div>
 
         <!-- Tab: Estadísticas Generales -->
         <div id="tab-estadisticas" class="tab-content active">
             <div class="card">
-                <h3 style="color: {{ THEME_COLORS.primary }};">📊 Resumen de Rendimiento</h3>
+                <h3 style="color: {{ THEME_COLORS.primary }};">Resumen de Rendimiento</h3>
                 
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
                     <div style="text-align: center; padding: 1rem; background: #f8f9fa; border-radius: 6px;">

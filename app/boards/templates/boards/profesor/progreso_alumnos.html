@@ -56,7 +56,7 @@
 
 <div class="container">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-        <h1 style="color: {{ THEME_COLORS.primary }}; margin: 0;">👥 {{ page_title }}</h1>
+        <h1 style="color: {{ THEME_COLORS.primary }}; margin: 0;">{{ page_title }}</h1>
         <a href="{% url 'boards:dashboard_profesor' %}" style="color: {{ THEME_COLORS.primary }}; text-decoration: none; font-weight: 500;">
             ← Volver al Dashboard
         </a>
@@ -261,7 +261,7 @@
                             {% if alumno_data.estado_alumno == 'EN RIESGO' %}
                                 <span style="background: #f8d7da; color: #721c24; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem; font-weight: 500;">⚠️ EN RIESGO</span>
                             {% elif alumno_data.estado_alumno == 'EXCELENTE' %}
-                                <span style="color: #28a745; font-weight: 500;">⭐ Excelente</span>
+                                <span style="color: #28a745; font-weight: 500;">Excelente</span>
                             {% elif alumno_data.estado_alumno == 'BUENO' %}
                                 <span style="background: #fff3cd; color: #856404; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">✅ Bueno</span>
                             {% elif alumno_data.estado_alumno == 'REGULAR' %}

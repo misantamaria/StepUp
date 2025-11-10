@@ -506,7 +506,7 @@ function toggleProgresoClase() {
                     {% empty %}
                     <tr>
                         <td colspan="10" style="text-align: center; padding: 2rem; color: {{ THEME_COLORS.text_inactive }};">
-                            No hay tests registrados. Crea el primer test usando el botón "➕"
+                            No hay tests registrados. Crea el primer test usando el botón
                         </td>
                     </tr>
                     {% endfor %}
@@ -633,7 +633,7 @@ function toggleProgresoClase() {
                 {% empty %}
                 <tr>
                     <td colspan="5" style="text-align: center; padding: 2rem; color: {{ THEME_COLORS.text_inactive }};">
-                        No hay preguntas registradas. Crea la primera pregunta usando el botón "➕"
+                        No hay preguntas registradas. Crea la primera pregunta usando el botón
                     </td>
                 </tr>
                 {% endfor %}
@@ -811,7 +811,7 @@ function toggleProgresoClase() {
                 ✕
             </button>
         </div>
-        <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem; font-size: 1.3rem; padding-right: 4rem;">➕ Crear Nuevo Tema</h3>
+        <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem; font-size: 1.3rem; padding-right: 4rem;">Crear Nuevo Tema</h3>
         
         <form id="formCrearTema" onsubmit="crearTema(event)">
             <div style="margin-bottom: 1.5rem;">
@@ -824,7 +824,7 @@ function toggleProgresoClase() {
 
             <div style="background: #e7f3ff; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border-left: 4px solid {{ THEME_COLORS.primary }};">
                 <p style="margin: 0; color: #004085; font-size: 0.9rem;">
-                    <strong>ℹ️ Nota:</strong> El tema se creará inicialmente invisible para alumnos. Podrás activarlo después usando los checkboxes de visibilidad.
+                    <strong>Nota:</strong> El tema se creará inicialmente invisible para alumnos. Podrás activarlo después usando los checkboxes de visibilidad.
                 </p>
             </div>
 
@@ -843,7 +843,7 @@ function toggleProgresoClase() {
 <!-- Modal para crear nuevo TEST -->
 <div id="modalCrearTest" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
     <div style="background: white; border-radius: 12px; padding: 2rem; max-width: 700px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
-        <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem; font-size: 1.3rem;">➕ Crear Nuevo Test</h3>
+        <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem; font-size: 1.3rem;">Crear Nuevo Test</h3>
         
         <form id="formCrearTest" onsubmit="crearTest(event)">
             <div style="margin-bottom: 1.5rem;">
@@ -894,13 +894,13 @@ function toggleProgresoClase() {
                 <label style="display: flex; align-items: center; cursor: pointer; font-weight: 500;">
                     <input type="checkbox" id="inputTestAleatorio" onchange="toggleOpcionesAleatorias()" 
                            style="width: 18px; height: 18px; cursor: pointer; margin-right: 0.75rem; accent-color: #ffc107;">
-                    <span>🎲 Examen Aleatorio (selecciona preguntas al azar)</span>
+                    <span>Examen Aleatorio (selecciona preguntas al azar)</span>
                 </label>
             </div>
 
             <!-- Opciones de examen aleatorio (ocultas por defecto) -->
             <div id="opcionesAleatorias" style="display: none; margin-bottom: 1.5rem; padding: 1.5rem; background: #f8f9fa; border: 2px solid #ffc107; border-radius: 8px;">
-                <h4 style="margin: 0 0 1rem 0; color: #856404; font-size: 1rem;">⚙️ Configuración del Examen Aleatorio</h4>
+                <h4 style="margin: 0 0 1rem 0; color: #856404; font-size: 1rem;">Configuración del Examen Aleatorio</h4>
                 
                 <div style="margin-bottom: 1rem;">
                     <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">
@@ -932,14 +932,14 @@ function toggleProgresoClase() {
 
                 <div style="margin-top: 1rem; padding: 0.75rem; background: #e7f3ff; border-left: 3px solid #0d6efd; border-radius: 4px;">
                     <p style="margin: 0; font-size: 0.85rem; color: #004085;">
-                        <strong>💡 Nota:</strong> Cada alumno recibirá un conjunto diferente de preguntas seleccionadas aleatoriamente de los temas elegidos.
+                        <strong>Nota:</strong> Cada alumno recibirá un conjunto diferente de preguntas seleccionadas aleatoriamente de los temas elegidos.
                     </p>
                 </div>
             </div>
 
             <div style="background: #e7f3ff; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border-left: 4px solid {{ THEME_COLORS.primary }};">
                 <p style="margin: 0; color: #004085; font-size: 0.9rem;">
-                    <strong>ℹ️ Nota:</strong> El test se creará inicialmente invisible para alumnos. Después de crearlo, podrás añadir preguntas y activarlo.
+                    <strong>Nota:</strong> El test se creará inicialmente invisible para alumnos. Después de crearlo, podrás añadir preguntas y activarlo.
                 </p>
             </div>
 
@@ -967,7 +967,7 @@ function toggleProgresoClase() {
                 ✕
             </button>
         </div>
-        <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem; font-size: 1.3rem; padding-right: 4rem;">➕ Crear Nueva Pregunta</h3>
+        <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem; font-size: 1.3rem; padding-right: 4rem;">Crear Nueva Pregunta</h3>
         
         <form id="formCrearPregunta" onsubmit="crearPregunta(event)">
             <div style="margin-bottom: 1.5rem;">
@@ -1144,7 +1144,7 @@ function toggleProgresoClase() {
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
                     <h4 style="margin: 0; color: {{ THEME_COLORS.primary }};">Preguntas del test:</h4>
                     <button type="button" onclick="anadirPreguntaATest()" style="background: {{ THEME_COLORS.success }}; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">
-                        ➕ Añadir Pregunta
+                        Añadir Pregunta
                     </button>
                 </div>
                 <div id="editTestPreguntasList" style="max-height: 300px; overflow-y: auto;">
@@ -1283,7 +1283,7 @@ function toggleProgresoClase() {
                     </td>
                     <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #eee;">
                         {% if alumno_data.nota_media >= 8 %}
-                            <span style="background: #d4edda; color: #155724; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">🌟 TOP</span>
+                            <span style="background: #d4edda; color: #155724; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">TOP</span>
                         {% elif alumno_data.nota_media >= 6 %}
                             <span style="background: #fff3cd; color: #856404; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">✅ OK</span>
                         {% elif alumno_data.total_intentos > 0 %}
@@ -1337,7 +1337,7 @@ function toggleProgresoClase() {
 
     <!-- Distribución de rendimiento -->
     <div style="margin-bottom: 2rem; padding: 1.5rem; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-        <h4 style="margin-bottom: 1rem; color: {{ THEME_COLORS.primary }};">📊 Distribución de Rendimiento</h4>
+        <h4 style="margin-bottom: 1rem; color: {{ THEME_COLORS.primary }};">Distribución de Rendimiento</h4>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem;">
             <div style="text-align: center; padding: 1rem; background: #d4edda; border-radius: 6px;">
                 <div style="font-size: 1.5rem; font-weight: bold; color: #155724;">{{ distribucion.excelente }}</div>
@@ -2287,9 +2287,9 @@ async function crearTest(event) {
             .map(cb => cb.value);
         
         if (temasSeleccionados.length === 0) {
-            alert('⚠️ Debes seleccionar al menos un tema para el examen aleatorio');
+            alert('Debes seleccionar al menos un tema para el examen aleatorio');
             btnCrear.disabled = false;
-            btnCrear.textContent = '➕ Crear Test';
+            btnCrear.textContent = 'Crear Test';
             return;
         }
         

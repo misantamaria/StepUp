@@ -94,9 +94,10 @@ def get_dashboard_data(user, modo_test=False) -> Dict[str, Any]:
         bloqueado_secuencial = False
         motivo_bloqueo = None
         
-        # Verificar bloqueo secuencial tanto para alumnos como profesores (para indicador visual)
+        # Verificar bloqueo secuencial - SOLO para alumnos
+        # Los profesores en modo test pueden acceder a cualquier tema
         tema_index = list(temas_base).index(tema)
-        if tema_index > 0:
+        if tema_index > 0 and not (es_profesor and modo_test):
             # Verificar si el tema anterior está completado
             tema_anterior = list(temas_base)[tema_index - 1]
             progreso_anterior, _ = ProgresoTema.objects.get_or_create(
@@ -119,6 +120,11 @@ def get_dashboard_data(user, modo_test=False) -> Dict[str, Any]:
         if not es_profesor and not tema.visible_alumnos:
             bloqueado = True
             motivo_bloqueo = "Próximamente disponible"
+        
+        # Para PROFESORES en modo test: Permitir acceso a todos los temas visibles
+        if es_profesor and modo_test and tema_visible:
+            bloqueado = False
+            motivo_bloqueo = None
         
         # En modo test para profesores, marcar como bloqueado si el tema NO es visible (aunque sea disponible)
         if es_profesor and modo_test and not tema_visible:

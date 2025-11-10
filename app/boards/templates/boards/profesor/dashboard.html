@@ -196,15 +196,15 @@ function toggleProgresoClase() {
             <div>Alumnos Activos</div>
         </div>
         <div style="background: linear-gradient(135deg, {% if promedio_general >= 80 %}#28a745{% elif promedio_general >= 60 %}#ffc107{% else %}#dc3545{% endif %} 0%, {% if promedio_general >= 80 %}#155724{% elif promedio_general >= 60 %}#856404{% else %}#721c24{% endif %} 100%); color: white; padding: 1.5rem; border-radius: 8px;">
-            <div style="font-size: 2.5rem; font-weight: bold;">{{ promedio_general|floatformat:1 }}%</div>
+            <div style="font-size: 2.5rem; font-weight: bold;">{{ promedio_general|floatformat:1 }}</div>
             <div>Promedio General</div>
         </div>
         <div style="background: linear-gradient(135deg, {% if promedio_temas >= 80 %}#28a745{% elif promedio_temas >= 60 %}#ffc107{% else %}#dc3545{% endif %} 0%, {% if promedio_temas >= 80 %}#155724{% elif promedio_temas >= 60 %}#856404{% else %}#721c24{% endif %} 100%); color: white; padding: 1.5rem; border-radius: 8px;">
-            <div style="font-size: 2.5rem; font-weight: bold;">{{ promedio_temas|floatformat:1 }}%</div>
+            <div style="font-size: 2.5rem; font-weight: bold;">{{ promedio_temas|floatformat:1 }}</div>
             <div>Promedio Temas</div>
         </div>
         <div style="background: linear-gradient(135deg, {% if promedio_examenes >= 80 %}#28a745{% elif promedio_examenes >= 60 %}#ffc107{% else %}#dc3545{% endif %} 0%, {% if promedio_examenes >= 80 %}#155724{% elif promedio_examenes >= 60 %}#856404{% else %}#721c24{% endif %} 100%); color: white; padding: 1.5rem; border-radius: 8px;">
-            <div style="font-size: 2.5rem; font-weight: bold;">{{ promedio_examenes|floatformat:1 }}%</div>
+            <div style="font-size: 2.5rem; font-weight: bold;">{{ promedio_examenes|floatformat:1 }}</div>
             <div>Promedio Exámenes</div>
         </div>
         <div style="background: linear-gradient(135deg, {{ THEME_COLORS.primary_light }} 0%, #00a8e8 100%); color: white; padding: 1.5rem; border-radius: 8px;">
@@ -894,13 +894,13 @@ function toggleProgresoClase() {
                 <label style="display: flex; align-items: center; cursor: pointer; font-weight: 500;">
                     <input type="checkbox" id="inputTestAleatorio" onchange="toggleOpcionesAleatorias()" 
                            style="width: 18px; height: 18px; cursor: pointer; margin-right: 0.75rem; accent-color: #ffc107;">
-                    <span>Examen Aleatorio (selecciona preguntas al azar)</span>
+                    <span>🎲 Examen Aleatorio (selecciona preguntas al azar)</span>
                 </label>
             </div>
 
             <!-- Opciones de examen aleatorio (ocultas por defecto) -->
             <div id="opcionesAleatorias" style="display: none; margin-bottom: 1.5rem; padding: 1.5rem; background: #f8f9fa; border: 2px solid #ffc107; border-radius: 8px;">
-                <h4 style="margin: 0 0 1rem 0; color: #856404; font-size: 1rem;">Configuración del Examen Aleatorio</h4>
+                <h4 style="margin: 0 0 1rem 0; color: #856404; font-size: 1rem;">⚙️ Configuración del Examen Aleatorio</h4>
                 
                 <div style="margin-bottom: 1rem;">
                     <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">
@@ -932,7 +932,7 @@ function toggleProgresoClase() {
 
                 <div style="margin-top: 1rem; padding: 0.75rem; background: #e7f3ff; border-left: 3px solid #0d6efd; border-radius: 4px;">
                     <p style="margin: 0; font-size: 0.85rem; color: #004085;">
-                        <strong>Nota:</strong> Cada alumno recibirá un conjunto diferente de preguntas seleccionadas aleatoriamente de los temas elegidos.
+                        <strong>💡 Nota:</strong> Cada alumno recibirá un conjunto diferente de preguntas seleccionadas aleatoriamente de los temas elegidos.
                     </p>
                 </div>
             </div>
@@ -1337,7 +1337,7 @@ function toggleProgresoClase() {
 
     <!-- Distribución de rendimiento -->
     <div style="margin-bottom: 2rem; padding: 1.5rem; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-        <h4 style="margin-bottom: 1rem; color: {{ THEME_COLORS.primary }};">Distribución de Rendimiento</h4>
+        <h4 style="margin-bottom: 1rem; color: {{ THEME_COLORS.primary }};">📊 Distribución de Rendimiento</h4>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem;">
             <div style="text-align: center; padding: 1rem; background: #d4edda; border-radius: 6px;">
                 <div style="font-size: 1.5rem; font-weight: bold; color: #155724;">{{ distribucion.excelente }}</div>

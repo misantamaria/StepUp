@@ -208,11 +208,6 @@
                             </span>
                         </td>
                         <td style="padding: 0.75rem; text-align: center;">
-                            <span style="background: #e8f4f8; color: #0056b3; padding: 0.2rem 0.5rem; border-radius: 12px; font-size: 0.8rem; font-weight: 500;">
-                                {{ alumno_data.grupo|default:"Sin grupo" }}
-                            </span>
-                        </td>
-                        <td style="padding: 0.75rem; text-align: center;">
                             {% if alumno_data.total_intentos > 0 %}
                                 <span style="font-weight: 500; color: {% if alumno_data.nota_media_general >= 8 %}#28a745{% elif alumno_data.nota_media_general >= 6 %}#ffc107{% else %}#dc3545{% endif %};">
                                     {{ alumno_data.nota_media_general|floatformat:1 }}/10

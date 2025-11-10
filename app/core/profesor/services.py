@@ -112,9 +112,9 @@ def get_dashboard_data() -> Dict[str, Any]:
                 intentos_examenes = intentos_alumno.filter(test__tema__tema_id='Exámenes')
                 
                 # Calcular notas medias separadas SOBRE 10
-                nota_media_temas = (intentos_temas.aggregate(Avg('puntuacion'))['puntuacion__avg'] or 0) / 10
-                nota_media_examenes = (intentos_examenes.aggregate(Avg('puntuacion'))['puntuacion__avg'] or 0) / 10
-                nota_media_general = (intentos_alumno.aggregate(Avg('puntuacion'))['puntuacion__avg'] or 0) / 10
+                nota_media_temas = (intentos_temas.aggregate(Avg('puntuacion'))['puntuacion__avg'] or 0)
+                nota_media_examenes = (intentos_examenes.aggregate(Avg('puntuacion'))['puntuacion__avg'] or 0)
+                nota_media_general = (intentos_alumno.aggregate(Avg('puntuacion'))['puntuacion__avg'] or 0)
                 
                 # Calcular promedios por cada tema visible/disponible
                 promedios_por_tema = {}
@@ -127,7 +127,7 @@ def get_dashboard_data() -> Dict[str, Any]:
                 for tema in temas_disponibles:
                     intentos_tema = intentos_alumno.filter(test__tema=tema)
                     if intentos_tema.exists():
-                        promedio_tema = (intentos_tema.aggregate(Avg('puntuacion'))['puntuacion__avg'] or 0) / 10
+                        promedio_tema = (intentos_tema.aggregate(Avg('puntuacion'))['puntuacion__avg'] or 0)
                         promedios_por_tema[tema.tema_id] = {
                             'promedio': promedio_tema,
                             'intentos': intentos_tema.count()

@@ -45,7 +45,7 @@
                             {% if item.completado %}
                                 <div style="display: flex; align-items: center; gap: 0.5rem;">
                                     <span style="font-size: 0.9rem; color: {% if item.mejor_puntuacion >= 70 %}#27ae60{% else %}#f39c12{% endif %}; font-weight: bold;">
-                                        {{ item.mejor_puntuacion|nota_sobre_10 }}/10
+                                        {{ item.mejor_puntuacion }}/10
                                     </span>
                                 </div>
                                 <div style="display: flex; align-items: center; gap: 0.5rem; color: #666;">

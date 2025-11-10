@@ -155,7 +155,7 @@ def get_dashboard_data(user, modo_test=False) -> Dict[str, Any]:
     )
     
     # Convertir promedio a nota del 1 al 10
-    promedio_nota = (promedio_puntuacion / 10) if promedio_puntuacion > 0 else 0
+    promedio_nota = (promedio_puntuacion) if promedio_puntuacion > 0 else 0
     
     # Calcular progreso como % de tests completados
     tests_disponibles_total = Test.objects.filter(activo=True, visible_alumnos=True).count()

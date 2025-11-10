@@ -992,7 +992,7 @@ def mi_progreso(request):
             completado=True
         ).aggregate(Avg('puntuacion'))['puntuacion__avg']
         
-        nota_general = promedio_general / 10 if promedio_general else 0
+        nota_general = promedio_general if promedio_general else 0
         
         # Total de preguntas respondidas
         total_respuestas = RespuestaAlumno.objects.filter(
@@ -1068,7 +1068,7 @@ def mi_progreso(request):
             estadisticas_temas.append({
                 'tema': tema,
                 'promedio': promedio_tema,
-                'nota': promedio_tema / 10,
+                'nota': promedio_tema,
                 'total_tests': total_tests_tema,
                 'mejor_puntuacion': mejor_intento.puntuacion,
                 'total_preguntas': total_preg_tema,
@@ -1217,7 +1217,7 @@ def estadisticas_temas(request):
             estadisticas_temas.append({
                 'tema': tema,
                 'bloqueado': False,
-                'nota': promedio_tema / 10,
+                'nota': promedio_tema,
                 'tests_resueltos': tests_resueltos,
                 'tests_completados': tests_resueltos,  # Tests únicos completados
                 'total_tests_tema': total_tests_tema,  # Total tests disponibles en el tema

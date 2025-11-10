@@ -32,7 +32,7 @@
                         <td style="padding: 1rem; text-align: center; color: #666;">{{ intento.fecha_fin|date:"d/m/Y H:i" }}</td>
                         <td style="padding: 1rem; text-align: center;">
                             <span style="font-weight: bold; color: {% if intento.puntuacion >= 70 %}#27ae60{% elif intento.puntuacion >= 50 %}#f39c12{% else %}#dc3545{% endif %}; font-size: 1.1rem;">
-                                {{ intento.puntuacion|nota_sobre_10 }}/10
+                                {{ intento.puntuacion }}/10
                             </span>
                         </td>
                         <td style="padding: 1rem; text-align: center; color: #666;">

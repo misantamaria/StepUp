@@ -3,6 +3,187 @@
 {% block title %}Dashboard Profesor - StepUp{% endblock %}
 
 {% block content %}
+<style>
+/* Estilos para los modales */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    max-width: 800px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.modal-content-small {
+    max-width: 600px;
+}
+
+.modal-content-large {
+    max-width: 900px;
+    max-height: 85vh;
+    margin: 2rem auto;
+}
+
+/* Botones de control sticky */
+.modal-controls {
+    position: sticky;
+    top: 0;
+    right: 0;
+    float: right;
+    display: flex;
+    gap: 0.5rem;
+    z-index: 10;
+    background: white;
+    padding: 0.5rem;
+    margin: -0.5rem -0.5rem 0.5rem 0.5rem;
+    border-radius: 6px;
+    border: 1px solid #e3e6ea;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.modal-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+    background: white;
+    color: #6c757d;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    transition: all 0.2s;
+}
+
+.modal-btn:hover {
+    background: #f8f9fa;
+    border-color: #adb5bd;
+}
+
+.modal-btn-close:hover {
+    border-color: #dc3545;
+    color: #dc3545;
+}
+</style>
+
+<script>
+// Definir funciones globales necesarias antes de renderizar el contenido
+function switchTab(tab) {
+    const tabTemas = document.getElementById('tab-temas');
+    const tabTests = document.getElementById('tab-tests');
+    const tabPreguntas = document.getElementById('tab-preguntas');
+    const contentTemas = document.getElementById('content-temas');
+    const contentTests = document.getElementById('content-tests');
+    const contentPreguntas = document.getElementById('content-preguntas');
+    
+    if (!tabTemas || !tabTests || !tabPreguntas || !contentTemas || !contentTests || !contentPreguntas) {
+        console.error('No se encontraron todos los elementos necesarios');
+        return;
+    }
+    
+    const primaryColor = '#2563eb';
+    
+    // Resetear todos los tabs
+    [tabTemas, tabTests, tabPreguntas].forEach(tab => {
+        tab.style.background = 'transparent';
+        tab.style.color = '#666';
+        tab.style.border = '1px solid #d0d0d0';
+        tab.style.borderBottom = '3px solid transparent';
+    });
+    
+    // Ocultar todos los contenidos
+    contentTemas.style.display = 'none';
+    contentTests.style.display = 'none';
+    contentPreguntas.style.display = 'none';
+    
+    // Activar el tab seleccionado
+    if (tab === 'temas') {
+        tabTemas.style.background = primaryColor;
+        tabTemas.style.color = 'white';
+        tabTemas.style.border = '1px solid ' + primaryColor;
+        tabTemas.style.borderBottom = '3px solid ' + primaryColor;
+        contentTemas.style.display = 'block';
+    } else if (tab === 'tests') {
+        tabTests.style.background = primaryColor;
+        tabTests.style.color = 'white';
+        tabTests.style.border = '1px solid ' + primaryColor;
+        tabTests.style.borderBottom = '3px solid ' + primaryColor;
+        contentTests.style.display = 'block';
+    } else if (tab === 'preguntas') {
+        tabPreguntas.style.background = primaryColor;
+        tabPreguntas.style.color = 'white';
+        tabPreguntas.style.border = '1px solid ' + primaryColor;
+        tabPreguntas.style.borderBottom = '3px solid ' + primaryColor;
+        contentPreguntas.style.display = 'block';
+    }
+}
+
+function toggleEstadisticas() {
+    const estadisticas = document.getElementById('estadisticas');
+    if (!estadisticas) {
+        console.error('toggleEstadisticas: elemento #estadisticas no encontrado');
+        return;
+    }
+
+    const current = window.getComputedStyle(estadisticas).display;
+    estadisticas.style.display = (current === 'none') ? 'block' : 'none';
+}
+
+function toggleProgresoAlumnos() {
+    const progresoAlumnos = document.getElementById('progreso-alumnos');
+    const progresoClase = document.getElementById('progreso-clase');
+
+    if (!progresoAlumnos) {
+        console.error('toggleProgresoAlumnos: elemento #progreso-alumnos no encontrado');
+        return;
+    }
+
+    const current = window.getComputedStyle(progresoAlumnos).display;
+    if (current === 'none') {
+        progresoAlumnos.style.display = 'block';
+        if (progresoClase) progresoClase.style.display = 'none';
+    } else {
+        progresoAlumnos.style.display = 'none';
+    }
+}
+
+function toggleProgresoClase() {
+    const progresoClase = document.getElementById('progreso-clase');
+    const progresoAlumnos = document.getElementById('progreso-alumnos');
+
+    if (!progresoClase) {
+        console.error('toggleProgresoClase: elemento #progreso-clase no encontrado');
+        return;
+    }
+
+    const current = window.getComputedStyle(progresoClase).display;
+    if (current === 'none') {
+        progresoClase.style.display = 'block';
+        if (progresoAlumnos) progresoAlumnos.style.display = 'none';
+    } else {
+        progresoClase.style.display = 'none';
+    }
+}
+</script>
+
 <div class="card">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
         <h2 style="color: {{ THEME_COLORS.primary }}; margin: 0;"> Panel del Profesor</h2>
@@ -14,25 +195,37 @@
             <div style="font-size: 2.5rem; font-weight: bold;">{{ total_alumnos }}</div>
             <div>Alumnos Activos</div>
         </div>
-        <div style="background: linear-gradient(135deg, {{ THEME_COLORS.primary_light }} 0%, #00a8e8 100%); color: white; padding: 1.5rem; border-radius: 8px;">
-            <div style="font-size: 2.5rem; font-weight: bold;">{{ total_intentos }}</div>
-            <div>Tests Realizados</div>
-        </div>
-        <div style="background: linear-gradient(135deg, {{ THEME_COLORS.success }} 0%, #20c997 100%); color: white; padding: 1.5rem; border-radius: 8px;">
+        <div style="background: linear-gradient(135deg, {% if promedio_general >= 80 %}#28a745{% elif promedio_general >= 60 %}#ffc107{% else %}#dc3545{% endif %} 0%, {% if promedio_general >= 80 %}#155724{% elif promedio_general >= 60 %}#856404{% else %}#721c24{% endif %} 100%); color: white; padding: 1.5rem; border-radius: 8px;">
             <div style="font-size: 2.5rem; font-weight: bold;">{{ promedio_general|floatformat:1 }}%</div>
             <div>Promedio General</div>
+        </div>
+        <div style="background: linear-gradient(135deg, {% if promedio_temas >= 80 %}#28a745{% elif promedio_temas >= 60 %}#ffc107{% else %}#dc3545{% endif %} 0%, {% if promedio_temas >= 80 %}#155724{% elif promedio_temas >= 60 %}#856404{% else %}#721c24{% endif %} 100%); color: white; padding: 1.5rem; border-radius: 8px;">
+            <div style="font-size: 2.5rem; font-weight: bold;">{{ promedio_temas|floatformat:1 }}%</div>
+            <div>Promedio Temas</div>
+        </div>
+        <div style="background: linear-gradient(135deg, {% if promedio_examenes >= 80 %}#28a745{% elif promedio_examenes >= 60 %}#ffc107{% else %}#dc3545{% endif %} 0%, {% if promedio_examenes >= 80 %}#155724{% elif promedio_examenes >= 60 %}#856404{% else %}#721c24{% endif %} 100%); color: white; padding: 1.5rem; border-radius: 8px;">
+            <div style="font-size: 2.5rem; font-weight: bold;">{{ promedio_examenes|floatformat:1 }}%</div>
+            <div>Promedio Exámenes</div>
+        </div>
+        <div style="background: linear-gradient(135deg, {{ THEME_COLORS.primary_light }} 0%, #00a8e8 100%); color: white; padding: 1.5rem; border-radius: 8px;">
+            <div style="font-size: 2.5rem; font-weight: bold;">{{ alumnos_activos|default:0 }}</div>
+            <div>Activos (7 días)</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #dc3545 0%, #721c24 100%); color: white; padding: 1.5rem; border-radius: 8px;">
+            <div style="font-size: 2.5rem; font-weight: bold;">{{ alumnos_en_riesgo|default:0 }}</div>
+            <div>En Riesgo</div>
         </div>
     </div>
 
     <!-- Botones de Gestión Rápida -->
     <div style="margin-bottom: 2rem; padding: 1.5rem; background: #f8f9fa; border-radius: 8px;">
-        <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1rem; font-size: 1.1rem;">Gestión de progreso</h3>
+        <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1rem; font-size: 1.1rem;">Análisis de Progreso</h3>
         <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-            <a href="/admin/boards/progresotema/" style="background: {{ THEME_COLORS.success }}; color: white; padding: 0.6rem 1.2rem; text-decoration: none; border-radius: 6px; font-weight: 500; font-size: 0.9rem;">
-                 Ver Progreso Alumnos
+            <a href="{% url 'boards:progreso_alumnos' %}" style="background: {{ THEME_COLORS.primary }}; color: white; padding: 0.6rem 1.2rem; text-decoration: none; border-radius: 6px; font-weight: 500; font-size: 0.9rem;">
+                 Progreso por Alumno
             </a>
-            <a href="#estadisticas" onclick="toggleEstadisticas(); return false;" style="background: {{ THEME_COLORS.warning }}; color: white; padding: 0.6rem 1.2rem; text-decoration: none; border-radius: 6px; font-weight: 500; font-size: 0.9rem;">
-                 Ver Estadísticas Detalladas
+            <a href="{% url 'boards:progreso_clase' %}" style="background: {{ THEME_COLORS.primary }}; color: white; padding: 0.6rem 1.2rem; text-decoration: none; border-radius: 6px; font-weight: 500; font-size: 0.9rem;">
+                Progreso por Clase
             </a>
         </div>
     </div>
@@ -40,11 +233,14 @@
     <!-- Tabs de navegación -->
     <div style="margin-bottom: 1.5rem; border-bottom: 2px solid #e0e0e0;">
         <div style="display: flex; gap: 1rem;">
-            <button id="tab-temas" onclick="switchTab('temas')" style="padding: 0.75rem 1.5rem; background: {{ THEME_COLORS.primary }}; color: white; border: none; border-bottom: 3px solid {{ THEME_COLORS.primary }}; cursor: pointer; font-weight: 500; border-radius: 6px 6px 0 0;">
-                Gestión de Temas
+            <button id="tab-temas" onclick="switchTab('temas')" style="padding: 0.75rem 1.5rem; background: {{ THEME_COLORS.primary }}; color: white; border: 1px solid {{ THEME_COLORS.primary }}; border-bottom: 3px solid {{ THEME_COLORS.primary }}; cursor: pointer; font-weight: 500; border-radius: 6px 6px 0 0;">
+                Gestionar Temas
             </button>
-            <button id="tab-tests" onclick="switchTab('tests')" style="padding: 0.75rem 1.5rem; background: transparent; color: {{ THEME_COLORS.text_active }}; border: none; border-bottom: 3px solid transparent; cursor: pointer; font-weight: 500; border-radius: 6px 6px 0 0;">
-                Tests por Tema
+            <button id="tab-tests" onclick="switchTab('tests')" style="padding: 0.75rem 1.5rem; background: transparent; color: {{ THEME_COLORS.text_active }}; border: 1px solid #d0d0d0; border-bottom: 3px solid transparent; cursor: pointer; font-weight: 500; border-radius: 6px 6px 0 0;">
+                Gestionar Tests
+            </button>
+            <button id="tab-preguntas" onclick="switchTab('preguntas')" style="padding: 0.75rem 1.5rem; background: transparent; color: {{ THEME_COLORS.text_active }}; border: 1px solid #d0d0d0; border-bottom: 3px solid transparent; cursor: pointer; font-weight: 500; border-radius: 6px 6px 0 0;">
+                Gestionar Preguntas
             </button>
         </div>
     </div>
@@ -54,22 +250,27 @@
         <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem; font-size: 1.2rem;"> Gestión de Temas</h3>
         
         <div style="margin-bottom: 2rem; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
-            <table style="margin: 0;">
+            <table id="tablaTemas" style="margin: 0;">
                 <thead>
                     <tr>
                         <th style="width: 90px; text-align: center;">Visible<br>Alumnos</th>
                         <th style="width: 90px; text-align: center;">Disponible<br>Alumnos</th>
                         <th style="width: 90px; text-align: center;">Visible<br>Profesor</th>
                         <th style="width: 90px; text-align: center;">Disponible<br>Profesor</th>
-                        <th>Tema</th>
-                        <th style="width: 100px; text-align: center;">Preguntas</th>
-                        <th style="width: 80px; text-align: center;">Tests</th>
+                        <th style="cursor: pointer; position: relative;" onclick="ordenarTablaTemas('tema')">Tema <span style="float: right; color: #ccc;">↕</span></th>
+                        <th style="width: 100px; text-align: center; cursor: pointer; position: relative;" onclick="ordenarTablaTemas('preguntas')">Preguntas <span style="float: right; color: #ccc;">↕</span></th>
+                        <th style="width: 80px; text-align: center; cursor: pointer; position: relative;" onclick="ordenarTablaTemas('tests')">Tests <span style="float: right; color: #ccc;">↕</span></th>
                         <th style="width: 100px; text-align: center;">Acciones</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="tbodyTemas">
                     {% for item in temas_con_tests %}
-                    <tr id="tema-row-{{ item.tema.tema_id }}" style="{% if item.tema.visible_alumnos and item.tema.disponible_alumno %}background: #e3f2fd;{% elif item.tema.visible_profesor and item.tema.disponible_profesor %}background: #fff8e1;{% endif %}">
+                    <tr class="fila-tema"
+                        id="tema-row-{{ item.tema.tema_id }}" 
+                        data-tema="{{ item.tema.tema_id|lower }}"
+                        data-preguntas="{{ item.total_preguntas }}"
+                        data-tests="{{ item.tests.count }}"
+                        style="{% if item.tema.visible_alumnos and item.tema.disponible_alumno %}background: #e3f2fd;{% elif item.tema.visible_profesor and item.tema.disponible_profesor %}background: #fff8e1;{% endif %}">
                         <td style="text-align: center;">
                             <label style="display: flex; align-items: center; justify-content: center; cursor: pointer;">
                                 <input type="checkbox" 
@@ -121,7 +322,8 @@
                         <td style="text-align: center;">{{ item.total_preguntas }}</td>
                         <td style="text-align: center;">{{ item.tests.count }}</td>
                         <td style="text-align: center;">
-                            <a href="/admin/boards/tema/{{ item.tema.tema_id }}/change/" 
+                            <a href="#" 
+                               onclick="editarTema('{{ item.tema.tema_id|escapejs }}'); return false;"
                                style="color: {{ THEME_COLORS.primary }}; text-decoration: none; font-size: 1.2rem; margin-right: 0.5rem;" 
                                title="Editar">
                                 🖉
@@ -144,10 +346,11 @@
                     <!-- Fila para añadir nuevo tema -->
                     <tr style="background: #f8f9fa; border-top: 2px solid #dee2e6;">
                         <td colspan="8" style="text-align: center; padding: 1rem;">
-                            <a href="/admin/boards/tema/add/" 
-                               style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: {{ THEME_COLORS.primary }}; color: white; border-radius: 8px; text-decoration: none; font-size: 1.5rem; font-weight: bold; transition: all 0.2s;"
-                               onmouseover="this.style.background='{{ THEME_COLORS.bg_medium }}'; this.style.transform='scale(1.1)'"
-                               onmouseout="this.style.background='{{ THEME_COLORS.primary }}'; this.style.transform='scale(1)'"
+                            <a href="#" 
+                               onclick="mostrarModalCrearTema(); return false;"
+                               style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: {{ THEME_COLORS.primary_light }}; color: white; border-radius: 8px; text-decoration: none; font-size: 1.5rem; font-weight: bold; transition: all 0.2s;"
+                               onmouseover="this.style.background='#00a8e8'; this.style.transform='scale(1.1)'"
+                               onmouseout="this.style.background='{{ THEME_COLORS.primary_light }}'; this.style.transform='scale(1)'"
                                title="Añadir tema">
                                 +
                             </a>
@@ -158,152 +361,313 @@
         </div>
     </div>
 
-    <!-- Contenido: Tests por Tema -->
+    <!-- Contenido: Tests -->
     <div id="content-tests" style="display: none;">
-    <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem; font-size: 1.2rem;">Gestión de tests</h3>
+        <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem; font-size: 1.2rem;">Gestión de Tests</h3>
+        
+        <!-- Total de tests -->
+        <div style="margin-bottom: 1.5rem; padding: 0.75rem 1rem; background: #e7f3ff; border-left: 4px solid {{ THEME_COLORS.primary }}; border-radius: 4px;">
+            <span style="font-weight: 500;">Total: <span id="totalTests">{{ todos_tests.count }}</span> tests</span>
+        </div>
 
-    {% for item in temas_con_tests %}
-    <div style="margin-bottom: 2rem; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
-        <!-- Encabezado del tema -->
-        <div style="background: linear-gradient(135deg, {{ THEME_COLORS.primary }} 0%, {{ THEME_COLORS.bg_medium }} 100%); color: white; padding: 1rem 1.5rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h4 style="margin: 0; font-size: 1.1rem;">{{ item.tema.tema_id }}</h4>
-                <div style="font-size: 0.9rem; opacity: 0.9;">
-                    {{ item.total_preguntas }} pregunta{{ item.total_preguntas|pluralize }} 
-                    (Fácil: {{ item.preguntas_faciles }}, Media: {{ item.preguntas_medias }}, Difícil: {{ item.preguntas_dificiles }})
+        <!-- Filtros de búsqueda -->
+        <div style="margin-bottom: 1.5rem; padding: 1.5rem; background: #f8f9fa; border-radius: 8px; border: 1px solid #e0e0e0;">
+            <h4 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1rem; font-size: 1rem;">Filtros de Búsqueda</h4>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; align-items: end;">
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: {{ THEME_COLORS.text_active }};">Tema:</label>
+                    <select id="filtroTestTema" onchange="aplicarFiltrosTests()" style="width: 100%; padding: 0.5rem; border: 1px solid #ced4da; border-radius: 4px; font-size: 0.95rem;">
+                        <option value="">Todos los temas</option>
+                        {% for item in temas_con_tests %}
+                        <option value="{{ item.tema.tema_id|lower }}">{{ item.tema.tema_id }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: {{ THEME_COLORS.text_active }};">Buscar en nombre:</label>
+                    <input type="text" id="filtroTestNombre" onkeyup="aplicarFiltrosTests()" placeholder="Escribe para buscar..." style="width: 100%; padding: 0.5rem; border: 1px solid #ced4da; border-radius: 4px; font-size: 0.95rem;">
+                </div>
+                <div>
+                    <button onclick="limpiarFiltrosTests()" style="width: 100%; background: #6c757d; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.95rem;">
+                        Limpiar Filtros
+                    </button>
                 </div>
             </div>
         </div>
 
-        <!-- Tests del tema -->
-        <div style="padding: 1.5rem;">
-            {% if item.tests %}
-                <table style="margin: 0;">
-                    <thead>
-                        <tr>
-                            <th style="width: 90px; text-align: center;">Visible<br>Alumnos</th>
-                            <th style="width: 90px; text-align: center;">Disponible<br>Alumnos</th>
-                            <th style="width: 90px; text-align: center;">Visible<br>Profesor</th>
-                            <th style="width: 90px; text-align: center;">Disponible<br>Profesor</th>
-                            <th>Test</th>
-                            <th style="width: 90px; text-align: center;">Preguntas</th>
-                            <th style="width: 90px; text-align: center;">Tiempo</th>
-                            <th style="width: 90px; text-align: center;">Intentos</th>
-                            <th style="width: 100px; text-align: center;">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for test in item.tests %}
-                        <tr id="test-row-{{ test.id }}" style="{% if test.visible_alumnos and test.disponible_alumno %}background: #e3f2fd;{% elif test.visible_profesor and test.disponible_profesor %}background: #fff8e1;{% endif %}">
-                            <td style="text-align: center;">
-                                <label style="display: flex; align-items: center; justify-content: center; cursor: pointer;">
-                                    <input type="checkbox" 
-                                           class="visibility-checkbox"
-                                           data-test-id="{{ test.id }}"
-                                           data-field="visible_alumnos"
-                                           {% if test.visible_alumnos %}checked{% endif %}
-                                           style="width: 18px; height: 18px; cursor: pointer; accent-color: #2196f3;">
-                                </label>
-                            </td>
-                            <td style="text-align: center;">
-                                <label style="display: flex; align-items: center; justify-content: center; cursor: pointer;">
-                                    <input type="checkbox" 
-                                           class="visibility-checkbox"
-                                           data-test-id="{{ test.id }}"
-                                           data-field="disponible_alumno"
-                                           {% if test.disponible_alumno %}checked{% endif %}
-                                           style="width: 18px; height: 18px; cursor: pointer; accent-color: #4caf50;">
-                                </label>
-                            </td>
-                            <td style="text-align: center;">
-                                <label style="display: flex; align-items: center; justify-content: center; cursor: pointer;">
-                                    <input type="checkbox" 
-                                           class="visibility-checkbox"
-                                           data-test-id="{{ test.id }}"
-                                           data-field="visible_profesor"
-                                           {% if test.visible_profesor %}checked{% endif %}
-                                           style="width: 18px; height: 18px; cursor: pointer; accent-color: #ff9800;">
-                                </label>
-                            </td>
-                            <td style="text-align: center;">
-                                <label style="display: flex; align-items: center; justify-content: center; cursor: pointer;">
-                                    <input type="checkbox" 
-                                           class="visibility-checkbox"
-                                           data-test-id="{{ test.id }}"
-                                           data-field="disponible_profesor"
-                                           {% if test.disponible_profesor %}checked{% endif %}
-                                           style="width: 18px; height: 18px; cursor: pointer; accent-color: #ffc107;">
-                                </label>
-                            </td>
-                            <td>
-                                <strong style="{% if test.visible_alumnos %}color: {{ THEME_COLORS.primary_light }};{% else %}color: {{ THEME_COLORS.text_inactive }};{% endif %}">
-                                    {{ test.nombre }}
-                                </strong>
-                                {% if test.descripcion %}
-                                <div style="font-size: 0.85rem; color: {{ THEME_COLORS.text_active }}; margin-top: 0.25rem;">{{ test.descripcion|truncatewords:15 }}</div>
-                                {% endif %}
-                            </td>
-                            <td style="text-align: center;">{{ test.total_preguntas }}</td>
-                            <td style="text-align: center;">{{ test.tiempo_limite }} min</td>
-                            <td style="text-align: center;">{{ test.num_intentos|default:0 }}</td>
-                            <td style="text-align: center;">
-                                <a href="/admin/boards/test/{{ test.id }}/change/" 
-                                   style="color: {{ THEME_COLORS.primary }}; text-decoration: none; font-size: 1.2rem; margin-right: 0.5rem;" 
-                                   title="Editar">
-                                    ✏️
-                                </a>
-                                <a href="#" 
-                                   onclick="mostrarModalEliminar({{ test.id }}, '{{ test.nombre|escapejs }}'); return false;"
-                                   style="color: #dc3545; text-decoration: none; font-size: 1.2rem;" 
-                                   title="Eliminar">
-                                    🗑️
-                                </a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                        <!-- Fila para añadir nuevo test -->
-                        <tr style="background: #f8f9fa; border-top: 2px solid #dee2e6;">
-                            <td colspan="8" style="text-align: center; padding: 1rem;">
-                                <a href="/admin/boards/test/add/?tema={{ item.tema.tema_id }}" 
-                                   style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: {{ THEME_COLORS.primary_light }}; color: white; border-radius: 8px; text-decoration: none; font-size: 1.5rem; font-weight: bold; transition: all 0.2s;"
-                                   onmouseover="this.style.background='#00a8e8'; this.style.transform='scale(1.1)'"
-                                   onmouseout="this.style.background='{{ THEME_COLORS.primary_light }}'; this.style.transform='scale(1)'"
-                                   title="Añadir test a {{ item.tema.tema_id }}">
-                                    +
-                                </a>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            {% else %}
-                <div style="text-align: center; padding: 2rem;">
-                    <p style="color: {{ THEME_COLORS.text_inactive }}; margin-bottom: 1rem;">No hay tests creados para este tema.</p>
-                    <a href="/admin/boards/test/add/?tema={{ item.tema.tema_id }}" 
-                       style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: {{ THEME_COLORS.primary_light }}; color: white; border-radius: 8px; text-decoration: none; font-size: 1.5rem; font-weight: bold; transition: all 0.2s;"
-                       onmouseover="this.style.background='#00a8e8'; this.style.transform='scale(1.1)'"
-                       onmouseout="this.style.background='{{ THEME_COLORS.primary_light }}'; this.style.transform='scale(1)'"
-                       title="Añadir test a {{ item.tema.tema_id }}">
-                        +
-                    </a>
-                </div>
-            {% endif %}
+        <!-- Contador de resultados -->
+        <div id="contadorTests" style="margin-bottom: 1rem; padding: 0.75rem; background: #e7f3ff; border-left: 4px solid {{ THEME_COLORS.primary }}; border-radius: 4px;">
+            <span style="font-weight: 500;">Mostrando <span id="numTestsFiltrados">{{ todos_tests.count }}</span> de {{ todos_tests.count }} tests</span>
+        </div>
+
+        <!-- Tabla de tests -->
+        <div style="overflow-x: auto;">
+            <table id="tablaTests">
+                <thead>
+                    <tr>
+                        <th style="width: 100px; text-align: center;">Visible<br>Alumnos</th>
+                        <th style="width: 100px; text-align: center;">Disponible<br>Alumnos</th>
+                        <th style="width: 100px; text-align: center;">Visible<br>Profesor</th>
+                        <th style="width: 100px; text-align: center;">Disponible<br>Profesor</th>
+                        <th style="cursor: pointer; position: relative;" onclick="ordenarTablaTests('tema')">Tema <span style="float: right; color: #ccc;">↕</span></th>
+                        <th style="cursor: pointer; position: relative;" onclick="ordenarTablaTests('nombre')">Test <span style="float: right; color: #ccc;">↕</span></th>
+                        <th style="width: 100px; text-align: center; cursor: pointer; position: relative;" onclick="ordenarTablaTests('preguntas')">Preguntas <span style="float: right; color: #ccc;">↕</span></th>
+                        <th style="width: 100px; text-align: center; cursor: pointer; position: relative;" onclick="ordenarTablaTests('tiempo')">Tiempo <span style="float: right; color: #ccc;">↕</span></th>
+                        <th style="width: 100px; text-align: center;">Intentos</th>
+                        <th style="width: 100px; text-align: center;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tbodyTests">
+                    {% for test in todos_tests %}
+                    <tr class="fila-test" 
+                        id="test-row-{{ test.id }}"
+                        data-id="{{ test.id }}"
+                        data-tema="{{ test.tema.tema_id|lower }}"
+                        data-nombre="{{ test.nombre|lower }}"
+                        data-preguntas="{{ test.total_preguntas }}"
+                        data-tiempo="{{ test.tiempo_limite }}"
+                        onclick="editarTest({{ test.id }})"
+                        style="cursor: pointer; {% if test.visible_alumnos and test.disponible_alumno %}background: #e3f2fd;{% elif test.visible_profesor and test.disponible_profesor %}background: #fff8e1;{% endif %}"
+                        onmouseover="this.style.opacity='0.8'"
+                        onmouseout="this.style.opacity='1'">
+                        <td style="text-align: center;" onclick="event.stopPropagation()">
+                            <label style="display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                                <input type="checkbox" 
+                                       class="visibility-checkbox"
+                                       data-test-id="{{ test.id }}"
+                                       data-field="visible_alumnos"
+                                       {% if test.visible_alumnos %}checked{% endif %}
+                                       style="width: 18px; height: 18px; cursor: pointer; accent-color: #2196f3;">
+                            </label>
+                        </td>
+                        <td style="text-align: center;" onclick="event.stopPropagation()">
+                            <label style="display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                                <input type="checkbox" 
+                                       class="visibility-checkbox"
+                                       data-test-id="{{ test.id }}"
+                                       data-field="disponible_alumno"
+                                       {% if test.disponible_alumno %}checked{% endif %}
+                                       style="width: 18px; height: 18px; cursor: pointer; accent-color: #4caf50;">
+                            </label>
+                        </td>
+                        <td style="text-align: center;" onclick="event.stopPropagation()">
+                            <label style="display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                                <input type="checkbox" 
+                                       class="visibility-checkbox"
+                                       data-test-id="{{ test.id }}"
+                                       data-field="visible_profesor"
+                                       {% if test.visible_profesor %}checked{% endif %}
+                                       style="width: 18px; height: 18px; cursor: pointer; accent-color: #ff9800;">
+                            </label>
+                        </td>
+                        <td style="text-align: center;" onclick="event.stopPropagation()">
+                            <label style="display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                                <input type="checkbox" 
+                                       class="visibility-checkbox"
+                                       data-test-id="{{ test.id }}"
+                                       data-field="disponible_profesor"
+                                       {% if test.disponible_profesor %}checked{% endif %}
+                                       style="width: 18px; height: 18px; cursor: pointer; accent-color: #ffc107;">
+                            </label>
+                        </td>
+                        <td><span style="background: #e3f2fd; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.85rem; font-weight: 500;">{{ test.tema.tema_id }}</span></td>
+                        <td>
+                            <strong style="{% if test.visible_alumnos %}color: {{ THEME_COLORS.primary_light }};{% else %}color: {{ THEME_COLORS.text_inactive }};{% endif %}">
+                                {{ test.nombre }}
+                            </strong>
+                            {% if test.descripcion %}
+                            <div style="font-size: 0.85rem; color: {{ THEME_COLORS.text_active }}; margin-top: 0.25rem;">{{ test.descripcion|truncatewords:10 }}</div>
+                            {% endif %}
+                        </td>
+                        <td style="text-align: center; font-weight: 500;">{{ test.total_preguntas }}</td>
+                        <td style="text-align: center;">
+                            {% if test.tiempo_limite == 0 %}
+                                <span style="color: #6c757d; font-style: italic;">∞ Sin límite</span>
+                            {% else %}
+                                {{ test.tiempo_limite }} min
+                            {% endif %}
+                        </td>
+                        <td style="text-align: center;">{{ test.num_intentos|default:0 }}</td>
+                        <td style="text-align: center;" onclick="event.stopPropagation()">
+                            <a href="#" 
+                               onclick="editarTest({{ test.id }}); return false;" 
+                               style="color: {{ THEME_COLORS.primary }}; text-decoration: none; font-size: 1.2rem; margin-right: 0.5rem;" 
+                               title="Editar">
+                                🖉
+                            </a>
+                            <a href="#" 
+                               onclick="mostrarModalEliminar({{ test.id }}, '{{ test.nombre|escapejs }}'); return false;" 
+                               style="color: #dc3545; text-decoration: none; font-size: 1.2rem;" 
+                               title="Eliminar">
+                                🗑️
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="10" style="text-align: center; padding: 2rem; color: {{ THEME_COLORS.text_inactive }};">
+                            No hay tests registrados. Crea el primer test usando el botón
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    <!-- Fila para añadir nuevo test -->
+                    <tr style="background: #f8f9fa; border-top: 2px solid #dee2e6;">
+                        <td colspan="10" style="text-align: center; padding: 1rem;">
+                            <a href="#" 
+                               onclick="mostrarModalCrearTest(); return false;"
+                               style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: {{ THEME_COLORS.primary_light }}; color: white; border-radius: 8px; text-decoration: none; font-size: 1.5rem; font-weight: bold; transition: all 0.2s;"
+                               onmouseover="this.style.background='#00a8e8'; this.style.transform='scale(1.1)'"
+                               onmouseout="this.style.background='{{ THEME_COLORS.primary_light }}'; this.style.transform='scale(1)'"
+                               title="Crear nuevo test">
+                                +
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div> <!-- Fin de content-tests -->
+
+<!-- Contenido: Gestionar Preguntas -->
+<div id="content-preguntas" style="display: none;">
+    <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem; font-size: 1.2rem;"> Gestión de Preguntas</h3>
+    
+    <!-- Total de preguntas -->
+    <div style="margin-bottom: 1.5rem; padding: 0.75rem 1rem; background: #e7f3ff; border-left: 4px solid {{ THEME_COLORS.primary }}; border-radius: 4px;">
+        <span style="font-weight: 500;">Total: <span id="totalPreguntas">{{ todas_preguntas.count }}</span> preguntas</span>
+    </div>
+
+    <!-- Filtros de búsqueda -->
+    <div style="margin-bottom: 1.5rem; padding: 1.5rem; background: #f8f9fa; border-radius: 8px; border: 1px solid #e0e0e0;">
+        <h4 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1rem; font-size: 1rem;"> Filtros de Búsqueda</h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; align-items: end;">
+            <div>
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: {{ THEME_COLORS.text_active }};">Tema:</label>
+                <select id="filtroTema" onchange="aplicarFiltrosPreguntas()" style="width: 100%; padding: 0.5rem; border: 1px solid #ced4da; border-radius: 4px; font-size: 0.95rem;">
+                    <option value="">Todos los temas</option>
+                    {% for item in temas_con_tests %}
+                    <option value="{{ item.tema.tema_id|lower }}">{{ item.tema.tema_id }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: {{ THEME_COLORS.text_active }};">Dificultad:</label>
+                <select id="filtroDificultad" onchange="aplicarFiltrosPreguntas()" style="width: 100%; padding: 0.5rem; border: 1px solid #ced4da; border-radius: 4px; font-size: 0.95rem;">
+                    <option value="">Todas</option>
+                    <option value="facil">Fácil</option>
+                    <option value="media">Media</option>
+                    <option value="dificil">Difícil</option>
+                </select>
+            </div>
+            <div>
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: {{ THEME_COLORS.text_active }};">Buscar en enunciado:</label>
+                <input type="text" id="filtroEnunciado" onkeyup="aplicarFiltrosPreguntas()" placeholder="Escribe para buscar..." style="width: 100%; padding: 0.5rem; border: 1px solid #ced4da; border-radius: 4px; font-size: 0.95rem;">
+            </div>
+            <div>
+                <button onclick="limpiarFiltrosPreguntas()" style="width: 100%; background: #6c757d; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.95rem;">
+                    Limpiar Filtros
+                </button>
+            </div>
         </div>
     </div>
-    {% empty %}
-    <div style="text-align: center; color: {{ THEME_COLORS.text_inactive }}; padding: 3rem; background: #f8f9fa; border-radius: 8px;">
-        <p style="font-size: 1.1rem; margin-bottom: 1rem;">No hay temas creados aún.</p>
-        <a href="/admin/boards/tema/add/" class="btn" style="width: auto; display: inline-block;">
-            Crear Primer Tema
-        </a>
+
+    <!-- Contador de resultados -->
+    <div id="contadorPreguntas" style="margin-bottom: 1rem; padding: 0.75rem; background: #e7f3ff; border-left: 4px solid {{ THEME_COLORS.primary }}; border-radius: 4px;">
+        <span style="font-weight: 500;">Mostrando <span id="numPreguntasFiltradas">{{ todas_preguntas.count }}</span> de {{ todas_preguntas.count }} preguntas</span>
     </div>
-    {% endfor %}
-</div>
-</div> <!-- Fin de content-tests -->
+
+    <!-- Tabla de preguntas -->
+    <div style="overflow-x: auto;">
+        <table id="tablaPreguntas">
+            <thead>
+                <tr>
+                    <th style="width: 80px; text-align: center; cursor: pointer; position: relative;" onclick="ordenarTablaPreguntas('id')">ID <span style="float: right; color: #ccc;">↕</span></th>
+                    <th style="cursor: pointer; position: relative;" onclick="ordenarTablaPreguntas('tema')">Tema <span style="float: right; color: #ccc;">↕</span></th>
+                    <th style="cursor: pointer; position: relative;" onclick="ordenarTablaPreguntas('enunciado')">Enunciado <span style="float: right; color: #ccc;">↕</span></th>
+                    <th style="width: 120px; text-align: center; cursor: pointer; position: relative;" onclick="ordenarTablaPreguntas('dificultad')">Dificultad <span style="float: right; color: #ccc;">↕</span></th>
+                    <th style="width: 100px; text-align: center;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tbodyPreguntas">
+                {% for pregunta in todas_preguntas %}
+                <tr class="fila-pregunta" 
+                    data-id="{{ pregunta.pregunta_id }}"
+                    data-tema="{{ pregunta.tema|lower }}"
+                    data-enunciado="{{ pregunta.enunciado|lower }}"
+                    data-dificultad="{{ pregunta.dificultad|lower }}"
+                    onclick="editarPregunta({{ pregunta.pregunta_id }})"
+                    style="cursor: pointer;"
+                    onmouseover="this.style.background='#f8f9fa'"
+                    onmouseout="this.style.background=''">
+                    <td style="text-align: center; font-weight: 500;">{{ pregunta.pregunta_id }}</td>
+                    <td><span style="background: #e3f2fd; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.85rem; font-weight: 500;">{{ pregunta.tema }}</span></td>
+                    <td>
+                        <div style="max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ pregunta.enunciado }}">
+                            {{ pregunta.enunciado }}
+                        </div>
+                    </td>
+                    <td style="text-align: center;">
+                        {% if pregunta.dificultad == 'Facil' %}
+                            <span style="background: #d4edda; color: #155724; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.85rem; font-weight: 500;">Fácil</span>
+                        {% elif pregunta.dificultad == 'Media' %}
+                            <span style="background: #fff3cd; color: #856404; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.85rem; font-weight: 500;">Media</span>
+                        {% else %}
+                            <span style="background: #f8d7da; color: #721c24; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.85rem; font-weight: 500;">Difícil</span>
+                        {% endif %}
+                    </td>
+                    <td style="text-align: center;" onclick="event.stopPropagation()">
+                        <a href="#" 
+                           onclick="editarPregunta({{ pregunta.pregunta_id }}); return false;" 
+                           style="color: {{ THEME_COLORS.primary }}; text-decoration: none; font-size: 1.2rem; margin-right: 0.5rem;" 
+                           title="Editar">
+                            🖉
+                        </a>
+                        <a href="#" 
+                           onclick="event.stopPropagation(); mostrarModalEliminarPregunta({{ pregunta.pregunta_id }}, '{{ pregunta.enunciado|truncatewords:10|escapejs }}'); return false;" 
+                           style="color: #dc3545; text-decoration: none; font-size: 1.2rem;" 
+                           title="Eliminar">
+                            🗑️
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 2rem; color: {{ THEME_COLORS.text_inactive }};">
+                        No hay preguntas registradas. Crea la primera pregunta usando el botón
+                    </td>
+                </tr>
+                {% endfor %}
+                <!-- Fila para añadir nueva pregunta -->
+                <tr style="background: #f8f9fa; border-top: 2px solid #dee2e6;">
+                    <td colspan="5" style="text-align: center; padding: 1rem;">
+                        <a href="#" 
+                           onclick="mostrarModalCrearPregunta(); return false;"
+                           style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: {{ THEME_COLORS.primary_light }}; color: white; border-radius: 8px; text-decoration: none; font-size: 1.5rem; font-weight: bold; transition: all 0.2s;"
+                           onmouseover="this.style.background='#00a8e8'; this.style.transform='scale(1.1)'"
+                           onmouseout="this.style.background='{{ THEME_COLORS.primary_light }}'; this.style.transform='scale(1)'"
+                           title="Crear nueva pregunta">
+                            +
+                        </a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div> <!-- Fin de content-preguntas -->
 
 <!-- Modal de confirmación de eliminación -->
-<div id="modalEliminar" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
-    <div style="background: white; border-radius: 12px; padding: 2rem; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
-        <h3 style="color: #dc3545; margin-bottom: 1.5rem; font-size: 1.3rem;">⚠️ Confirmar Eliminación de Test</h3>
+<div id="modalEliminar" class="modal-overlay">
+    <div id="modalEliminarContent" class="modal-content modal-content-small">
+        <!-- Botones de control del modal -->
+        <div class="modal-controls">
+            <button onclick="toggleMaximizeModal('modalEliminar')" class="modal-btn" title="Maximizar/Restaurar">
+                ⛶
+            </button>
+            <button onclick="cerrarModalEliminar()" class="modal-btn modal-btn-close" title="Cerrar">
+                ✕
+            </button>
+        </div>
+        <h3 style="color: #dc3545; margin-bottom: 1.5rem; font-size: 1.3rem; padding-right: 4rem;">⚠️ Confirmar Eliminación de Test</h3>
         
         <div style="margin-bottom: 1.5rem; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
             <p style="margin-bottom: 0.5rem;"><strong>Nombre del test:</strong></p>
@@ -322,19 +686,28 @@
 
         <div style="display: flex; gap: 1rem; justify-content: flex-end;">
             <button onclick="cerrarModalEliminar()" style="background: #6c757d; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 1rem;">
-                ❌ No, cancelar
+                 No, cancelar
             </button>
             <button id="btnConfirmarEliminar" onclick="confirmarEliminarTest()" style="background: #dc3545; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 1rem;">
-                ✅ Sí, eliminar
+                 Sí, eliminar
             </button>
         </div>
     </div>
 </div>
 
 <!-- Modal de confirmación de eliminación de TEMA -->
-<div id="modalEliminarTema" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
-    <div style="background: white; border-radius: 12px; padding: 2rem; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
-        <h3 style="color: #dc3545; margin-bottom: 1.5rem; font-size: 1.3rem;">⚠️ Confirmar Eliminación de Tema</h3>
+<div id="modalEliminarTema" class="modal-overlay">
+    <div id="modalEliminarTemaContent" class="modal-content modal-content-small">
+        <!-- Botones de control del modal -->
+        <div class="modal-controls">
+            <button onclick="toggleMaximizeModal('modalEliminarTema')" class="modal-btn" title="Maximizar/Restaurar">
+                ⛶
+            </button>
+            <button onclick="cerrarModalEliminarTema()" class="modal-btn modal-btn-close" title="Cerrar">
+                ✕
+            </button>
+        </div>
+        <h3 style="color: #dc3545; margin-bottom: 1.5rem; font-size: 1.3rem; padding-right: 4rem;">⚠️ Confirmar Eliminación de Tema</h3>
         
         <div style="margin-bottom: 1.5rem; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
             <p style="margin-bottom: 0.5rem;"><strong>Nombre del tema:</strong></p>
@@ -362,181 +735,568 @@
 
         <div style="display: flex; gap: 1rem; justify-content: flex-end;">
             <button onclick="cerrarModalEliminarTema()" style="background: #6c757d; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 1rem;">
-                ❌ No, cancelar
+                 No, cancelar
             </button>
             <button id="btnConfirmarEliminarTema" onclick="confirmarEliminarTema()" style="background: #dc3545; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 1rem;">
-                ✅ Sí, eliminar todo
+                 Sí, eliminar todo
             </button>
         </div>
     </div>
 </div>
 
-<!-- Sección de estadísticas detalladas (colapsable) -->
-<div id="estadisticas" class="card" style="display: none;">
-    <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem;">Estadísticas Detalladas</h3>
+<!-- Modal de confirmación de eliminación de PREGUNTA -->
+<div id="modalEliminarPregunta" class="modal-overlay">
+    <div id="modalEliminarPreguntaContent" class="modal-content modal-content-small">
+        <!-- Botones de control del modal -->
+        <div class="modal-controls">
+            <button onclick="toggleMaximizeModal('modalEliminarPregunta')" class="modal-btn" title="Maximizar/Restaurar">
+                ⛶
+            </button>
+            <button onclick="cerrarModalEliminarPregunta()" class="modal-btn modal-btn-close" title="Cerrar">
+                ✕
+            </button>
+        </div>
+        <h3 style="color: #dc3545; margin-bottom: 1.5rem; font-size: 1.3rem; padding-right: 4rem;">⚠️ Confirmar Eliminación de Pregunta</h3>
+        
+        <div style="margin-bottom: 1.5rem; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+            <p style="margin-bottom: 0.5rem;"><strong>ID de la pregunta:</strong></p>
+            <p id="modalPreguntaId" style="color: {{ THEME_COLORS.primary }}; font-size: 1.1rem; margin: 0;"></p>
+        </div>
 
-    <!-- Resumen de estadísticas agregadas en tabla compacta -->
-    <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
-        <h4 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1rem; font-size: 1.1rem;">Resumen Global</h4>
-        <table style="margin: 0;">
-            <thead>
-                <tr>
-                    <th>Promedio</th>
-                    <th>Máxima</th>
-                    <th>Mínima</th>
-                    <th>Tasa Acierto</th>
-                    <th>Correctas</th>
-                    <th>Total Preguntas</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td style="text-align: center; font-weight: bold; color: {{ THEME_COLORS.success }};">
-                        {{ estadisticas_intentos.promedio|floatformat:1 }}%
-                    </td>
-                    <td style="text-align: center; font-weight: bold; color: #28a745;">
-                        {{ estadisticas_intentos.puntuacion_maxima|floatformat:1 }}%
-                    </td>
-                    <td style="text-align: center; font-weight: bold; color: #ffc107;">
-                        {{ estadisticas_intentos.puntuacion_minima|floatformat:1 }}%
-                    </td>
-                    <td style="text-align: center; font-weight: bold; color: {{ THEME_COLORS.primary }};">
-                        {{ tasa_acierto_global|floatformat:1 }}%
-                    </td>
-                    <td style="text-align: center;">
-                        {{ estadisticas_intentos.total_respuestas_correctas|default:0 }}
-                    </td>
-                    <td style="text-align: center;">
-                        {{ estadisticas_intentos.total_preguntas_respondidas|default:0 }}
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+        <div style="margin-bottom: 1.5rem; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+            <p style="margin-bottom: 0.5rem;"><strong>Enunciado:</strong></p>
+            <p id="modalPreguntaEnunciado" style="color: #495057; font-size: 0.95rem; margin: 0;"></p>
+        </div>
 
-    <!-- Filtros con selectores -->
-        <!-- Filtros con selectores -->
-    <div style="background: #f8f9fa; padding: 1.25rem; border-radius: 8px; margin-bottom: 1.5rem;">
-        <h4 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1rem; font-size: 1rem;"> Filtros</h4>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-            <div>
-                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 0.9rem;">Alumno:</label>
-                <select id="filtroAlumno" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem;">
-                    <option value="">Todos los alumnos</option>
-                    {% for alumno in alumnos_unicos %}
-                        <option value="{{ alumno|lower }}">{{ alumno }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div>
-                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 0.9rem;">Test:</label>
-                <select id="filtroTest" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem;">
-                    <option value="">Todos los tests</option>
-                    {% for test in tests_unicos %}
-                        <option value="{{ test|lower }}">{{ test }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div>
-                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 0.9rem;">Tema:</label>
-                <select id="filtroTema" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem;">
-                    <option value="">Todos los temas</option>
-                    {% for tema in temas_unicos %}
-                        <option value="{{ tema.tema_id|lower }}">{{ tema.tema_id }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div>
-                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 0.9rem;">Puntuación mínima:</label>
-                <select id="filtroPuntuacion" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem;">
-                    <option value="0">Todas</option>
-                    <option value="50">≥ 50%</option>
-                    <option value="60">≥ 60%</option>
-                    <option value="70">≥ 70%</option>
-                    <option value="80">≥ 80%</option>
-                    <option value="90">≥ 90%</option>
-                </select>
+        <!-- Sección expandible de respuestas -->
+        <div style="margin-bottom: 1.5rem;">
+            <button id="btnExpandirRespuestas" onclick="toggleRespuestasEliminar()" 
+                    style="width: 100%; padding: 0.75rem; background: #e7f3ff; border: 1px solid #2563eb; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; font-weight: 500; color: #2563eb; transition: all 0.2s;"
+                    onmouseover="this.style.background='#dbeafe'" 
+                    onmouseout="this.style.background='#e7f3ff'">
+                <span>Ver respuestas</span>
+                <span id="iconoExpandir">▼</span>
+            </button>
+            <div id="contenedorRespuestasEliminar" style="display: none; margin-top: 0.75rem; padding: 1rem; background: #f8f9fa; border-radius: 6px; border: 1px solid #dee2e6;">
+                <p style="color: #6c757d; font-style: italic; margin: 0;">Cargando respuestas...</p>
             </div>
         </div>
-        <div style="margin-top: 1rem; text-align: right;">
-            <button onclick="limpiarFiltros()" style="background: #6c757d; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">
-                Limpiar Filtros
+
+        <div style="background: #fff3cd; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border-left: 4px solid #ffc107;">
+            <p style="margin: 0; color: #856404; font-size: 0.95rem;">
+                <strong>⚠️ Advertencia:</strong> Esta acción eliminará permanentemente la pregunta y todas sus respuestas asociadas. Esta acción no se puede deshacer.
+            </p>
+        </div>
+
+        <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+            <button onclick="cerrarModalEliminarPregunta()" style="background: #6c757d; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 1rem;">
+                 No, cancelar
+            </button>
+            <button id="btnConfirmarEliminarPregunta" onclick="confirmarEliminarPregunta()" style="background: #dc3545; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 1rem;">
+                 Sí, eliminar
             </button>
         </div>
     </div>
+</div>
 
-    <!-- Contador de resultados filtrados -->
-    <div id="contadorResultados" style="margin-bottom: 1rem; padding: 0.75rem; background: #e7f3ff; border-left: 4px solid {{ THEME_COLORS.primary }}; border-radius: 4px;">
-        <span style="font-weight: 500;">Mostrando <span id="numResultados">{{ todos_intentos.count }}</span> de {{ todos_intentos.count }} intentos</span>
+<!-- Modal para crear nuevo TEMA -->
+<div id="modalCrearTema" class="modal-overlay">
+    <div id="modalCrearTemaContent" class="modal-content modal-content-small">
+        <!-- Botones de control del modal -->
+        <div class="modal-controls">
+            <button onclick="toggleMaximizeModal('modalCrearTema')" class="modal-btn" title="Maximizar/Restaurar">
+                ⛶
+            </button>
+            <button onclick="cerrarModalCrearTema()" class="modal-btn modal-btn-close" title="Cerrar">
+                ✕
+            </button>
+        </div>
+        <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem; font-size: 1.3rem; padding-right: 4rem;">Crear Nuevo Tema</h3>
+        
+        <form id="formCrearTema" onsubmit="crearTema(event)">
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Nombre del Tema <span style="color: #dc3545;">*</span></label>
+                <input type="text" id="inputTemaNombre" required 
+                       style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;"
+                       placeholder="Ej: Introducción a Python">
+                <small style="color: #6c757d; font-size: 0.85rem;">Este será el identificador del tema</small>
+            </div>
+
+            <div style="background: #e7f3ff; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border-left: 4px solid {{ THEME_COLORS.primary }};">
+                <p style="margin: 0; color: #004085; font-size: 0.9rem;">
+                    <strong>Nota:</strong> El tema se creará inicialmente invisible para alumnos. Podrás activarlo después usando los checkboxes de visibilidad.
+                </p>
+            </div>
+
+            <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                <button type="button" onclick="cerrarModalCrearTema()" style="background: #6c757d; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 1rem;">
+                     Cancelar
+                </button>
+                <button type="submit" id="btnCrearTema" style="background: {{ THEME_COLORS.primary }}; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 1rem;">
+                     Crear Tema
+                </button>
+            </div>
+        </form>
     </div>
+</div>
 
-    <!-- Estadísticas acumuladas de resultados filtrados -->
-    <div id="estadisticasFiltradas" style="background: #f8f9fa; padding: 1.25rem; border-radius: 8px; margin-bottom: 1.5rem;">
-        <h4 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1rem; font-size: 1rem;">Estadísticas de Resultados Actuales</h4>
-        <table style="margin: 0;">
-            <thead>
+<!-- Modal para crear nuevo TEST -->
+<div id="modalCrearTest" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+    <div style="background: white; border-radius: 12px; padding: 2rem; max-width: 700px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+        <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem; font-size: 1.3rem;">Crear Nuevo Test</h3>
+        
+        <form id="formCrearTest" onsubmit="crearTest(event)">
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Tema <span style="color: #dc3545;">*</span></label>
+                <select id="inputTestTemaId" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;">
+                    <option value="">Selecciona un tema</option>
+                    {% for item in temas_con_tests %}
+                        <option value="{{ item.tema.tema_id }}">{{ item.tema.tema_id }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Nombre del Test <span style="color: #dc3545;">*</span></label>
+                <input type="text" id="inputTestNombre" required 
+                       style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;"
+                       placeholder="Ej: Test de Python - Nivel Básico">
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Descripción</label>
+                <textarea id="inputTestDescripcion" rows="3"
+                       style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; resize: vertical;"
+                       placeholder="Descripción opcional del test"></textarea>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Nivel de Dificultad <span style="color: #dc3545;">*</span></label>
+                    <select id="inputTestNivel" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;">
+                        <option value="Facil">Fácil</option>
+                        <option value="Media">Intermedio</option>
+                        <option value="Dificil">Difícil</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">
+                        Tiempo Límite (min) 
+                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%; background: #6c757d; color: white; font-size: 11px; font-weight: bold; cursor: help; margin-left: 4px; font-family: serif;" title="Campo opcional. Dejar en 0 para tiempo infinito (sin temporizador)">i</span>
+                    </label>
+                    <input type="number" id="inputTestTiempo" min="0" max="180" value="30" placeholder="0 = tiempo infinito"
+                           style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;">
+                </div>
+            </div>
+
+            <!-- Checkbox para examen aleatorio -->
+            <div style="margin-bottom: 1.5rem; padding: 1rem; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 6px;">
+                <label style="display: flex; align-items: center; cursor: pointer; font-weight: 500;">
+                    <input type="checkbox" id="inputTestAleatorio" onchange="toggleOpcionesAleatorias()" 
+                           style="width: 18px; height: 18px; cursor: pointer; margin-right: 0.75rem; accent-color: #ffc107;">
+                    <span>Examen Aleatorio (selecciona preguntas al azar)</span>
+                </label>
+            </div>
+
+            <!-- Opciones de examen aleatorio (ocultas por defecto) -->
+            <div id="opcionesAleatorias" style="display: none; margin-bottom: 1.5rem; padding: 1.5rem; background: #f8f9fa; border: 2px solid #ffc107; border-radius: 8px;">
+                <h4 style="margin: 0 0 1rem 0; color: #856404; font-size: 1rem;">Configuración del Examen Aleatorio</h4>
+                
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">
+                        Seleccionar Temas 
+                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%; background: #6c757d; color: white; font-size: 11px; font-weight: bold; cursor: help; margin-left: 4px; font-family: serif;" title="Selecciona uno o más temas de los que se tomarán las preguntas al azar">i</span>
+                    </label>
+                    <div id="temasAleatoriosCheckboxes" style="max-height: 150px; overflow-y: auto; padding: 0.75rem; background: white; border: 1px solid #ddd; border-radius: 6px;">
+                        {% for item in temas_con_tests %}
+                        <label style="display: block; padding: 0.5rem; cursor: pointer; border-radius: 4px;" 
+                               onmouseover="this.style.background='#f8f9fa'" 
+                               onmouseout="this.style.background='transparent'">
+                            <input type="checkbox" name="temasAleatorios" value="{{ item.tema.tema_id }}" 
+                                   style="width: 16px; height: 16px; cursor: pointer; margin-right: 0.5rem; accent-color: #ffc107;">
+                            <span>{{ item.tema.tema_id }} ({{ item.total_preguntas }} preguntas)</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">
+                        Número de Preguntas por Examen
+                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%; background: #6c757d; color: white; font-size: 11px; font-weight: bold; cursor: help; margin-left: 4px; font-family: serif;" title="Cuántas preguntas se seleccionarán al azar cada vez que un alumno haga el examen">i</span>
+                    </label>
+                    <input type="number" id="inputNumPreguntasAleatorias" min="1" max="100" value="10" 
+                           style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;"
+                           placeholder="Ej: 10">
+                </div>
+
+                <div style="margin-top: 1rem; padding: 0.75rem; background: #e7f3ff; border-left: 3px solid #0d6efd; border-radius: 4px;">
+                    <p style="margin: 0; font-size: 0.85rem; color: #004085;">
+                        <strong>Nota:</strong> Cada alumno recibirá un conjunto diferente de preguntas seleccionadas aleatoriamente de los temas elegidos.
+                    </p>
+                </div>
+            </div>
+
+            <div style="background: #e7f3ff; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border-left: 4px solid {{ THEME_COLORS.primary }};">
+                <p style="margin: 0; color: #004085; font-size: 0.9rem;">
+                    <strong>Nota:</strong> El test se creará inicialmente invisible para alumnos. Después de crearlo, podrás añadir preguntas y activarlo.
+                </p>
+            </div>
+
+            <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                <button type="button" onclick="cerrarModalCrearTest()" style="background: #6c757d; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 1rem;">
+                     Cancelar
+                </button>
+                <button type="submit" id="btnCrearTest" style="background: {{ THEME_COLORS.primary }}; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 1rem;">
+                     Crear Test
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal para crear nueva PREGUNTA -->
+<div id="modalCrearPregunta" class="modal-overlay">
+    <div id="modalCrearPreguntaContent" class="modal-content">
+        <!-- Botones de control del modal -->
+        <div class="modal-controls">
+            <button onclick="toggleMaximizeModal('modalCrearPregunta')" class="modal-btn" title="Maximizar/Restaurar">
+                ⛶
+            </button>
+            <button onclick="cerrarModalCrearPregunta()" class="modal-btn modal-btn-close" title="Cerrar">
+                ✕
+            </button>
+        </div>
+        <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem; font-size: 1.3rem; padding-right: 4rem;">Crear Nueva Pregunta</h3>
+        
+        <form id="formCrearPregunta" onsubmit="crearPregunta(event)">
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Tema <span style="color: #dc3545;">*</span></label>
+                <select id="inputPreguntaTema" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;">
+                    <option value="">Selecciona un tema</option>
+                    {% for item in temas_con_tests %}
+                        <option value="{{ item.tema.tema_id }}">{{ item.tema.tema_id }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Enunciado de la Pregunta <span style="color: #dc3545;">*</span></label>
+                <textarea id="inputPreguntaEnunciado" rows="3" required
+                       style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; resize: vertical;"
+                       placeholder="Escribe aquí el enunciado de la pregunta"></textarea>
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Dificultad <span style="color: #dc3545;">*</span></label>
+                <select id="inputPreguntaDificultad" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;">
+                    <option value="Facil">Fácil</option>
+                    <option value="Media">Media</option>
+                    <option value="Dificil">Difícil</option>
+                </select>
+            </div>
+            
+            <input type="hidden" id="inputPreguntaPuntuacion" value="10">
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.75rem; font-weight: 500;">Respuestas <span style="color: #dc3545;">*</span></label>
+                <div id="contenedorRespuestas">
+                    <!-- Las respuestas se añadirán dinámicamente aquí -->
+                </div>
+                <div style="margin-top: 1rem; text-align: center;">
+                    <button type="button" onclick="agregarRespuesta()" 
+                            style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: {{ THEME_COLORS.primary_light }}; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1.5rem; font-weight: bold; transition: all 0.2s;"
+                            onmouseover="this.style.background='#00a8e8'; this.style.transform='scale(1.1)'"
+                            onmouseout="this.style.background='{{ THEME_COLORS.primary_light }}'; this.style.transform='scale(1)'"
+                            title="Añadir respuesta">
+                        +
+                    </button>
+                </div>
+                <div style="margin-top: 0.5rem; text-align: center;">
+                    <small style="color: #6c757d; font-size: 0.85rem;">
+                        Debe haber exactamente una respuesta correcta
+                    </small>
+                </div>
+            </div>
+
+            <div style="background: #fff3cd; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border-left: 4px solid #ffc107;">
+                <p style="margin: 0; color: #856404; font-size: 0.9rem;">
+                    <strong>⚠️ Importante:</strong> Asegúrate de marcar solo UNA respuesta como correcta. Puedes añadir tantas respuestas como necesites (mínimo 2).
+                </p>
+            </div>
+
+            <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                <button type="button" onclick="cerrarModalCrearPregunta()" style="background: #6c757d; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 1rem;">
+                     Cancelar
+                </button>
+                <button type="submit" id="btnCrearPregunta" style="background: {{ THEME_COLORS.primary }}; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 1rem;">
+                     Crear Pregunta
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal para EDITAR TEMA -->
+<div id="modalEditarTema" class="modal-overlay" style="overflow-y: auto;">
+    <div id="modalEditarTemaContent" class="modal-content modal-content-large">
+        <!-- Botones de control del modal -->
+        <div class="modal-controls">
+            <button onclick="toggleMaximizeModal('modalEditarTema')" class="modal-btn" title="Maximizar/Restaurar">
+                ⛶
+            </button>
+            <button onclick="cerrarModalEditarTema()" class="modal-btn modal-btn-close" title="Cerrar">
+                ✕
+            </button>
+        </div>
+        <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem; font-size: 1.3rem; padding-right: 4rem;">🖉 Editar Tema</h3>
+        
+        <form id="formEditarTema" onsubmit="guardarCambiosTema(event)">
+            <input type="hidden" id="editTemaIdOriginal">
+            
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Nombre del Tema <span style="color: #dc3545;">*</span></label>
+                <input type="text" id="editTemaNombre" required 
+                       style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;"
+                       placeholder="Nombre del tema">
+            </div>
+
+            <div style="background: #e7f3ff; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border-left: 4px solid {{ THEME_COLORS.primary }};">
+                <h4 style="margin: 0 0 0.5rem 0; color: {{ THEME_COLORS.primary }};">Tests de este tema:</h4>
+                <div id="editTemaTestsList" style="max-height: 300px; overflow-y: auto;">
+                    <!-- Los tests se cargarán dinámicamente aquí -->
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                <button type="button" onclick="cerrarModalEditarTema()" style="background: #6c757d; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 1rem;">
+                     Cancelar
+                </button>
+                <button type="submit" id="btnGuardarTema" style="background: {{ THEME_COLORS.primary }}; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 1rem;">
+                     Guardar Cambios
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal para EDITAR TEST -->
+<div id="modalEditarTest" class="modal-overlay" style="overflow-y: auto;">
+    <div id="modalEditarTestContent" class="modal-content modal-content-large">
+        <!-- Botones de control del modal -->
+        <div class="modal-controls">
+            <button onclick="toggleMaximizeModal('modalEditarTest')" class="modal-btn" title="Maximizar/Restaurar">
+                ⛶
+            </button>
+            <button onclick="cerrarModalEditarTest()" class="modal-btn modal-btn-close" title="Cerrar">
+                ✕
+            </button>
+        </div>
+        <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem; font-size: 1.3rem; padding-right: 4rem;">🖉 Editar Test</h3>
+        
+        <form id="formEditarTest" onsubmit="guardarCambiosTest(event)">
+            <input type="hidden" id="editTestId">
+            
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Tema <span style="color: #dc3545;">*</span></label>
+                <select id="editTestTema" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;">
+                    <option value="">Selecciona un tema</option>
+                    {% for item in temas_con_tests %}
+                        <option value="{{ item.tema.tema_id }}">{{ item.tema.tema_id }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Nombre del Test <span style="color: #dc3545;">*</span></label>
+                <input type="text" id="editTestNombre" required 
+                       style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;"
+                       placeholder="Nombre del test">
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Descripción</label>
+                <textarea id="editTestDescripcion" rows="3"
+                       style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; resize: vertical;"
+                       placeholder="Descripción del test"></textarea>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Nivel <span style="color: #dc3545;">*</span></label>
+                    <select id="editTestNivel" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;">
+                        <option value="Facil">Fácil</option>
+                        <option value="Media">Intermedio</option>
+                        <option value="Dificil">Difícil</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">
+                        Tiempo (min) 
+                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%; background: #6c757d; color: white; font-size: 11px; font-weight: bold; cursor: help; margin-left: 4px; font-family: serif;" title="Campo opcional. Dejar en 0 para tiempo infinito (sin temporizador)">i</span>
+                    </label>
+                    <input type="number" id="editTestTiempo" min="0" max="180" placeholder="0 = tiempo infinito"
+                           style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;">
+                </div>
+            </div>
+
+            <div style="background: #e7f3ff; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border-left: 4px solid {{ THEME_COLORS.primary }};">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <h4 style="margin: 0; color: {{ THEME_COLORS.primary }};">Preguntas del test:</h4>
+                    <button type="button" onclick="anadirPreguntaATest()" style="background: {{ THEME_COLORS.success }}; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">
+                        Añadir Pregunta
+                    </button>
+                </div>
+                <div id="editTestPreguntasList" style="max-height: 300px; overflow-y: auto;">
+                    <!-- Las preguntas se cargarán dinámicamente aquí -->
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                <button type="button" onclick="cerrarModalEditarTest()" style="background: #6c757d; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 1rem;">
+                     Cancelar
+                </button>
+                <button type="submit" id="btnGuardarTest" style="background: {{ THEME_COLORS.primary }}; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 1rem;">
+                     Guardar Cambios
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal para EDITAR PREGUNTA -->
+<div id="modalEditarPregunta" class="modal-overlay" style="overflow-y: auto;">
+    <div id="modalEditarPreguntaContent" class="modal-content modal-content-large">
+        <!-- Botones de control del modal -->
+        <div class="modal-controls">
+            <button onclick="toggleMaximizeModal('modalEditarPregunta')" class="modal-btn" title="Maximizar/Restaurar">
+                ⛶
+            </button>
+            <button onclick="cerrarModalEditarPregunta()" class="modal-btn modal-btn-close" title="Cerrar">
+                ✕
+            </button>
+        </div>
+        <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem; font-size: 1.3rem; padding-right: 4rem;">🖉 Editar Pregunta</h3>
+        
+        <form id="formEditarPregunta" onsubmit="guardarCambiosPregunta(event)">
+            <input type="hidden" id="editPreguntaId">
+            
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Tema <span style="color: #dc3545;">*</span></label>
+                <select id="editPreguntaTema" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;">
+                    <option value="">Selecciona un tema</option>
+                    {% for item in temas_con_tests %}
+                        <option value="{{ item.tema.tema_id }}">{{ item.tema.tema_id }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Enunciado <span style="color: #dc3545;">*</span></label>
+                <textarea id="editPreguntaEnunciado" rows="3" required
+                       style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; resize: vertical;"
+                       placeholder="Enunciado de la pregunta"></textarea>
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Dificultad <span style="color: #dc3545;">*</span></label>
+                <select id="editPreguntaDificultad" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;">
+                    <option value="Facil">Fácil</option>
+                    <option value="Media">Media</option>
+                    <option value="Dificil">Difícil</option>
+                </select>
+            </div>
+            
+            <input type="hidden" id="editPreguntaPuntuacion" value="10">
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.75rem; font-weight: 500;">Respuestas <span style="color: #dc3545;">*</span></label>
+                <div id="editContenedorRespuestas">
+                    <!-- Las respuestas se cargarán dinámicamente aquí -->
+                </div>
+                <div style="text-align: center; margin-top: 1rem;">
+                    <button type="button" onclick="agregarRespuestaEditar()" 
+                            style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: {{ THEME_COLORS.primary_light }}; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1.5rem; font-weight: bold; transition: all 0.2s;"
+                            onmouseover="this.style.background='#00a8e8'; this.style.transform='scale(1.1)'"
+                            onmouseout="this.style.background='{{ THEME_COLORS.primary_light }}'; this.style.transform='scale(1)'"
+                            title="Añadir respuesta">
+                        +
+                    </button>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                <button type="button" onclick="cerrarModalEditarPregunta()" style="background: #6c757d; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 1rem;">
+                     Cancelar
+                </button>
+                <button type="submit" id="btnGuardarPregunta" style="background: {{ THEME_COLORS.primary }}; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 1rem;">
+                     Guardar Cambios
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Sección de Progreso por Alumno (colapsable) -->
+<div id="progreso-alumnos" class="card" style="display: none;">
+    <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem;"> Progreso por Alumno</h3>
+
+    <!-- Lista de alumnos con progreso individual -->
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 6px; overflow: hidden;">
+            <thead style="background: {{ THEME_COLORS.primary_light }}; color: white;">
                 <tr>
-                    <th>Última Fecha</th>
-                    <th>Promedio</th>
-                    <th>Correctas</th>
-                    <th>Total Preguntas</th>
-                    <th>Tasa Acierto</th>
+                    <th style="padding: 0.75rem; text-align: left; font-weight: 500;">Alumno</th>
+                    <th style="padding: 0.75rem; text-align: center; font-weight: 500;">Nota Media</th>
+                    <th style="padding: 0.75rem; text-align: center; font-weight: 500;">Progreso</th>
+                    <th style="padding: 0.75rem; text-align: center; font-weight: 500;">Tests</th>
+                    <th style="padding: 0.75rem; text-align: center; font-weight: 500;">Último Acceso</th>
+                    <th style="padding: 0.75rem; text-align: center; font-weight: 500;">Estado</th>
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td id="filtro-ultima-fecha" style="text-align: center; font-weight: 500;">-</td>
-                    <td id="filtro-promedio" style="text-align: center; font-weight: bold; color: {{ THEME_COLORS.success }};">-</td>
-                    <td id="filtro-correctas" style="text-align: center;">-</td>
-                    <td id="filtro-total" style="text-align: center;">-</td>
-                    <td id="filtro-tasa" style="text-align: center; font-weight: bold; color: {{ THEME_COLORS.primary }};">-</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-
-    <h4 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1rem;">Todos los Intentos</h4>
-    <div style="overflow-x: auto;">
-        <table id="tablaIntentos">
-            <thead>
-                <tr>
-                    <th style="cursor: pointer;" onclick="ordenarTabla('alumno')">Alumno ↕</th>
-                    <th style="cursor: pointer;" onclick="ordenarTabla('test')">Test ↕</th>
-                    <th style="cursor: pointer;" onclick="ordenarTabla('tema')">Tema ↕</th>
-                    <th style="cursor: pointer;" onclick="ordenarTabla('fecha')">Fecha ↕</th>
-                    <th style="cursor: pointer;" onclick="ordenarTabla('puntuacion')">Puntuación ↕</th>
-                    <th>Correctas</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody id="tbodyIntentos">
-                {% for intento in todos_intentos %}
-                <tr class="fila-intento" 
-                    data-alumno="{{ intento.alumno.username|lower }}"
-                    data-test="{{ intento.test.nombre|lower }}"
-                    data-tema="{% if intento.test.tema %}{{ intento.test.tema.tema_id|lower }}{% endif %}"
-                    data-fecha="{{ intento.fecha_fin|date:'Y-m-d H:i' }}"
-                    data-puntuacion="{{ intento.puntuacion }}">
-                    <td><strong>{{ intento.alumno.username }}</strong></td>
-                    <td>{{ intento.test.nombre }}</td>
-                    <td>{% if intento.test.tema %}{{ intento.test.tema.tema_id }}{% else %}-{% endif %}</td>
-                    <td>{{ intento.fecha_fin|date:"d/m/Y H:i" }}</td>
-                    <td>
-                        <span style="font-weight: bold; color: {% if intento.puntuacion >= 70 %}{{ THEME_COLORS.success }}{% elif intento.puntuacion >= 50 %}{{ THEME_COLORS.warning }}{% else %}{{ THEME_COLORS.danger }}{% endif %};">
-                            {{ intento.puntuacion|floatformat:1 }}%
+                {% for alumno_data in alumnos_detallados %}
+                <tr style="{% if alumno_data.nota_media < 6 and alumno_data.total_intentos > 0 %}background: #fff5f5;{% elif alumno_data.nota_media >= 8 %}background: #f0fff4;{% endif %}">
+                    <td style="padding: 0.75rem; border-bottom: 1px solid #eee;">
+                        <strong>{{ alumno_data.alumno.username }}</strong>
+                    </td>
+                    <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #eee;">
+                        <span style="font-weight: 500; color: {% if alumno_data.nota_media >= 8 %}#28a745{% elif alumno_data.nota_media >= 6 %}#ffc107{% else %}#dc3545{% endif %};">
+                            {{ alumno_data.nota_media|floatformat:1 }}/10
                         </span>
                     </td>
-                    <td>{{ intento.respuestas_correctas }}/{{ intento.total_preguntas }}</td>
-                    <td>
-                        <a href="{% url 'boards:estadisticas_alumno' intento.alumno.id %}" style="color: {{ THEME_COLORS.primary }}; text-decoration: none; font-weight: 500; font-size: 0.9rem;">
-                            Ver detalles
-                        </a>
+                    <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #eee;">
+                        <div style="background: #e9ecef; border-radius: 10px; height: 8px; margin-bottom: 0.25rem;">
+                            <div style="background: {% if alumno_data.progreso_porcentaje >= 75 %}#28a745{% elif alumno_data.progreso_porcentaje >= 25 %}#ffc107{% else %}#dc3545{% endif %}; height: 100%; border-radius: 10px; width: {{ alumno_data.progreso_porcentaje }}%;"></div>
+                        </div>
+                        <small>{{ alumno_data.progreso_porcentaje|floatformat:0 }}%</small>
+                    </td>
+                    <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #eee;">
+                        {{ alumno_data.total_intentos }}
+                    </td>
+                    <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #eee;">
+                        {% if alumno_data.ultimo_acceso %}
+                            {{ alumno_data.ultimo_acceso|timesince }} ago
+                        {% else %}
+                            <span style="color: #999;">Nunca</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid #eee;">
+                        {% if alumno_data.nota_media >= 8 %}
+                            <span style="background: #d4edda; color: #155724; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">TOP</span>
+                        {% elif alumno_data.nota_media >= 6 %}
+                            <span style="background: #fff3cd; color: #856404; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">✅ OK</span>
+                        {% elif alumno_data.total_intentos > 0 %}
+                            <span style="background: #f8d7da; color: #721c24; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">⚠️ RIESGO</span>
+                        {% else %}
+                            <span style="background: #e2e3e5; color: #6c757d; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">SIN DATOS</span>
+                        {% endif %}
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="7" style="text-align: center; color: {{ THEME_COLORS.text_inactive }}; padding: 2rem;">
-                        No hay intentos registrados aún.
+                    <td colspan="6" style="text-align: center; padding: 2rem; color: #999;">
+                        No hay alumnos registrados
                     </td>
                 </tr>
                 {% endfor %}
@@ -545,8 +1305,91 @@
     </div>
 
     <div style="text-align: center; margin-top: 2rem;">
-        <button onclick="toggleEstadisticas()" class="btn-secondary" style="width: auto; padding: 0.6rem 1.5rem;">
-            Ocultar Estadísticas
+        <button onclick="toggleProgresoAlumnos()" class="btn-secondary" style="width: auto; padding: 0.6rem 1.5rem;">
+            Ocultar Progreso de Alumnos
+        </button>
+    </div>
+</div>
+
+<!-- Sección de Progreso por Clase (colapsable) -->
+<div id="progreso-clase" class="card" style="display: none;">
+    <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem;">Progreso por Clase</h3>
+
+    <!-- Resumen general de la clase -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+        <div style="text-align: center; padding: 1.5rem; background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: white; border-radius: 8px;">
+            <div style="font-size: 2rem; font-weight: bold;">{{ total_alumnos }}</div>
+            <div style="font-size: 0.9rem; opacity: 0.9;">Alumnos Totales</div>
+        </div>
+        <div style="text-align: center; padding: 1.5rem; background: linear-gradient(135deg, {% if promedio_general >= 70 %}#28a745{% elif promedio_general >= 50 %}#ffc107{% else %}#dc3545{% endif %} 0%, {% if promedio_general >= 70 %}#155724{% elif promedio_general >= 50 %}#856404{% else %}#721c24{% endif %} 100%); color: white; border-radius: 8px;">
+            <div style="font-size: 2rem; font-weight: bold;">{{ promedio_general|floatformat:1 }}%</div>
+            <div style="font-size: 0.9rem; opacity: 0.9;">Promedio de Clase</div>
+        </div>
+        <div style="text-align: center; padding: 1.5rem; background: linear-gradient(135deg, #17a2b8 0%, #0c5460 100%); color: white; border-radius: 8px;">
+            <div style="font-size: 2rem; font-weight: bold;">{{ alumnos_activos }}</div>
+            <div style="font-size: 0.9rem; opacity: 0.9;">Activos (7 días)</div>
+        </div>
+        <div style="text-align: center; padding: 1.5rem; background: linear-gradient(135deg, #dc3545 0%, #721c24 100%); color: white; border-radius: 8px;">
+            <div style="font-size: 2rem; font-weight: bold;">{{ alumnos_en_riesgo }}</div>
+            <div style="font-size: 0.9rem; opacity: 0.9;">En Riesgo</div>
+        </div>
+    </div>
+
+    <!-- Distribución de rendimiento -->
+    <div style="margin-bottom: 2rem; padding: 1.5rem; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <h4 style="margin-bottom: 1rem; color: {{ THEME_COLORS.primary }};">Distribución de Rendimiento</h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem;">
+            <div style="text-align: center; padding: 1rem; background: #d4edda; border-radius: 6px;">
+                <div style="font-size: 1.5rem; font-weight: bold; color: #155724;">{{ distribucion.excelente }}</div>
+                <div style="font-size: 0.85rem; color: #155724;">Excelente (8-10)</div>
+            </div>
+            <div style="text-align: center; padding: 1rem; background: #fff3cd; border-radius: 6px;">
+                <div style="font-size: 1.5rem; font-weight: bold; color: #856404;">{{ distribucion.bien }}</div>
+                <div style="font-size: 0.85rem; color: #856404;">Bien (6-8)</div>
+            </div>
+            <div style="text-align: center; padding: 1rem; background: #ffeaa7; border-radius: 6px;">
+                <div style="font-size: 1.5rem; font-weight: bold; color: #856404;">{{ distribucion.regular }}</div>
+                <div style="font-size: 0.85rem; color: #856404;">Regular (4-6)</div>
+            </div>
+            <div style="text-align: center; padding: 1rem; background: #f8d7da; border-radius: 6px;">
+                <div style="font-size: 1.5rem; font-weight: bold; color: #721c24;">{{ distribucion.mal }}</div>
+                <div style="font-size: 0.85rem; color: #721c24;">Insuf. (<4)</div>
+            </div>
+            <div style="text-align: center; padding: 1rem; background: #e2e3e5; border-radius: 6px;">
+                <div style="font-size: 1.5rem; font-weight: bold; color: #6c757d;">{{ distribucion.sin_actividad }}</div>
+                <div style="font-size: 0.85rem; color: #6c757d;">Sin Actividad</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Outliers destacados -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
+        <div style="padding: 1rem; background: #d4edda; border-radius: 6px; border-left: 4px solid #28a745;">
+            <h5 style="margin: 0 0 0.5rem 0; color: #155724;">🏆 Mejores Alumnos</h5>
+            {% for alumno in mejores_alumnos|slice:":5" %}
+            <div style="font-size: 0.9rem; color: #155724; margin-bottom: 0.25rem;">
+                {{ forloop.counter }}. {{ alumno.alumno.username }} ({{ alumno.nota_media|floatformat:1 }}/10)
+            </div>
+            {% empty %}
+            <div style="font-size: 0.9rem; color: #155724; font-style: italic;">Sin datos suficientes</div>
+            {% endfor %}
+        </div>
+        
+        <div style="padding: 1rem; background: #f8d7da; border-radius: 6px; border-left: 4px solid #dc3545;">
+            <h5 style="margin: 0 0 0.5rem 0; color: #721c24;">⚠️ Alumnos en Riesgo</h5>
+            {% for alumno in alumnos_riesgo|slice:":5" %}
+            <div style="font-size: 0.9rem; color: #721c24; margin-bottom: 0.25rem;">
+                {{ alumno.alumno.username }} ({{ alumno.nota_media|floatformat:1 }}/10)
+            </div>
+            {% empty %}
+            <div style="font-size: 0.9rem; color: #721c24; font-style: italic;">¡Todos bien!</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 2rem;">
+        <button onclick="toggleProgresoClase()" class="btn-secondary" style="width: auto; padding: 0.6rem 1.5rem;">
+            Ocultar Progreso de Clase
         </button>
     </div>
 </div>
@@ -681,33 +1524,51 @@ document.addEventListener('DOMContentLoaded', function() {
 function switchTab(tab) {
     const tabTemas = document.getElementById('tab-temas');
     const tabTests = document.getElementById('tab-tests');
+    const tabPreguntas = document.getElementById('tab-preguntas');
     const contentTemas = document.getElementById('content-temas');
     const contentTests = document.getElementById('content-tests');
+    const contentPreguntas = document.getElementById('content-preguntas');
     
+    // Resetear todos los tabs a estilo inactivo
+    tabTemas.style.background = 'transparent';
+    tabTemas.style.color = '{{ THEME_COLORS.text_active }}';
+    tabTemas.style.border = '1px solid #d0d0d0';
+    tabTemas.style.borderBottom = '3px solid transparent';
+    
+    tabTests.style.background = 'transparent';
+    tabTests.style.color = '{{ THEME_COLORS.text_active }}';
+    tabTests.style.border = '1px solid #d0d0d0';
+    tabTests.style.borderBottom = '3px solid transparent';
+    
+    tabPreguntas.style.background = 'transparent';
+    tabPreguntas.style.color = '{{ THEME_COLORS.text_active }}';
+    tabPreguntas.style.border = '1px solid #d0d0d0';
+    tabPreguntas.style.borderBottom = '3px solid transparent';
+    
+    // Ocultar todos los contenidos
+    contentTemas.style.display = 'none';
+    contentTests.style.display = 'none';
+    contentPreguntas.style.display = 'none';
+    
+    // Activar el tab seleccionado
     if (tab === 'temas') {
-        // Activar tab de temas
         tabTemas.style.background = '{{ THEME_COLORS.primary }}';
         tabTemas.style.color = 'white';
+        tabTemas.style.border = '1px solid {{ THEME_COLORS.primary }}';
         tabTemas.style.borderBottom = '3px solid {{ THEME_COLORS.primary }}';
-        
-        tabTests.style.background = 'transparent';
-        tabTests.style.color = '{{ THEME_COLORS.text_active }}';
-        tabTests.style.borderBottom = '3px solid transparent';
-        
         contentTemas.style.display = 'block';
-        contentTests.style.display = 'none';
-    } else {
-        // Activar tab de tests
+    } else if (tab === 'tests') {
         tabTests.style.background = '{{ THEME_COLORS.primary }}';
         tabTests.style.color = 'white';
+        tabTests.style.border = '1px solid {{ THEME_COLORS.primary }}';
         tabTests.style.borderBottom = '3px solid {{ THEME_COLORS.primary }}';
-        
-        tabTemas.style.background = 'transparent';
-        tabTemas.style.color = '{{ THEME_COLORS.text_active }}';
-        tabTemas.style.borderBottom = '3px solid transparent';
-        
-        contentTemas.style.display = 'none';
         contentTests.style.display = 'block';
+    } else if (tab === 'preguntas') {
+        tabPreguntas.style.background = '{{ THEME_COLORS.primary }}';
+        tabPreguntas.style.color = 'white';
+        tabPreguntas.style.border = '1px solid {{ THEME_COLORS.primary }}';
+        tabPreguntas.style.borderBottom = '3px solid {{ THEME_COLORS.primary }}';
+        contentPreguntas.style.display = 'block';
     }
 }
 
@@ -726,6 +1587,43 @@ function getCookie(name) {
         }
     }
     return cookieValue;
+}
+
+// Función para maximizar/restaurar modales
+const modalStates = {};
+
+function toggleMaximizeModal(modalId) {
+    const modalContent = document.getElementById(modalId + 'Content');
+    if (!modalContent) return;
+    
+    // Si no existe el estado, inicializarlo como no maximizado
+    if (!modalStates[modalId]) {
+        modalStates[modalId] = {
+            isMaximized: false,
+            originalMaxWidth: modalContent.style.maxWidth,
+            originalWidth: modalContent.style.width,
+            originalMaxHeight: modalContent.style.maxHeight,
+            originalMargin: modalContent.style.margin
+        };
+    }
+    
+    const state = modalStates[modalId];
+    
+    if (state.isMaximized) {
+        // Restaurar tamaño original
+        modalContent.style.maxWidth = state.originalMaxWidth;
+        modalContent.style.width = state.originalWidth;
+        modalContent.style.maxHeight = state.originalMaxHeight;
+        modalContent.style.margin = state.originalMargin;
+        state.isMaximized = false;
+    } else {
+        // Maximizar
+        modalContent.style.maxWidth = '95vw';
+        modalContent.style.width = '95%';
+        modalContent.style.maxHeight = '95vh';
+        modalContent.style.margin = '2.5vh auto';
+        state.isMaximized = true;
+    }
 }
 
 // Variables globales para el modal de eliminación
@@ -838,22 +1736,22 @@ async function confirmarEliminarTest() {
             cerrarModalEliminar();
             
             // Mostrar mensaje de éxito
-            alert('✅ Test eliminado correctamente');
+            alert(' Test eliminado correctamente');
             
             // Recargar la página para actualizar estadísticas
             setTimeout(() => {
                 window.location.reload();
             }, 1000);
         } else {
-            alert('❌ Error al eliminar el test: ' + (data.error || 'Error desconocido'));
+            alert(' Error al eliminar el test: ' + (data.error || 'Error desconocido'));
             btnConfirmar.disabled = false;
-            btnConfirmar.textContent = '✅ Sí, eliminar';
+            btnConfirmar.textContent = ' Sí, eliminar';
         }
     } catch (error) {
         console.error('Error al eliminar test:', error);
-        alert('❌ Error al eliminar el test. Por favor, intenta de nuevo.');
+        alert(' Error al eliminar el test. Por favor, intenta de nuevo.');
         btnConfirmar.disabled = false;
-        btnConfirmar.textContent = '✅ Sí, eliminar';
+        btnConfirmar.textContent = ' Sí, eliminar';
     }
 }
 
@@ -927,22 +1825,167 @@ async function confirmarEliminarTema() {
             cerrarModalEliminarTema();
             
             // Mostrar mensaje de éxito con información
-            alert(`✅ Tema eliminado correctamente\n\n${data.info || ''}`);
+            alert(` Tema eliminado correctamente\n\n${data.info || ''}`);
             
             // Recargar la página para actualizar estadísticas
             setTimeout(() => {
                 window.location.reload();
             }, 1000);
         } else {
-            alert('❌ Error al eliminar el tema: ' + (data.error || 'Error desconocido'));
+            alert(' Error al eliminar el tema: ' + (data.error || 'Error desconocido'));
             btnConfirmar.disabled = false;
-            btnConfirmar.textContent = '✅ Sí, eliminar todo';
+            btnConfirmar.textContent = ' Sí, eliminar todo';
         }
     } catch (error) {
         console.error('Error al eliminar tema:', error);
-        alert('❌ Error al eliminar el tema. Por favor, intenta de nuevo.');
+        alert(' Error al eliminar el tema. Por favor, intenta de nuevo.');
         btnConfirmar.disabled = false;
-        btnConfirmar.textContent = '✅ Sí, eliminar todo';
+        btnConfirmar.textContent = ' Sí, eliminar todo';
+    }
+}
+
+// ===========================================
+// FUNCIONES PARA ELIMINAR PREGUNTA
+// ===========================================
+let preguntaIdAEliminar = null;
+let respuestasCargadas = false;
+
+function mostrarModalEliminarPregunta(preguntaId, enunciado) {
+    preguntaIdAEliminar = preguntaId;
+    const modal = document.getElementById('modalEliminarPregunta');
+    const modalId = document.getElementById('modalPreguntaId');
+    const modalEnunciado = document.getElementById('modalPreguntaEnunciado');
+    
+    modalId.textContent = preguntaId;
+    modalEnunciado.textContent = enunciado;
+    
+    // Reset estado de respuestas
+    respuestasCargadas = false;
+    const contenedor = document.getElementById('contenedorRespuestasEliminar');
+    contenedor.style.display = 'none';
+    document.getElementById('iconoExpandir').textContent = '▼';
+    
+    modal.style.display = 'flex';
+}
+
+async function toggleRespuestasEliminar() {
+    const contenedor = document.getElementById('contenedorRespuestasEliminar');
+    const icono = document.getElementById('iconoExpandir');
+    
+    if (contenedor.style.display === 'none') {
+        contenedor.style.display = 'block';
+        icono.textContent = '▲';
+        
+        // Cargar respuestas si no se han cargado aún
+        if (!respuestasCargadas) {
+            await cargarRespuestasEliminar();
+        }
+    } else {
+        contenedor.style.display = 'none';
+        icono.textContent = '▼';
+    }
+}
+
+async function cargarRespuestasEliminar() {
+    const contenedor = document.getElementById('contenedorRespuestasEliminar');
+    contenedor.innerHTML = '<p style="color: #6c757d; font-style: italic; margin: 0;">Cargando respuestas...</p>';
+    
+    try {
+        const response = await fetch(`/profesor/pregunta/${preguntaIdAEliminar}/respuestas/`);
+        const data = await response.json();
+        
+        if (data.success && data.respuestas && data.respuestas.length > 0) {
+            let html = '<div style="max-height: 300px; overflow-y: auto;">';
+            
+            data.respuestas.forEach((resp, index) => {
+                const esCorrecta = resp.es_correcta;
+                const bgColor = esCorrecta ? '#d4edda' : '#f8f9fa';
+                const borderColor = esCorrecta ? '#28a745' : '#dee2e6';
+                const iconoCheck = esCorrecta ? '✅ ' : '';
+                
+                html += `
+                    <div style="padding: 0.75rem; margin-bottom: 0.5rem; background: ${bgColor}; border: 1px solid ${borderColor}; border-radius: 6px;">
+                        <div style="display: flex; align-items: start; gap: 0.5rem;">
+                            <span style="font-weight: bold; color: #495057; min-width: 20px;">${index + 1}.</span>
+                            <div style="flex: 1;">
+                                <p style="margin: 0; color: #212529;">${iconoCheck}${resp.texto}</p>
+                                ${esCorrecta ? '<p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: #28a745; font-weight: 500;">Respuesta correcta</p>' : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            contenedor.innerHTML = html;
+            respuestasCargadas = true;
+        } else if (data.respuestas && data.respuestas.length === 0) {
+            contenedor.innerHTML = '<p style="color: #856404; font-style: italic; margin: 0;">⚠️ Esta pregunta no tiene respuestas asociadas.</p>';
+            respuestasCargadas = true;
+        } else {
+            contenedor.innerHTML = '<p style="color: #dc3545; font-style: italic; margin: 0;">❌ Error al cargar las respuestas.</p>';
+        }
+    } catch (error) {
+        console.error('Error al cargar respuestas:', error);
+        contenedor.innerHTML = '<p style="color: #dc3545; font-style: italic; margin: 0;">❌ Error al cargar las respuestas.</p>';
+    }
+}
+
+function cerrarModalEliminarPregunta() {
+    const modal = document.getElementById('modalEliminarPregunta');
+    modal.style.display = 'none';
+    preguntaIdAEliminar = null;
+}
+
+async function confirmarEliminarPregunta() {
+    if (!preguntaIdAEliminar) return;
+    
+    const btnConfirmar = document.getElementById('btnConfirmarEliminarPregunta');
+    btnConfirmar.disabled = true;
+    btnConfirmar.textContent = 'Eliminando...';
+    
+    try {
+        const response = await fetch(`/profesor/preguntas/${preguntaIdAEliminar}/eliminar/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json',
+            },
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Eliminar la fila de la pregunta de la tabla
+            const rows = document.querySelectorAll('.fila-pregunta');
+            rows.forEach(row => {
+                if (row.getAttribute('data-id') == preguntaIdAEliminar) {
+                    row.style.backgroundColor = '#d4edda';
+                    setTimeout(() => {
+                        row.remove();
+                        // Actualizar contador
+                        const totalPreguntas = document.getElementById('totalPreguntas');
+                        if (totalPreguntas) {
+                            const count = parseInt(totalPreguntas.textContent) - 1;
+                            totalPreguntas.textContent = count;
+                        }
+                        aplicarFiltrosPreguntas();
+                    }, 500);
+                }
+            });
+            
+            cerrarModalEliminarPregunta();
+            alert('✅ Pregunta eliminada correctamente');
+        } else {
+            alert('❌ Error al eliminar la pregunta: ' + (data.error || 'Error desconocido'));
+            btnConfirmar.disabled = false;
+            btnConfirmar.textContent = '🗑️ Sí, eliminar';
+        }
+    } catch (error) {
+        console.error('Error al eliminar pregunta:', error);
+        alert('Error al eliminar la pregunta. Por favor, intenta de nuevo.');
+        btnConfirmar.disabled = false;
+        btnConfirmar.textContent = '🗑️ Sí, eliminar';
     }
 }
 
@@ -1114,7 +2157,1320 @@ document.addEventListener('DOMContentLoaded', function() {
     if (document.getElementById('estadisticasFiltradas')) {
         aplicarFiltros();
     }
+    
+    // Inicializar respuestas en el modal de pregunta
+    agregarRespuesta();
+    agregarRespuesta();
 });
+
+// ========== FUNCIONES PARA MODALES DE CREACIÓN ==========
+
+// Modal Crear Tema
+function mostrarModalCrearTema() {
+    const modal = document.getElementById('modalCrearTema');
+    document.getElementById('inputTemaNombre').value = '';
+    modal.style.display = 'flex';
+}
+
+function cerrarModalCrearTema() {
+    document.getElementById('modalCrearTema').style.display = 'none';
+}
+
+async function crearTema(event) {
+    event.preventDefault();
+    
+    const btnCrear = document.getElementById('btnCrearTema');
+    btnCrear.disabled = true;
+    btnCrear.textContent = 'Creando...';
+    
+    const tema_id = document.getElementById('inputTemaNombre').value.trim();
+    
+    try {
+        const response = await fetch('/profesor/tema/crear/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ tema_id })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            alert(' ' + data.message);
+            cerrarModalCrearTema();
+            // Recargar la página para mostrar el nuevo tema
+            window.location.reload();
+        } else {
+            alert(' ' + data.error);
+            btnCrear.disabled = false;
+            btnCrear.textContent = ' Crear Tema';
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert(' Error al crear el tema. Por favor, intenta de nuevo.');
+        btnCrear.disabled = false;
+        btnCrear.textContent = ' Crear Tema';
+    }
+}
+
+// Modal Crear Test
+function mostrarModalCrearTest(temaId) {
+    const modal = document.getElementById('modalCrearTest');
+    
+    // Resetear el formulario
+    document.getElementById('inputTestNombre').value = '';
+    document.getElementById('inputTestDescripcion').value = '';
+    document.getElementById('inputTestNivel').value = 'Facil';
+    document.getElementById('inputTestTiempo').value = '30';
+    document.getElementById('inputTestAleatorio').checked = false;
+    document.getElementById('opcionesAleatorias').style.display = 'none';
+    
+    // Desmarcar todos los temas del examen aleatorio
+    document.querySelectorAll('input[name="temasAleatorios"]').forEach(cb => cb.checked = false);
+    document.getElementById('inputNumPreguntasAleatorias').value = '10';
+    
+    if (temaId) {
+        // Si viene con un tema específico, pre-seleccionarlo
+        document.getElementById('inputTestTemaId').value = temaId;
+    } else {
+        // Si no tiene tema, dejar el selector vacío para que el usuario elija
+        document.getElementById('inputTestTemaId').value = '';
+    }
+    
+    modal.style.display = 'flex';
+}
+
+function toggleOpcionesAleatorias() {
+    const checkbox = document.getElementById('inputTestAleatorio');
+    const opciones = document.getElementById('opcionesAleatorias');
+    const temaSelect = document.getElementById('inputTestTemaId');
+    
+    if (checkbox.checked) {
+        opciones.style.display = 'block';
+        // Deshabilitar el selector de tema principal si es aleatorio
+        temaSelect.disabled = true;
+        temaSelect.style.background = '#e9ecef';
+    } else {
+        opciones.style.display = 'none';
+        temaSelect.disabled = false;
+        temaSelect.style.background = 'white';
+    }
+}
+
+function cerrarModalCrearTest() {
+    document.getElementById('modalCrearTest').style.display = 'none';
+}
+
+async function crearTest(event) {
+    event.preventDefault();
+    
+    const btnCrear = document.getElementById('btnCrearTest');
+    btnCrear.disabled = true;
+    btnCrear.textContent = 'Creando...';
+    
+    const esAleatorio = document.getElementById('inputTestAleatorio').checked;
+    
+    const data = {
+        tema_id: document.getElementById('inputTestTemaId').value,
+        nombre: document.getElementById('inputTestNombre').value.trim(),
+        descripcion: document.getElementById('inputTestDescripcion').value.trim(),
+        nivel: document.getElementById('inputTestNivel').value,
+        tiempo_limite: parseInt(document.getElementById('inputTestTiempo').value),
+        es_aleatorio: esAleatorio
+    };
+    
+    // Si es aleatorio, añadir configuración adicional
+    if (esAleatorio) {
+        const temasSeleccionados = Array.from(document.querySelectorAll('input[name="temasAleatorios"]:checked'))
+            .map(cb => cb.value);
+        
+        if (temasSeleccionados.length === 0) {
+            alert('Debes seleccionar al menos un tema para el examen aleatorio');
+            btnCrear.disabled = false;
+            btnCrear.textContent = 'Crear Test';
+            return;
+        }
+        
+        data.temas_aleatorios = temasSeleccionados;
+        data.num_preguntas_aleatorias = parseInt(document.getElementById('inputNumPreguntasAleatorias').value);
+        
+        // Para examen aleatorio, usar el primer tema como tema principal
+        data.tema_id = temasSeleccionados[0];
+    }
+    
+    try {
+        const response = await fetch('/profesor/test/crear/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            alert('✅ ' + result.message);
+            cerrarModalCrearTest();
+            // Recargar la página para mostrar el nuevo test
+            window.location.reload();
+        } else {
+            alert('❌ ' + result.error);
+            btnCrear.disabled = false;
+            btnCrear.textContent = ' Crear Test';
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert(' Error al crear el test. Por favor, intenta de nuevo.');
+        btnCrear.disabled = false;
+        btnCrear.textContent = ' Crear Test';
+    }
+}
+
+// Modal Crear Pregunta
+let contadorRespuestas = 0;
+
+function mostrarModalCrearPregunta() {
+    const modal = document.getElementById('modalCrearPregunta');
+    document.getElementById('inputPreguntaTema').value = '';
+    document.getElementById('inputPreguntaEnunciado').value = '';
+    document.getElementById('inputPreguntaDificultad').value = 'Facil';
+    document.getElementById('inputPreguntaPuntuacion').value = '1';
+    
+    // Limpiar respuestas anteriores
+    const contenedor = document.getElementById('contenedorRespuestas');
+    contenedor.innerHTML = '';
+    contadorRespuestas = 0;
+    
+    // Añadir dos respuestas iniciales
+    agregarRespuesta();
+    agregarRespuesta();
+    
+    modal.style.display = 'flex';
+}
+
+function mostrarModalCrearPreguntaTema(temaId) {
+    mostrarModalCrearPregunta();
+    // Pre-seleccionar el tema
+    document.getElementById('inputPreguntaTema').value = temaId;
+}
+
+function cerrarModalCrearPregunta() {
+    document.getElementById('modalCrearPregunta').style.display = 'none';
+}
+
+function agregarRespuesta() {
+    contadorRespuestas++;
+    const contenedor = document.getElementById('contenedorRespuestas');
+    
+    // Crear el elemento div principal con position relative para el botón absoluto
+    const divRespuesta = document.createElement('div');
+    divRespuesta.className = 'respuesta-item';
+    divRespuesta.id = `respuesta-${contadorRespuestas}`;
+    divRespuesta.style.cssText = 'margin-bottom: 1rem; padding: 1rem; padding-bottom: 2.5rem; background: #f8f9fa; border-radius: 6px; border-left: 3px solid #6c757d; position: relative;';
+    
+    // Contenedor flex
+    const flexContainer = document.createElement('div');
+    flexContainer.style.cssText = 'display: flex; gap: 1rem; align-items: start; margin-bottom: 0.5rem;';
+    
+    // Contenedor del input de texto
+    const inputContainer = document.createElement('div');
+    inputContainer.style.flex = '1';
+    
+    // Input de texto
+    const inputTexto = document.createElement('input');
+    inputTexto.type = 'text';
+    inputTexto.className = 'input-respuesta-texto';
+    inputTexto.required = true;
+    inputTexto.placeholder = 'Escribe la respuesta aquí';
+    // Usar setAttribute para forzar los estilos
+    inputTexto.setAttribute('style', 'width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 0.95rem; color: #212529 !important; background: white !important;');
+    
+    inputContainer.appendChild(inputTexto);
+    
+    // Label para respuesta correcta
+    const label = document.createElement('label');
+    label.style.cssText = 'display: flex; align-items: center; gap: 0.5rem; cursor: pointer; white-space: nowrap;';
+    
+    const radioCorrecta = document.createElement('input');
+    radioCorrecta.type = 'radio';
+    radioCorrecta.name = 'respuesta_correcta';
+    radioCorrecta.value = contadorRespuestas;
+    radioCorrecta.className = 'input-respuesta-correcta';
+    radioCorrecta.style.cssText = 'width: 18px; height: 18px; cursor: pointer;';
+    
+    const spanCorrecta = document.createElement('span');
+    spanCorrecta.textContent = 'Correcta';
+    spanCorrecta.style.fontSize = '0.9rem';
+    
+    label.appendChild(radioCorrecta);
+    label.appendChild(spanCorrecta);
+    
+    flexContainer.appendChild(inputContainer);
+    flexContainer.appendChild(label);
+    
+    divRespuesta.appendChild(flexContainer);
+    
+    // Botón eliminar centrado abajo (solo si hay más de 2 respuestas)
+    if (contadorRespuestas > 2) {
+        const btnEliminar = document.createElement('button');
+        btnEliminar.type = 'button';
+        btnEliminar.textContent = '🗑️';
+        btnEliminar.title = 'Eliminar respuesta';
+        btnEliminar.style.cssText = 'position: absolute; bottom: 0.5rem; left: 50%; transform: translateX(-50%); background: #dc3545; color: white; border: none; width: 32px; height: 32px; border-radius: 4px; cursor: pointer; font-size: 1rem; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; padding: 0;';
+        btnEliminar.onmouseover = function() { this.style.background = '#bb2d3b'; this.style.transform = 'translateX(-50%) scale(1.05)'; };
+        btnEliminar.onmouseout = function() { this.style.background = '#dc3545'; this.style.transform = 'translateX(-50%) scale(1)'; };
+        btnEliminar.onclick = function() {
+            eliminarRespuesta(`respuesta-${contadorRespuestas}`);
+        };
+        divRespuesta.appendChild(btnEliminar);
+    }
+    
+    contenedor.appendChild(divRespuesta);
+}
+
+function eliminarRespuesta(id) {
+    const elemento = document.getElementById(id);
+    if (elemento) {
+        elemento.remove();
+    }
+}
+
+async function crearPregunta(event) {
+    event.preventDefault();
+    
+    const btnCrear = document.getElementById('btnCrearPregunta');
+    btnCrear.disabled = true;
+    btnCrear.textContent = 'Creando...';
+    
+    // Recoger datos de las respuestas
+    const respuestas = [];
+    const respuestasItems = document.querySelectorAll('.respuesta-item');
+    const radioSeleccionado = document.querySelector('input[name="respuesta_correcta"]:checked');
+    
+    if (!radioSeleccionado) {
+        alert(' Debes marcar una respuesta como correcta');
+        btnCrear.disabled = false;
+        btnCrear.textContent = ' Crear Pregunta';
+        return;
+    }
+    
+    const idCorrecta = radioSeleccionado.value;
+    
+    respuestasItems.forEach((item, index) => {
+        const texto = item.querySelector('.input-respuesta-texto').value.trim();
+        if (texto) {
+            const itemId = item.id.split('-')[1];
+            respuestas.push({
+                contenido: texto,
+                es_correcta: itemId === idCorrecta
+            });
+        }
+    });
+    
+    if (respuestas.length < 2) {
+        alert(' Debes proporcionar al menos 2 respuestas');
+        btnCrear.disabled = false;
+        btnCrear.textContent = ' Crear Pregunta';
+        return;
+    }
+    
+    const data = {
+        tema_id: document.getElementById('inputPreguntaTema').value,
+        enunciado: document.getElementById('inputPreguntaEnunciado').value.trim(),
+        dificultad: document.getElementById('inputPreguntaDificultad').value,
+        puntuacion: parseInt(document.getElementById('inputPreguntaPuntuacion').value),
+        respuestas: respuestas
+    };
+    
+    try {
+        const response = await fetch('/profesor/pregunta/crear/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            alert(' ' + result.message);
+            cerrarModalCrearPregunta();
+            // No recargar la página, solo cerrar el modal
+        } else {
+            alert(' ' + result.error);
+            btnCrear.disabled = false;
+            btnCrear.textContent = ' Crear Pregunta';
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert(' Error al crear la pregunta. Por favor, intenta de nuevo.');
+        btnCrear.disabled = false;
+        btnCrear.textContent = ' Crear Pregunta';
+    }
+}
+
+// Cerrar modales al hacer clic fuera
+document.addEventListener('click', function(event) {
+    if (event.target === document.getElementById('modalCrearTema')) {
+        cerrarModalCrearTema();
+    }
+    if (event.target === document.getElementById('modalCrearTest')) {
+        cerrarModalCrearTest();
+    }
+    if (event.target === document.getElementById('modalCrearPregunta')) {
+        cerrarModalCrearPregunta();
+    }
+});
+
+// ===========================================
+// FUNCIONES PARA ORDENAR TEMAS
+// ===========================================
+let ordenTemaActual = { columna: null, ascendente: true };
+
+function ordenarTablaTemas(columna) {
+    const tbody = document.getElementById('tbodyTemas');
+    const filas = Array.from(tbody.querySelectorAll('.fila-tema'));
+    
+    // Cambiar dirección si es la misma columna
+    if (ordenTemaActual.columna === columna) {
+        ordenTemaActual.ascendente = !ordenTemaActual.ascendente;
+    } else {
+        ordenTemaActual.columna = columna;
+        ordenTemaActual.ascendente = true;
+    }
+    
+    filas.sort((a, b) => {
+        let valorA, valorB;
+        
+        switch(columna) {
+            case 'tema':
+                valorA = a.dataset.tema;
+                valorB = b.dataset.tema;
+                break;
+            case 'preguntas':
+                valorA = parseInt(a.dataset.preguntas);
+                valorB = parseInt(b.dataset.preguntas);
+                break;
+            case 'tests':
+                valorA = parseInt(a.dataset.tests);
+                valorB = parseInt(b.dataset.tests);
+                break;
+            default:
+                return 0;
+        }
+        
+        if (valorA < valorB) return ordenTemaActual.ascendente ? -1 : 1;
+        if (valorA > valorB) return ordenTemaActual.ascendente ? 1 : -1;
+        return 0;
+    });
+    
+    // Reordenar las filas en el DOM
+    const filaAgregar = tbody.querySelector('tr:last-child'); // Fila del botón +
+    filas.forEach(fila => tbody.insertBefore(fila, filaAgregar));
+    
+    // Actualizar icono de ordenación
+    actualizarIconosOrdenTemas(columna);
+}
+
+function actualizarIconosOrdenTemas(columnaActual) {
+    // Actualizar todos los headers de la tabla de temas
+    const headers = document.querySelectorAll('#tablaTemas thead th[onclick]');
+    headers.forEach(header => {
+        const columna = header.getAttribute('onclick').match(/'([^']+)'/)[1];
+        const textoBase = header.textContent.replace(/[↑↓↕]/g, '').trim();
+        
+        if (columna === columnaActual) {
+            const flecha = ordenTemaActual.ascendente ? '↑' : '↓';
+            header.innerHTML = `${textoBase} <span style="float: right;">${flecha}</span>`;
+        } else {
+            header.innerHTML = `${textoBase} <span style="float: right; color: #ccc;">↕</span>`;
+        }
+    });
+}
+
+// ===========================================
+// FUNCIONES PARA FILTROS DE TESTS
+// ===========================================
+function aplicarFiltrosTests() {
+    const filtroTema = document.getElementById('filtroTestTema').value.toLowerCase();
+    const filtroNombre = document.getElementById('filtroTestNombre').value.toLowerCase();
+    const filas = document.querySelectorAll('#tbodyTests .fila-test');
+    
+    let visibles = 0;
+    filas.forEach(fila => {
+        const tema = fila.dataset.tema;
+        const nombre = fila.dataset.nombre;
+        
+        const cumpleTema = !filtroTema || tema === filtroTema;
+        const cumpleNombre = !filtroNombre || nombre.includes(filtroNombre);
+        
+        if (cumpleTema && cumpleNombre) {
+            fila.style.display = '';
+            visibles++;
+        } else {
+            fila.style.display = 'none';
+        }
+    });
+    
+    document.getElementById('numTestsFiltrados').textContent = visibles;
+}
+
+function limpiarFiltrosTests() {
+    document.getElementById('filtroTestTema').value = '';
+    document.getElementById('filtroTestNombre').value = '';
+    aplicarFiltrosTests();
+}
+
+let ordenTestActual = { columna: null, ascendente: true };
+
+function ordenarTablaTests(columna) {
+    const tbody = document.getElementById('tbodyTests');
+    const filas = Array.from(tbody.querySelectorAll('.fila-test'));
+    
+    // Cambiar dirección si es la misma columna
+    if (ordenTestActual.columna === columna) {
+        ordenTestActual.ascendente = !ordenTestActual.ascendente;
+    } else {
+        ordenTestActual.columna = columna;
+        ordenTestActual.ascendente = true;
+    }
+    
+    filas.sort((a, b) => {
+        let valorA, valorB;
+        
+        switch(columna) {
+            case 'tema':
+                valorA = a.dataset.tema;
+                valorB = b.dataset.tema;
+                break;
+            case 'nombre':
+                valorA = a.dataset.nombre;
+                valorB = b.dataset.nombre;
+                break;
+            case 'preguntas':
+                valorA = parseInt(a.dataset.preguntas);
+                valorB = parseInt(b.dataset.preguntas);
+                break;
+            case 'tiempo':
+                valorA = parseInt(a.dataset.tiempo);
+                valorB = b.dataset.tiempo;
+                break;
+            default:
+                return 0;
+        }
+        
+        if (valorA < valorB) return ordenTestActual.ascendente ? -1 : 1;
+        if (valorA > valorB) return ordenTestActual.ascendente ? 1 : -1;
+        return 0;
+    });
+    
+    // Reordenar las filas en el DOM
+    const filaAgregar = tbody.querySelector('tr:last-child'); // Fila del botón +
+    filas.forEach(fila => tbody.insertBefore(fila, filaAgregar));
+    
+    // Actualizar icono de ordenación
+    actualizarIconosOrdenTests(columna);
+}
+
+function actualizarIconosOrdenTests(columnaActual) {
+    // Actualizar todos los headers de la tabla de tests
+    const headers = document.querySelectorAll('#tablaTests thead th[onclick]');
+    headers.forEach(header => {
+        const columna = header.getAttribute('onclick').match(/'([^']+)'/)[1];
+        const textoBase = header.textContent.replace(/[↑↓↕]/g, '').trim();
+        
+        if (columna === columnaActual) {
+            const flecha = ordenTestActual.ascendente ? '↑' : '↓';
+            header.innerHTML = `${textoBase} <span style="float: right;">${flecha}</span>`;
+        } else {
+            header.innerHTML = `${textoBase} <span style="float: right; color: #ccc;">↕</span>`;
+        }
+    });
+}
+
+// ===========================================
+// FUNCIONES PARA FILTROS DE PREGUNTAS
+// ===========================================
+function aplicarFiltrosPreguntas() {
+    const filtroTema = document.getElementById('filtroTema').value.toLowerCase();
+    const filtroDificultad = document.getElementById('filtroDificultad').value.toLowerCase();
+    const filtroEnunciado = document.getElementById('filtroEnunciado').value.toLowerCase();
+    const filas = document.querySelectorAll('#tbodyPreguntas .fila-pregunta');
+    
+    let visibles = 0;
+    filas.forEach(fila => {
+        const tema = fila.dataset.tema;
+        const dificultad = fila.dataset.dificultad;
+        const enunciado = fila.dataset.enunciado;
+        
+        const cumpleTema = !filtroTema || tema === filtroTema;
+        const cumpleDificultad = !filtroDificultad || dificultad === filtroDificultad;
+        const cumpleEnunciado = !filtroEnunciado || enunciado.includes(filtroEnunciado);
+        
+        if (cumpleTema && cumpleDificultad && cumpleEnunciado) {
+            fila.style.display = '';
+            visibles++;
+        } else {
+            fila.style.display = 'none';
+        }
+    });
+    
+    document.getElementById('numPreguntasFiltradas').textContent = visibles;
+}
+
+function limpiarFiltrosPreguntas() {
+    document.getElementById('filtroTema').value = '';
+    document.getElementById('filtroDificultad').value = '';
+    document.getElementById('filtroEnunciado').value = '';
+    aplicarFiltrosPreguntas();
+}
+
+let ordenPreguntaActual = { columna: null, ascendente: true };
+
+function ordenarTablaPreguntas(columna) {
+    const tbody = document.getElementById('tbodyPreguntas');
+    const filas = Array.from(tbody.querySelectorAll('.fila-pregunta'));
+    
+    // Cambiar dirección si es la misma columna
+    if (ordenPreguntaActual.columna === columna) {
+        ordenPreguntaActual.ascendente = !ordenPreguntaActual.ascendente;
+    } else {
+        ordenPreguntaActual.columna = columna;
+        ordenPreguntaActual.ascendente = true;
+    }
+    
+    filas.sort((a, b) => {
+        let valorA, valorB;
+        
+        switch(columna) {
+            case 'id':
+                valorA = parseInt(a.dataset.id);
+                valorB = parseInt(b.dataset.id);
+                break;
+            case 'tema':
+                valorA = a.dataset.tema;
+                valorB = b.dataset.tema;
+                break;
+            case 'enunciado':
+                valorA = a.dataset.enunciado;
+                valorB = b.dataset.enunciado;
+                break;
+            case 'dificultad':
+                // Orden: Facil < Media < Dificil
+                const orden = { 'facil': 1, 'media': 2, 'dificil': 3 };
+                valorA = orden[a.dataset.dificultad] || 999;
+                valorB = orden[b.dataset.dificultad] || 999;
+                break;
+            default:
+                return 0;
+        }
+        
+        if (valorA < valorB) return ordenPreguntaActual.ascendente ? -1 : 1;
+        if (valorA > valorB) return ordenPreguntaActual.ascendente ? 1 : -1;
+        return 0;
+    });
+    
+    // Reordenar las filas en el DOM
+    filas.forEach(fila => tbody.appendChild(fila));
+    
+    // Actualizar icono de ordenación
+    actualizarIconosOrdenPreguntas(columna);
+}
+
+function actualizarIconosOrdenPreguntas(columnaActual) {
+    // Actualizar todos los headers de la tabla de preguntas
+    const headers = document.querySelectorAll('#tablaPreguntas thead th[onclick]');
+    headers.forEach(header => {
+        const columna = header.getAttribute('onclick').match(/'([^']+)'/)[1];
+        const textoBase = header.textContent.replace(/[↑↓↕]/g, '').trim();
+        
+        if (columna === columnaActual) {
+            const flecha = ordenPreguntaActual.ascendente ? '↑' : '↓';
+            header.innerHTML = `${textoBase} <span style="float: right;">${flecha}</span>`;
+        } else {
+            header.innerHTML = `${textoBase} <span style="float: right; color: #ccc;">↕</span>`;
+        }
+    });
+}
+
+// ===========================================
+// FUNCIONES PARA EDITAR TEMA
+// ===========================================
+async function editarTema(temaId) {
+    const modal = document.getElementById('modalEditarTema');
+    document.getElementById('editTemaIdOriginal').value = temaId;
+    document.getElementById('editTemaNombre').value = temaId;
+    
+    // Cargar tests del tema
+    const testsList = document.getElementById('editTemaTestsList');
+    testsList.innerHTML = '<p style="color: #6c757d;">Cargando tests...</p>';
+    
+    try {
+        const response = await fetch(`/profesor/tema/${encodeURIComponent(temaId)}/detalles/`);
+        const data = await response.json();
+        
+        if (data.success) {
+            if (data.tests.length === 0) {
+                testsList.innerHTML = '<p style="color: #6c757d; font-style: italic;">No hay tests en este tema</p>';
+            } else {
+                let html = '<div style="display: flex; flex-direction: column; gap: 0.5rem;">';
+                data.tests.forEach(test => {
+                    html += `
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: white; border: 1px solid #dee2e6; border-radius: 4px;">
+                            <div>
+                                <strong>${test.nombre}</strong>
+                                <div style="font-size: 0.85rem; color: #6c757d;">${test.preguntas} preguntas • ${test.tiempo} min</div>
+                            </div>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button type="button" onclick="editarTestDesdeModal(${test.id}); event.stopPropagation();" 
+                                        style="background: {{ THEME_COLORS.primary }}; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; font-size: 0.85rem;"
+                                        title="Editar">
+                                    🖉
+                                </button>
+                            </div>
+                        </div>`;
+                });
+                html += '</div>';
+                testsList.innerHTML = html;
+            }
+        } else {
+            testsList.innerHTML = '<p style="color: #dc3545;">Error al cargar tests</p>';
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        testsList.innerHTML = '<p style="color: #dc3545;">Error al cargar tests</p>';
+    }
+    
+    modal.style.display = 'flex';
+}
+
+function cerrarModalEditarTema() {
+    document.getElementById('modalEditarTema').style.display = 'none';
+}
+
+async function guardarCambiosTema(event) {
+    event.preventDefault();
+    
+    const btnGuardar = document.getElementById('btnGuardarTema');
+    btnGuardar.disabled = true;
+    btnGuardar.textContent = 'Guardando...';
+    
+    const idOriginal = document.getElementById('editTemaIdOriginal').value;
+    const nuevoNombre = document.getElementById('editTemaNombre').value.trim();
+    
+    try {
+        const response = await fetch(`/profesor/tema/${encodeURIComponent(idOriginal)}/actualizar/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                nuevo_nombre: nuevoNombre
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            alert(data.message);
+            cerrarModalEditarTema();
+            location.reload(); // Recargar para mostrar cambios
+        } else {
+            alert(' ' + (data.error || 'Error al guardar cambios'));
+            btnGuardar.disabled = false;
+            btnGuardar.textContent = 'Guardar Cambios';
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert(' Error al guardar cambios del tema');
+        btnGuardar.disabled = false;
+        btnGuardar.textContent = ' Guardar Cambios';
+    }
+}
+
+// ===========================================
+// FUNCIONES PARA EDITAR TEST
+// ===========================================
+async function editarTest(testId) {
+    const modal = document.getElementById('modalEditarTest');
+    document.getElementById('editTestId').value = testId;
+    
+    // Cargar datos del test
+    try {
+        const response = await fetch(`/profesor/test/${testId}/obtener/`);
+        const data = await response.json();
+        
+        if (data.success) {
+            document.getElementById('editTestTema').value = data.tema;
+            document.getElementById('editTestNombre').value = data.nombre;
+            document.getElementById('editTestDescripcion').value = data.descripcion || '';
+            document.getElementById('editTestNivel').value = data.nivel;
+            document.getElementById('editTestTiempo').value = data.tiempo_limite;
+            
+            // Cargar preguntas del test
+            const preguntasList = document.getElementById('editTestPreguntasList');
+            if (data.preguntas.length === 0) {
+                preguntasList.innerHTML = '<p style="color: #6c757d; font-style: italic;">No hay preguntas en este test</p>';
+            } else {
+                let html = '<div style="display: flex; flex-direction: column; gap: 0.5rem;">';
+                data.preguntas.forEach(pregunta => {
+                    html += `
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: white; border: 1px solid #dee2e6; border-radius: 4px;">
+                            <div style="flex: 1;">
+                                <strong>ID ${pregunta.id}:</strong> ${pregunta.enunciado.substring(0, 80)}${pregunta.enunciado.length > 80 ? '...' : ''}
+                                <div style="font-size: 0.85rem; color: #6c757d;">${pregunta.dificultad} • ${pregunta.respuestas} respuestas</div>
+                            </div>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button type="button" onclick="editarPreguntaDesdeModal(${pregunta.id}); event.stopPropagation();" 
+                                        style="background: {{ THEME_COLORS.primary }}; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; font-size: 0.85rem;"
+                                        title="Editar">
+                                    🖉
+                                </button>
+                            </div>
+                        </div>`;
+                });
+                html += '</div>';
+                preguntasList.innerHTML = html;
+            }
+            
+            modal.style.display = 'flex';
+        } else {
+            alert(' Error al cargar datos del test');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert(' Error al cargar datos del test');
+    }
+}
+
+function editarTestDesdeModal(testId) {
+    cerrarModalEditarTema();
+    setTimeout(() => editarTest(testId), 300);
+}
+
+function cerrarModalEditarTest() {
+    document.getElementById('modalEditarTest').style.display = 'none';
+}
+
+async function guardarCambiosTest(event) {
+    event.preventDefault();
+    
+    const btnGuardar = document.getElementById('btnGuardarTest');
+    btnGuardar.disabled = true;
+    btnGuardar.textContent = 'Guardando...';
+    
+    const testId = document.getElementById('editTestId').value;
+    const data = {
+        tema: document.getElementById('editTestTema').value,
+        nombre: document.getElementById('editTestNombre').value.trim(),
+        descripcion: document.getElementById('editTestDescripcion').value.trim(),
+        nivel: document.getElementById('editTestNivel').value,
+        tiempo_limite: parseInt(document.getElementById('editTestTiempo').value)
+    };
+    
+    try {
+        const response = await fetch(`/profesor/test/${testId}/actualizar/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            alert(' ' + result.message);
+            cerrarModalEditarTest();
+            location.reload();
+        } else {
+            alert(' ' + (result.error || 'Error al guardar cambios'));
+            btnGuardar.disabled = false;
+            btnGuardar.textContent = ' Guardar Cambios';
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert(' Error al guardar cambios del test');
+        btnGuardar.disabled = false;
+        btnGuardar.textContent = ' Guardar Cambios';
+    }
+}
+
+function anadirPreguntaATest() {
+    cerrarModalEditarTest();
+    setTimeout(() => {
+        mostrarModalCrearPregunta();
+        // Pre-seleccionar el tema del test si está disponible
+        const temaTest = document.getElementById('editTestTema').value;
+        if (temaTest) {
+            document.getElementById('inputPreguntaTema').value = temaTest;
+        }
+    }, 300);
+}
+
+// ===========================================
+// FUNCIONES PARA EDITAR PREGUNTA
+// ===========================================
+let contadorRespuestasEditar = 0;
+
+// Función auxiliar para escapar HTML
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+async function editarPregunta(preguntaId) {
+    const modal = document.getElementById('modalEditarPregunta');
+    document.getElementById('editPreguntaId').value = preguntaId;
+    contadorRespuestasEditar = 0;
+    
+    // Cargar datos de la pregunta
+    try {
+        const response = await fetch(`/profesor/pregunta/${preguntaId}/obtener/`);
+        const data = await response.json();
+        
+        console.log('Datos recibidos de la pregunta:', data);
+        
+        if (data.success) {
+            document.getElementById('editPreguntaTema').value = data.tema;
+            document.getElementById('editPreguntaEnunciado').value = data.enunciado;
+            document.getElementById('editPreguntaDificultad').value = data.dificultad;
+            document.getElementById('editPreguntaPuntuacion').value = data.puntuacion;
+            
+            // Cargar respuestas
+            const contenedor = document.getElementById('editContenedorRespuestas');
+            contenedor.innerHTML = '';
+            
+            // Agregar instrucciones con botón de cerrar
+            const instrucciones = document.createElement('div');
+            instrucciones.id = 'instruccionesEditarRespuestas';
+            instrucciones.style.marginBottom = '1rem';
+            instrucciones.style.padding = '0.75rem 1rem';
+            instrucciones.style.background = '#e7f3ff';
+            instrucciones.style.borderLeft = '4px solid #2563eb';
+            instrucciones.style.borderRadius = '4px';
+            instrucciones.style.fontSize = '0.9rem';
+            instrucciones.style.color = '#1e3a8a';
+            instrucciones.style.display = 'flex';
+            instrucciones.style.justifyContent = 'space-between';
+            instrucciones.style.alignItems = 'center';
+            instrucciones.style.gap = '1rem';
+            
+            const textoInstrucciones = document.createElement('span');
+            textoInstrucciones.textContent = 'Haz clic en una respuesta para marcarla como correcta';
+            textoInstrucciones.style.flex = '1';
+            
+            const btnCerrar = document.createElement('button');
+            btnCerrar.type = 'button';
+            btnCerrar.textContent = '✕';
+            btnCerrar.title = 'No volver a mostrar';
+            btnCerrar.style.background = 'transparent';
+            btnCerrar.style.border = 'none';
+            btnCerrar.style.color = '#1e3a8a';
+            btnCerrar.style.fontSize = '1.2rem';
+            btnCerrar.style.cursor = 'pointer';
+            btnCerrar.style.padding = '0';
+            btnCerrar.style.width = '24px';
+            btnCerrar.style.height = '24px';
+            btnCerrar.style.display = 'flex';
+            btnCerrar.style.alignItems = 'center';
+            btnCerrar.style.justifyContent = 'center';
+            btnCerrar.style.borderRadius = '50%';
+            btnCerrar.style.transition = 'background 0.2s';
+            btnCerrar.onmouseover = function() { this.style.background = 'rgba(30, 58, 138, 0.1)'; };
+            btnCerrar.onmouseout = function() { this.style.background = 'transparent'; };
+            btnCerrar.onclick = function() {
+                instrucciones.style.display = 'none';
+                // Guardar preferencia en localStorage
+                localStorage.setItem('ocultarInstruccionesRespuestas', 'true');
+            };
+            
+            instrucciones.appendChild(textoInstrucciones);
+            instrucciones.appendChild(btnCerrar);
+            
+            // Solo mostrar si no se ha ocultado antes
+            if (localStorage.getItem('ocultarInstruccionesRespuestas') !== 'true') {
+                contenedor.appendChild(instrucciones);
+            }
+            
+            console.log('Respuestas a cargar:', data.respuestas);
+            data.respuestas.forEach((respuesta, index) => {
+                console.log(`Respuesta ${index}:`, respuesta.contenido);
+                // Crear el elemento div
+                const respuestaDiv = document.createElement('div');
+                respuestaDiv.className = 'respuesta-item';
+                respuestaDiv.style.marginBottom = '1.5rem';
+                respuestaDiv.style.padding = '1rem';
+                respuestaDiv.style.paddingBottom = '2.5rem'; // Espacio para la papelera abajo
+                respuestaDiv.style.border = '2px solid #dee2e6';
+                respuestaDiv.style.borderRadius = '6px';
+                respuestaDiv.style.background = respuesta.es_correcta ? '#d4edda' : '#ffffff';
+                respuestaDiv.style.cursor = 'pointer';
+                respuestaDiv.style.transition = 'all 0.2s';
+                respuestaDiv.style.position = 'relative'; // Para posicionar la papelera
+                
+                // Radio oculto pero funcional
+                const radio = document.createElement('input');
+                radio.type = 'radio';
+                radio.name = 'respuestaCorrectaEdit';
+                radio.className = 'respuesta-correcta';
+                radio.checked = respuesta.es_correcta;
+                radio.style.display = 'none';
+                respuestaDiv.appendChild(radio);
+                
+                // Input de texto (ocupa todo el ancho)
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'respuesta-contenido';
+                input.value = respuesta.contenido;
+                input.placeholder = 'Contenido de la respuesta';
+                input.required = true;
+                input.style.width = '100%';
+                input.style.padding = '0.5rem';
+                input.style.border = '1px solid #ced4da';
+                input.style.borderRadius = '4px';
+                input.style.fontSize = '0.95rem';
+                input.style.color = '#212529';
+                input.style.backgroundColor = '#ffffff';
+                input.style.boxSizing = 'border-box';
+                input.style.marginBottom = '0.5rem';
+                
+                respuestaDiv.appendChild(input);
+                
+                // Indicador de respuesta correcta
+                const indicador = document.createElement('div');
+                indicador.style.fontSize = '0.85rem';
+                indicador.style.fontWeight = '500';
+                indicador.style.color = respuesta.es_correcta ? '#155724' : '#6c757d';
+                indicador.style.marginBottom = '0.5rem';
+                indicador.textContent = respuesta.es_correcta ? '✓ Esta es la respuesta correcta' : '';
+                
+                respuestaDiv.appendChild(indicador);
+                
+                // Botón eliminar centrado abajo
+                const btnEliminar = document.createElement('button');
+                btnEliminar.type = 'button';
+                btnEliminar.textContent = '🗑️';
+                btnEliminar.title = 'Eliminar respuesta';
+                btnEliminar.style.position = 'absolute';
+                btnEliminar.style.bottom = '0.5rem';
+                btnEliminar.style.left = '50%';
+                btnEliminar.style.transform = 'translateX(-50%)';
+                btnEliminar.style.background = '#dc3545';
+                btnEliminar.style.color = 'white';
+                btnEliminar.style.border = 'none';
+                btnEliminar.style.width = '32px';
+                btnEliminar.style.height = '32px';
+                btnEliminar.style.borderRadius = '4px';
+                btnEliminar.style.cursor = 'pointer';
+                btnEliminar.style.fontSize = '1rem';
+                btnEliminar.style.padding = '0';
+                btnEliminar.style.display = 'flex';
+                btnEliminar.style.alignItems = 'center';
+                btnEliminar.style.justifyContent = 'center';
+                btnEliminar.style.transition = 'all 0.2s';
+                btnEliminar.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+                btnEliminar.onmouseover = function() {
+                    this.style.background = '#bb2d3b';
+                    this.style.transform = 'translateX(-50%) scale(1.05)';
+                };
+                btnEliminar.onmouseout = function() {
+                    this.style.background = '#dc3545';
+                    this.style.transform = 'translateX(-50%) scale(1)';
+                };
+                btnEliminar.onclick = function(e) {
+                    e.stopPropagation();
+                    respuestaDiv.remove();
+                };
+                
+                respuestaDiv.appendChild(btnEliminar);
+                
+                // Hacer clic en el div completo marca como correcta
+                respuestaDiv.onclick = function(e) {
+                    if (e.target === input || e.target === btnEliminar) return;
+                    
+                    radio.checked = true;
+                    
+                    // Actualizar estilos de todas las respuestas
+                    document.querySelectorAll('#editContenedorRespuestas .respuesta-item').forEach(item => {
+                        const itemRadio = item.querySelector('input[type="radio"]');
+                        const itemIndicador = item.querySelector('div:last-child');
+                        if (itemRadio && itemRadio.checked) {
+                            item.style.background = '#d4edda';
+                            item.style.borderColor = '#28a745';
+                            if (itemIndicador) {
+                                itemIndicador.textContent = '✓ Esta es la respuesta correcta';
+                                itemIndicador.style.color = '#155724';
+                            }
+                        } else {
+                            item.style.background = '#ffffff';
+                            item.style.borderColor = '#dee2e6';
+                        }
+                    });
+                };
+                
+                // Hover effect
+                respuestaDiv.onmouseenter = function() {
+                    if (!radio.checked) {
+                        respuestaDiv.style.borderColor = '#2563eb';
+                        respuestaDiv.style.background = '#f8f9fa';
+                    }
+                };
+                respuestaDiv.onmouseleave = function() {
+                    if (!radio.checked) {
+                        respuestaDiv.style.borderColor = '#dee2e6';
+                        respuestaDiv.style.background = '#ffffff';
+                    }
+                };
+                
+                contenedor.appendChild(respuestaDiv);
+                contadorRespuestasEditar++;
+            });
+            
+            modal.style.display = 'flex';
+        } else {
+            alert(' Error al cargar datos de la pregunta');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert(' Error al cargar datos de la pregunta');
+    }
+}
+
+function editarPreguntaDesdeModal(preguntaId) {
+    cerrarModalEditarTest();
+    setTimeout(() => editarPregunta(preguntaId), 300);
+}
+
+function cerrarModalEditarPregunta() {
+    document.getElementById('modalEditarPregunta').style.display = 'none';
+}
+
+function agregarRespuestaEditar() {
+    const contenedor = document.getElementById('editContenedorRespuestas');
+    contadorRespuestasEditar++;
+    
+    // Crear el elemento div con position relative para el botón absoluto
+    const respuestaDiv = document.createElement('div');
+    respuestaDiv.className = 'respuesta-item';
+    respuestaDiv.style.marginBottom = '1.5rem';
+    respuestaDiv.style.padding = '1rem';
+    respuestaDiv.style.paddingBottom = '2.5rem';
+    respuestaDiv.style.border = '2px solid #dee2e6';
+    respuestaDiv.style.borderRadius = '6px';
+    respuestaDiv.style.background = '#ffffff';
+    respuestaDiv.style.cursor = 'pointer';
+    respuestaDiv.style.transition = 'all 0.2s';
+    respuestaDiv.style.position = 'relative';
+    
+    // Radio oculto pero funcional
+    const radio = document.createElement('input');
+    radio.type = 'radio';
+    radio.name = 'respuestaCorrectaEdit';
+    radio.className = 'respuesta-correcta';
+    radio.style.display = 'none';
+    respuestaDiv.appendChild(radio);
+    
+    // Input de texto (ocupa todo el ancho)
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'respuesta-contenido';
+    input.placeholder = 'Contenido de la respuesta';
+    input.required = true;
+    input.style.width = '100%';
+    input.style.padding = '0.5rem';
+    input.style.border = '1px solid #ced4da';
+    input.style.borderRadius = '4px';
+    input.style.fontSize = '0.95rem';
+    input.style.color = '#212529';
+    input.style.backgroundColor = '#ffffff';
+    input.style.boxSizing = 'border-box';
+    input.style.marginBottom = '0.5rem';
+    
+    respuestaDiv.appendChild(input);
+    
+    // Indicador de respuesta correcta (opcional, comentado para simplicidad)
+    const indicador = document.createElement('div');
+    indicador.style.fontSize = '0.85rem';
+    indicador.style.fontWeight = '500';
+    indicador.style.color = '#6c757d';
+    indicador.style.marginBottom = '0.5rem';
+    indicador.textContent = 'Haz clic para marcar como correcta';
+    respuestaDiv.appendChild(indicador);
+    
+    // Botón eliminar centrado abajo
+    const btnEliminar = document.createElement('button');
+    btnEliminar.type = 'button';
+    btnEliminar.textContent = '🗑️';
+    btnEliminar.title = 'Eliminar respuesta';
+    btnEliminar.style.position = 'absolute';
+    btnEliminar.style.bottom = '0.5rem';
+    btnEliminar.style.left = '50%';
+    btnEliminar.style.transform = 'translateX(-50%)';
+    btnEliminar.style.background = '#dc3545';
+    btnEliminar.style.color = 'white';
+    btnEliminar.style.border = 'none';
+    btnEliminar.style.width = '32px';
+    btnEliminar.style.height = '32px';
+    btnEliminar.style.borderRadius = '4px';
+    btnEliminar.style.cursor = 'pointer';
+    btnEliminar.style.fontSize = '1rem';
+    btnEliminar.style.padding = '0';
+    btnEliminar.style.display = 'flex';
+    btnEliminar.style.alignItems = 'center';
+    btnEliminar.style.justifyContent = 'center';
+    btnEliminar.style.transition = 'all 0.2s';
+    btnEliminar.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+    btnEliminar.onmouseover = function() {
+        this.style.background = '#bb2d3b';
+        this.style.transform = 'translateX(-50%) scale(1.05)';
+    };
+    btnEliminar.onmouseout = function() {
+        this.style.background = '#dc3545';
+        this.style.transform = 'translateX(-50%) scale(1)';
+    };
+    btnEliminar.onclick = function(e) {
+        e.stopPropagation();
+        respuestaDiv.remove();
+    };
+    respuestaDiv.appendChild(btnEliminar);
+    
+    // Hacer clic en el div completo marca como correcta
+    respuestaDiv.onclick = function(e) {
+        if (e.target === input || e.target === btnEliminar) return;
+        
+        radio.checked = true;
+        
+        // Actualizar estilos de todas las respuestas
+        document.querySelectorAll('#editContenedorRespuestas .respuesta-item').forEach(item => {
+            const itemRadio = item.querySelector('input[type="radio"]');
+            // Buscar el div indicador (el que contiene el texto)
+            const divs = item.querySelectorAll('div');
+            let itemIndicador = null;
+            for (let i = 0; i < divs.length; i++) {
+                if (divs[i].textContent.includes('correcta') || divs[i].textContent.includes('Haz clic')) {
+                    itemIndicador = divs[i];
+                    break;
+                }
+            }
+            
+            if (itemRadio && itemRadio.checked) {
+                item.style.background = '#d4edda';
+                item.style.borderColor = '#28a745';
+                if (itemIndicador) {
+                    itemIndicador.textContent = '✓ Esta es la respuesta correcta';
+                    itemIndicador.style.color = '#155724';
+                }
+            } else {
+                item.style.background = '#ffffff';
+                item.style.borderColor = '#dee2e6';
+                if (itemIndicador) {
+                    itemIndicador.textContent = 'Haz clic para marcar como correcta';
+                    itemIndicador.style.color = '#6c757d';
+                }
+            }
+        });
+    };
+    
+    // Hover effect
+    respuestaDiv.onmouseenter = function() {
+        if (!radio.checked) {
+            respuestaDiv.style.borderColor = '#2563eb';
+            respuestaDiv.style.background = '#f8f9fa';
+        }
+    };
+    respuestaDiv.onmouseleave = function() {
+        if (!radio.checked) {
+            respuestaDiv.style.borderColor = '#dee2e6';
+            respuestaDiv.style.background = '#ffffff';
+        }
+    };
+    
+    contenedor.appendChild(respuestaDiv);
+}
+
+async function guardarCambiosPregunta(event) {
+    event.preventDefault();
+    
+    const btnGuardar = document.getElementById('btnGuardarPregunta');
+    btnGuardar.disabled = true;
+    btnGuardar.textContent = 'Guardando...';
+    
+    const preguntaId = document.getElementById('editPreguntaId').value;
+    
+    // Recopilar respuestas
+    const respuestasItems = document.querySelectorAll('#editContenedorRespuestas .respuesta-item');
+    const respuestas = [];
+    
+    respuestasItems.forEach(item => {
+        const contenido = item.querySelector('.respuesta-contenido').value.trim();
+        const esCorrecta = item.querySelector('.respuesta-correcta').checked;
+        if (contenido) {
+            respuestas.push({ contenido, es_correcta: esCorrecta });
+        }
+    });
+    
+    // Validaciones
+    if (respuestas.length < 2) {
+        alert(' Debe haber al menos 2 respuestas');
+        btnGuardar.disabled = false;
+        btnGuardar.textContent = ' Guardar Cambios';
+        return;
+    }
+    
+    const correctas = respuestas.filter(r => r.es_correcta);
+    if (correctas.length !== 1) {
+        alert(' Debe haber exactamente una respuesta correcta');
+        btnGuardar.disabled = false;
+        btnGuardar.textContent = ' Guardar Cambios';
+        return;
+    }
+    
+    const data = {
+        tema: document.getElementById('editPreguntaTema').value,
+        enunciado: document.getElementById('editPreguntaEnunciado').value.trim(),
+        dificultad: document.getElementById('editPreguntaDificultad').value,
+        puntuacion: parseInt(document.getElementById('editPreguntaPuntuacion').value),
+        respuestas: respuestas
+    };
+    
+    try {
+        const response = await fetch(`/profesor/pregunta/${preguntaId}/actualizar/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            alert(' ' + result.message);
+            cerrarModalEditarPregunta();
+            location.reload();
+        } else {
+            alert(' ' + (result.error || 'Error al guardar cambios'));
+            btnGuardar.disabled = false;
+            btnGuardar.textContent = ' Guardar Cambios';
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert(' Error al guardar cambios de la pregunta');
+        btnGuardar.disabled = false;
+        btnGuardar.textContent = ' Guardar Cambios';
+    }
+}
 
 </script>
 

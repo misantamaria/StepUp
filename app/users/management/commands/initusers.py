@@ -8,7 +8,7 @@ class Command(BaseCommand):
     help = "Crea usuarios y configura permisos para StepUp: alumno, profesor, profesor_ayudante, admin"
 
     def handle(self, *args, **options):
-        from boards.models import Question, Test, IntentTest, RespuestaAlumno
+        from boards.models import Pregunta, Test, IntentTest, RespuestaAlumno
         
         # Crear grupos si no existen
         grupo_alumnos, _ = Group.objects.get_or_create(name='Alumnos')
@@ -122,7 +122,7 @@ class Command(BaseCommand):
     
     def _configurar_permisos_grupos(self, grupo_alumnos, grupo_profesores, grupo_profesores_ayudantes):
         """Configura los permisos específicos para cada grupo"""
-        from boards.models import Question, Test, IntentTest, RespuestaAlumno
+        from boards.models import Pregunta, Test, IntentTest, RespuestaAlumno
         
         # Limpiar permisos anteriores
         grupo_alumnos.permissions.clear()
@@ -130,7 +130,7 @@ class Command(BaseCommand):
         grupo_profesores_ayudantes.permissions.clear()
         
         # ContentTypes de los modelos
-        ct_question = ContentType.objects.get_for_model(Question)
+        ct_pregunta = ContentType.objects.get_for_model(Pregunta)
         ct_test = ContentType.objects.get_for_model(Test)
         ct_intenttest = ContentType.objects.get_for_model(IntentTest)
         ct_respuesta = ContentType.objects.get_for_model(RespuestaAlumno)
@@ -140,16 +140,16 @@ class Command(BaseCommand):
         
         # === PROFESORES: Control total sobre preguntas y tests ===
         permisos_profesor = Permission.objects.filter(
-            content_type__in=[ct_question, ct_test, ct_intenttest, ct_respuesta]
+            content_type__in=[ct_pregunta, ct_test, ct_intenttest, ct_respuesta]
         )
         grupo_profesores.permissions.set(permisos_profesor)
         
         # === PROFESORES AYUDANTES: Pueden crear y editar, pero NO eliminar ===
         permisos_ayudante = Permission.objects.filter(
-            content_type__in=[ct_question, ct_test, ct_intenttest, ct_respuesta],
+            content_type__in=[ct_pregunta, ct_test, ct_intenttest, ct_respuesta],
             codename__in=[
-                # Question
-                'add_question', 'change_question', 'view_question',
+                # Pregunta
+                'add_pregunta', 'change_pregunta', 'view_pregunta',
                 # Test
                 'add_test', 'change_test', 'view_test',
                 # IntentTest (solo lectura)

@@ -144,7 +144,7 @@ def seleccionar_modo(request):
         no_preguntar = request.POST.get('no_preguntar') == 'on'
         
         # Debug: verificar datos recibidos
-        print(f"🔍 POST recibido - Modo: {modo}, No preguntar: {no_preguntar}, POST data: {request.POST}")
+        print(f" POST recibido - Modo: {modo}, No preguntar: {no_preguntar}, POST data: {request.POST}")
         
         # Validar modo
         if modo not in ['alumno', 'profesor']:
@@ -154,7 +154,7 @@ def seleccionar_modo(request):
         
         # Guardar en sesión
         request.session['modo_actual'] = modo
-        print(f"✅ Modo guardado en sesión: {request.session.get('modo_actual')}")
+        print(f" Modo guardado en sesión: {request.session.get('modo_actual')}")
         
         # Guardar preferencia si lo solicitó
         if no_preguntar:

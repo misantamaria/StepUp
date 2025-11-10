@@ -21,18 +21,23 @@ def get_dashboard_data(user, modo_test=False) -> Dict[str, Any]:
     if es_profesor and modo_test:
         # MODO TEST: Mostrar TODOS los temas disponibles para profesor (visibles o no)
         # Esto permite ver qué hay en borrador vs qué está publicado
-        temas_disponibles = Tema.objects.filter(
+        # EXCLUIR siempre el tema "Exámenes" que es solo para modo examen
+        temas_base = Tema.objects.filter(
             activo=True,
             disponible_profesor=True
-        ).prefetch_related('tests').order_by('tema_id')
+        ).exclude(tema_id="Exámenes").prefetch_related('tests').order_by('tema_id')
     else:
-        # MODO ALUMNO NORMAL: Solo temas visibles Y disponibles
-        # Esto aplica tanto a alumnos reales como a profesores en modo normal
-        temas_disponibles = Tema.objects.filter(
+        # MODO ALUMNO NORMAL: Mostrar TODOS los temas disponibles (incluidos no visibles)
+        # Esto permite mostrar temas bloqueados secuencialmente con indicadores visuales
+        # EXCLUIR siempre el tema "Exámenes" que es solo para modo examen
+        temas_base = Tema.objects.filter(
             activo=True, 
-            visible_alumnos=True, 
             disponible_alumno=True
-        ).prefetch_related('tests').order_by('tema_id')
+        ).exclude(tema_id="Exámenes").prefetch_related('tests').order_by('tema_id')
+    
+    # APLICAR LÓGICA SECUENCIAL: Mostrar TODOS los temas con indicadores de bloqueo
+    # Tanto alumnos como profesores pueden ver todos los temas para progreso visual
+    temas_disponibles = list(temas_base)
     
     # Organizar tests por tema
     tests_por_tema = []
@@ -85,8 +90,43 @@ def get_dashboard_data(user, modo_test=False) -> Dict[str, Any]:
         
         tiene_tests_visibles = len(tests_disponibles) > 0
         
-        # En modo test, marcar como bloqueado si el tema NO es visible (aunque sea disponible)
-        bloqueado = not tiene_tests_visibles
+        # Determinar si el tema está bloqueado secuencialmente
+        bloqueado_secuencial = False
+        motivo_bloqueo = None
+        
+        # Verificar bloqueo secuencial - SOLO para alumnos
+        # Los profesores en modo test pueden acceder a cualquier tema
+        tema_index = list(temas_base).index(tema)
+        if tema_index > 0 and not (es_profesor and modo_test):
+            # Verificar si el tema anterior está completado
+            tema_anterior = list(temas_base)[tema_index - 1]
+            progreso_anterior, _ = ProgresoTema.objects.get_or_create(
+                alumno=user,
+                tema=tema_anterior,
+                defaults={'total_preguntas': Pregunta.objects.filter(tema=tema_anterior.tema_id).count()}
+            )
+            progreso_anterior.actualizar_progreso()
+            
+            if not progreso_anterior.completado:
+                bloqueado_secuencial = True
+                # Solo asignar motivo secuencial si el tema ES visible para alumnos
+                if tema.visible_alumnos:
+                    motivo_bloqueo = f"Completa el tema '{tema_anterior.tema_id}' primero"
+        
+        # Determinar bloqueo final
+        bloqueado = not tiene_tests_visibles or bloqueado_secuencial
+        
+        # Para ALUMNOS: Si el tema no es visible (temas 4, 5, 6), usar mensaje docente
+        if not es_profesor and not tema.visible_alumnos:
+            bloqueado = True
+            motivo_bloqueo = "Próximamente disponible"
+        
+        # Para PROFESORES en modo test: Permitir acceso a todos los temas visibles
+        if es_profesor and modo_test and tema_visible:
+            bloqueado = False
+            motivo_bloqueo = None
+        
+        # En modo test para profesores, marcar como bloqueado si el tema NO es visible (aunque sea disponible)
         if es_profesor and modo_test and not tema_visible:
             bloqueado = True
         
@@ -97,6 +137,8 @@ def get_dashboard_data(user, modo_test=False) -> Dict[str, Any]:
             'tests_por_nivel': tests_por_nivel,
             'tiene_tests_visibles': tiene_tests_visibles,
             'bloqueado': bloqueado,
+            'bloqueado_secuencial': bloqueado_secuencial,
+            'motivo_bloqueo': motivo_bloqueo,
             'tema_visible': tema_visible,  # Nuevo: indica si el tema está visible o solo disponible
         })
     

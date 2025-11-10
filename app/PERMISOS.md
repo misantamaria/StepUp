@@ -19,17 +19,17 @@
 **is_superuser**: `False`
 
 **Puede:**
-- ✅ Acceder a la interfaz web (no admin)
-- ✅ Ver tests disponibles
-- ✅ Realizar tests
-- ✅ Ver sus propios resultados
-- ✅ Ver explicaciones de respuestas
+-  Acceder a la interfaz web (no admin)
+-  Ver tests disponibles
+-  Realizar tests
+-  Ver sus propios resultados
+-  Ver explicaciones de respuestas
 
 **NO puede:**
-- ❌ Acceder al panel de administración Django
-- ❌ Ver o modificar preguntas
-- ❌ Ver resultados de otros alumnos
-- ❌ Crear, editar o eliminar nada en la base de datos
+-  Acceder al panel de administración Django
+-  Ver o modificar preguntas
+-  Ver resultados de otros alumnos
+-  Crear, editar o eliminar nada en la base de datos
 
 ---
 
@@ -39,26 +39,26 @@
 **is_superuser**: `False`
 
 **Permisos en modelos:**
-- **Question**: `add`, `change`, `view` (❌ NO `delete`)
-- **Test**: `add`, `change`, `view` (❌ NO `delete`)
+- **Question**: `add`, `change`, `view` ( NO `delete`)
+- **Test**: `add`, `change`, `view` ( NO `delete`)
 - **IntentTest**: `view` (solo lectura)
 - **RespuestaAlumno**: `view` (solo lectura)
 
 **Puede:**
-- ✅ Acceder al panel de administración
-- ✅ Crear nuevas preguntas
-- ✅ Editar preguntas existentes
-- ✅ Crear nuevos tests
-- ✅ Editar tests existentes
-- ✅ Ver estadísticas de alumnos
-- ✅ Ver intentos y respuestas (solo lectura)
+-  Acceder al panel de administración
+-  Crear nuevas preguntas
+-  Editar preguntas existentes
+-  Crear nuevos tests
+-  Editar tests existentes
+-  Ver estadísticas de alumnos
+-  Ver intentos y respuestas (solo lectura)
 
 **NO puede:**
-- ❌ Eliminar preguntas
-- ❌ Eliminar tests
-- ❌ Modificar o eliminar intentos de tests
-- ❌ Modificar o eliminar respuestas de alumnos
-- ❌ Gestionar usuarios
+-  Eliminar preguntas
+-  Eliminar tests
+-  Modificar o eliminar intentos de tests
+-  Modificar o eliminar respuestas de alumnos
+-  Gestionar usuarios
 
 **Uso ideal:** Profesores en prácticas, ayudantes de laboratorio que necesitan crear contenido pero no deben poder eliminar material existente.
 
@@ -76,17 +76,17 @@
 - **RespuestaAlumno**: `view` (solo lectura)
 
 **Puede:**
-- ✅ Acceder al panel de administración
-- ✅ Crear, editar y **eliminar** preguntas
-- ✅ Crear, editar y **eliminar** tests
-- ✅ Ver estadísticas de alumnos
-- ✅ Ver intentos y respuestas (solo lectura)
+-  Acceder al panel de administración
+-  Crear, editar y **eliminar** preguntas
+-  Crear, editar y **eliminar** tests
+-  Ver estadísticas de alumnos
+-  Ver intentos y respuestas (solo lectura)
 
 **NO puede:**
-- ❌ Modificar o eliminar intentos de tests (protección de datos)
-- ❌ Modificar o eliminar respuestas de alumnos (protección de datos)
-- ❌ Gestionar usuarios
-- ❌ Acceder a configuraciones del sistema
+-  Modificar o eliminar intentos de tests (protección de datos)
+-  Modificar o eliminar respuestas de alumnos (protección de datos)
+-  Gestionar usuarios
+-  Acceder a configuraciones del sistema
 
 **Uso ideal:** Profesores titulares de la asignatura con control total sobre el contenido educativo.
 
@@ -98,12 +98,12 @@
 **is_superuser**: `True`
 
 **Puede:**
-- ✅ **TODO** - Control absoluto del sistema
-- ✅ Gestionar usuarios (crear, editar, eliminar)
-- ✅ Modificar cualquier dato en la base de datos
-- ✅ Eliminar intentos y respuestas de alumnos (si necesario)
-- ✅ Acceder a todas las configuraciones de Django
-- ✅ Ejecutar comandos de gestión
+-  **TODO** - Control absoluto del sistema
+-  Gestionar usuarios (crear, editar, eliminar)
+-  Modificar cualquier dato en la base de datos
+-  Eliminar intentos y respuestas de alumnos (si necesario)
+-  Acceder a todas las configuraciones de Django
+-  Ejecutar comandos de gestión
 
 **Uso ideal:** Administrador técnico del sistema, coordinador de asignatura.
 

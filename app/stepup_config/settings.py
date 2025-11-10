@@ -42,6 +42,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     
+    # Debug toolbar (solo en desarrollo)
+    'debug_toolbar',
+    
     # Apps locales
     'boards',
     'users',
@@ -50,6 +53,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',  # Debug toolbar
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -224,4 +228,25 @@ def theme_context(request):
     return {
         'THEME_COLORS': THEME_COLORS,
         'THEME_TYPOGRAPHY': THEME_TYPOGRAPHY,
+    }
+
+# Configuración de Django Debug Toolbar
+if DEBUG:
+    INTERNAL_IPS = [
+        '127.0.0.1',
+        'localhost',
+        'angela.etsisi.upm.es',
+        'docker',  # Para contenedores Docker
+    ]
+    
+    # Configuración adicional del debug toolbar
+    DEBUG_TOOLBAR_CONFIG = {
+        'SHOW_TOOLBAR_CALLBACK': lambda request: DEBUG,
+        'HIDE_IN_STACKTRACES': [
+            'socketserver',
+            'threading',
+            'wsgiref',
+            'debug_toolbar',
+            'django',
+        ],
     }

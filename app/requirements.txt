@@ -11,3 +11,7 @@ PyMySQL==1.1.1
 python-dotenv==1.0.0
 gunicorn==23.0.0
 whitenoise==6.7.0
+pytest==7.4.3
+pytest-django==4.7.0
+pytest-cov==4.1.0
+django-debug-toolbar==4.4.6

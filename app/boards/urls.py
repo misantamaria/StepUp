@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 from . import views_bdd
+from .views import profesor
 
 app_name = 'boards'
 
@@ -30,12 +31,29 @@ urlpatterns = [
     
     # Rutas para profesores
     path('profesor/', views.dashboard_profesor, name='dashboard_profesor'),
+    path('profesor/progreso-alumnos/', profesor.progreso_alumnos, name='progreso_alumnos'),
+    path('profesor/progreso-clase/', profesor.progreso_clase, name='progreso_clase'),
+    path('profesor/alumno/<int:alumno_id>/', profesor.detalle_alumno, name='detalle_alumno'),
     path('profesor/alumno/<int:alumno_id>/estadisticas/', views.estadisticas_alumno, name='estadisticas_alumno'),
     path('profesor/test/<int:test_id>/toggle-field/', views.toggle_test_field, name='toggle_test_field'),
     path('profesor/tema/<str:tema_id>/toggle-field/', views.toggle_tema_field, name='toggle_tema_field'),
     path('profesor/test/<int:test_id>/detalles/', views.get_test_details, name='get_test_details'),
     path('profesor/test/<int:test_id>/eliminar/', views.delete_test, name='delete_test'),
     path('profesor/tema/<str:tema_id>/eliminar/', views.delete_tema, name='delete_tema'),
+    path('profesor/pregunta/<int:pregunta_id>/respuestas/', profesor.obtener_respuestas_pregunta, name='obtener_respuestas_pregunta'),
+    
+    # Rutas para crear mediante modales
+    path('profesor/tema/crear/', views.crear_tema_modal, name='crear_tema_modal'),
+    path('profesor/test/crear/', views.crear_test_modal, name='crear_test_modal'),
+    path('profesor/pregunta/crear/', views.crear_pregunta_modal, name='crear_pregunta_modal'),
+    
+    # Rutas para editar mediante modales
+    path('profesor/tema/<str:tema_id>/detalles/', views.get_tema_details, name='get_tema_details'),
+    path('profesor/tema/<str:tema_id>/actualizar/', views.update_tema, name='update_tema'),
+    path('profesor/test/<int:test_id>/obtener/', views.get_test_data, name='get_test_data'),
+    path('profesor/test/<int:test_id>/actualizar/', views.update_test, name='update_test'),
+    path('profesor/pregunta/<int:pregunta_id>/obtener/', views.get_pregunta_data, name='get_pregunta_data'),
+    path('profesor/pregunta/<int:pregunta_id>/actualizar/', views.update_pregunta, name='update_pregunta'),
     
     # Rutas para gestión de preguntas desde BDD
     path('profesor/preguntas/', views_bdd.listar_preguntas, name='listar_preguntas_bdd'),

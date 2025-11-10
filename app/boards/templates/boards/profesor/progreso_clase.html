@@ -1,0 +1,279 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - StepUp{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h1 style="color: {{ THEME_COLORS.primary }}; margin: 0;">{{ page_title }}</h1>
+        <a href="{% url 'boards:dashboard_profesor' %}" style="color: {{ THEME_COLORS.primary }}; text-decoration: none; font-weight: 500;">
+            ← Volver al Dashboard
+        </a>
+    </div>
+
+    <!-- Métricas globales -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+        <div style="text-align: center; padding: 1.5rem; background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: white; border-radius: 8px;">
+            <div style="font-size: 2rem; font-weight: bold;">{{ total_alumnos }}</div>
+            <div style="font-size: 0.9rem; opacity: 0.9;">Alumnos Totales</div>
+        </div>
+        <div style="text-align: center; padding: 1.5rem; background: linear-gradient(135deg, {% if promedio_general >= 7 %}#28a745{% elif promedio_general >= 5 %}#ffc107{% else %}#dc3545{% endif %} 0%, {% if promedio_general >= 7 %}#155724{% elif promedio_general >= 5 %}#856404{% else %}#721c24{% endif %} 100%); color: white; border-radius: 8px;">
+            <div style="font-size: 2rem; font-weight: bold;">{{ promedio_general|floatformat:1 }}</div>
+            <div style="font-size: 0.9rem; opacity: 0.9;">Promedio de Clase</div>
+        </div>
+        <div style="text-align: center; padding: 1.5rem; background: linear-gradient(135deg, #17a2b8 0%, #0c5460 100%); color: white; border-radius: 8px;">
+            <div style="font-size: 2rem; font-weight: bold;">{{ alumnos_activos }}</div>
+            <div style="font-size: 0.9rem; opacity: 0.9;">Activos (7 días)</div>
+        </div>
+        <div style="text-align: center; padding: 1.5rem; background: linear-gradient(135deg, #dc3545 0%, #721c24 100%); color: white; border-radius: 8px;">
+            <div style="font-size: 2rem; font-weight: bold;">{{ alumnos_en_riesgo }}</div>
+            <div style="font-size: 0.9rem; opacity: 0.9;">En Riesgo</div>
+        </div>
+    </div>
+
+    <!-- Distribución de rendimiento -->
+    <div class="card">
+        <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem;">Distribución de Rendimiento</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+            <div style="text-align: center; padding: 1.5rem; background: #d4edda; border-radius: 8px; border-left: 4px solid #28a745;">
+                <div style="font-size: 2rem; font-weight: bold; color: #155724;">{{ distribucion.excelente }}</div>
+                <div style="font-size: 0.9rem; color: #155724; font-weight: 500;">Excelente (8-10)</div>
+                <div style="font-size: 0.8rem; color: #155724; opacity: 0.8;">
+                    {{ distribucion.excelente|floatformat:0|default:"0" }}%
+                </div>
+            </div>
+            <div style="text-align: center; padding: 1.5rem; background: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107;">
+                <div style="font-size: 2rem; font-weight: bold; color: #856404;">{{ distribucion.bien }}</div>
+                <div style="font-size: 0.9rem; color: #856404; font-weight: 500;">Bien (6-8)</div>
+                <div style="font-size: 0.8rem; color: #856404; opacity: 0.8;">
+                    {% widthratio distribucion.bien total_alumnos 100 %}%
+                </div>
+            </div>
+            <div style="text-align: center; padding: 1.5rem; background: #ffeaa7; border-radius: 8px; border-left: 4px solid #f39c12;">
+                <div style="font-size: 2rem; font-weight: bold; color: #856404;">{{ distribucion.regular }}</div>
+                <div style="font-size: 0.9rem; color: #856404; font-weight: 500;">Regular (4-6)</div>
+                <div style="font-size: 0.8rem; color: #856404; opacity: 0.8;">
+                    {% widthratio distribucion.regular total_alumnos 100 %}%
+                </div>
+            </div>
+            <div style="text-align: center; padding: 1.5rem; background: #f8d7da; border-radius: 8px; border-left: 4px solid #dc3545;">
+                <div style="font-size: 2rem; font-weight: bold; color: #721c24;">{{ distribucion.mal }}</div>
+                <div style="font-size: 0.9rem; color: #721c24; font-weight: 500;">Insuficiente (<4)</div>
+                <div style="font-size: 0.8rem; color: #721c24; opacity: 0.8;">
+                    {% widthratio distribucion.mal total_alumnos 100 %}%
+                </div>
+            </div>
+            <div style="text-align: center; padding: 1.5rem; background: #e2e3e5; border-radius: 8px; border-left: 4px solid #6c757d;">
+                <div style="font-size: 2rem; font-weight: bold; color: #6c757d;">{{ distribucion.sin_actividad }}</div>
+                <div style="font-size: 0.9rem; color: #6c757d; font-weight: 500;">Sin Actividad</div>
+                <div style="font-size: 0.8rem; color: #6c757d; opacity: 0.8;">
+                    {% widthratio distribucion.sin_actividad total_alumnos 100 %}%
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas por Grupos -->
+    {% if estadisticas_grupos %}
+    <div class="card">
+        <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem;">Estadísticas por Grupos</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+            {% for grupo, stats in estadisticas_grupos.items %}
+            <div style="padding: 1.5rem; border: 1px solid #ddd; border-radius: 8px; background: #f8f9fa;">
+                <h4 style="margin: 0 0 1rem 0; color: {{ THEME_COLORS.primary }}; font-size: 1.1rem;">
+                    {{ grupo }}
+                </h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: #333;">{{ stats.total_alumnos }}</div>
+                        <div style="font-size: 0.8rem; color: #666;">Alumnos</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: {% if stats.promedio >= 7 %}#28a745{% elif stats.promedio >= 5 %}#ffc107{% else %}#dc3545{% endif %};">
+                            {{ stats.promedio|floatformat:1 }}
+                        </div>
+                        <div style="font-size: 0.8rem; color: #666;">Promedio</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: {% if stats.en_riesgo == 0 %}#28a745{% else %}#dc3545{% endif %};">
+                            {{ stats.en_riesgo }}
+                        </div>
+                        <div style="font-size: 0.8rem; color: #666;">En Riesgo</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: {% if stats.sin_actividad == 0 %}#28a745{% else %}#ffc107{% endif %};">
+                            {{ stats.sin_actividad }}
+                        </div>
+                        <div style="font-size: 0.8rem; color: #666;">Sin Actividad</div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Outliers destacados -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
+        <div class="card">
+            <h4 style="margin: 0 0 0.5rem 0; color: #155724; display: flex; align-items: center;">
+                Top 5 Mejores Alumnos
+            </h4>
+            {% for alumno in mejores_alumnos|slice:":5" %}
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #eee;">
+                <div>
+                    <span style="font-weight: 500;">{{ forloop.counter }}. {{ alumno.alumno.username }}</span>
+                    {% if alumno.alumno.first_name or alumno.alumno.last_name %}
+                        <div style="font-size: 0.8rem; color: #666;">
+                            {{ alumno.alumno.first_name }} {{ alumno.alumno.last_name }}
+                        </div>
+                    {% endif %}
+                </div>
+                <span style="font-weight: bold; color: #28a745;">{{ alumno.nota_media|floatformat:1 }}/10</span>
+            </div>
+            {% empty %}
+            <div style="color: #999; font-style: italic; text-align: center; padding: 1rem;">
+                Sin datos suficientes
+            </div>
+            {% endfor %}
+            <div style="text-align: center; margin-top: 1rem;">
+                <a href="{% url 'boards:progreso_alumnos' %}" 
+                   style="color: {{ THEME_COLORS.primary }}; text-decoration: none; font-size: 0.9rem;">
+                    Ver todos los alumnos →
+                </a>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h4 style="margin: 0 0 1rem 0; color: #721c24; display: flex; align-items: center;">
+                ⚠️ Alumnos en Riesgo
+            </h4>
+            {% for alumno in alumnos_riesgo|slice:":5" %}
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #eee;">
+                <div>
+                    <span style="font-weight: 500;">{{ alumno.alumno.username }}</span>
+                    {% if alumno.alumno.first_name or alumno.alumno.last_name %}
+                        <div style="font-size: 0.8rem; color: #666;">
+                            {{ alumno.alumno.first_name }} {{ alumno.alumno.last_name }}
+                        </div>
+                    {% endif %}
+                </div>
+                <span style="font-weight: bold; color: #dc3545;">{{ alumno.nota_media|floatformat:1 }}/10</span>
+            </div>
+            {% empty %}
+            <div style="color: #28a745; font-style: italic; text-align: center; padding: 1rem;">
+                ¡Todos los alumnos van bien!
+            </div>
+            {% endfor %}
+            {% if alumnos_riesgo %}
+            <div style="text-align: center; margin-top: 1rem;">
+                <a href="{% url 'boards:progreso_alumnos' %}" 
+                   style="color: {{ THEME_COLORS.primary }}; text-decoration: none; font-size: 0.9rem;">
+                    Ver detalles →
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Estadísticas detalladas por tema -->
+    <div class="card">
+        <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem;">Análisis Detallado por Temas</h3>
+        
+        {% if estadisticas_temas %}
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 6px; overflow: hidden;">
+                <thead style="background: {{ THEME_COLORS.primary_light }}; color: white;">
+                    <tr>
+                        <th style="padding: 0.75rem; text-align: left; font-weight: 500;">Tema</th>
+                        <th style="padding: 0.75rem; text-align: center; font-weight: 500;">Participantes</th>
+                        <th style="padding: 0.75rem; text-align: center; font-weight: 500;">Media de Clase</th>
+                        <th style="padding: 0.75rem; text-align: center; font-weight: 500;">Mejor Nota</th>
+                        <th style="padding: 0.75rem; text-align: center; font-weight: 500;">Peor Nota</th>
+                        <th style="padding: 0.75rem; text-align: center; font-weight: 500;">Total Intentos</th>
+                        <th style="padding: 0.75rem; text-align: center; font-weight: 500;">Preguntas</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tema_stats in estadisticas_temas %}
+                    <tr style="border-bottom: 1px solid #eee;">
+                        <td style="padding: 0.75rem;">
+                            <strong style="color: {{ THEME_COLORS.primary }};">{{ tema_stats.tema }}</strong>
+                        </td>
+                        <td style="padding: 0.75rem; text-align: center;">
+                            <span style="font-weight: 500;">{{ tema_stats.alumnos_participantes }}</span>
+                            <div style="font-size: 0.8rem; color: #666;">
+                                de {{ total_alumnos }}
+                            </div>
+                        </td>
+                        <td style="padding: 0.75rem; text-align: center;">
+                            <span style="font-weight: bold; color: {% if tema_stats.nota_media >= 7 %}#28a745{% elif tema_stats.nota_media >= 5 %}#ffc107{% else %}#dc3545{% endif %};">
+                                {{ tema_stats.nota_media|floatformat:1 }}%
+                            </span>
+                        </td>
+                        <td style="padding: 0.75rem; text-align: center;">
+                            <span style="color: #28a745; font-weight: 500;">{{ tema_stats.mejor_puntuacion|floatformat:1 }}%</span>
+                        </td>
+                        <td style="padding: 0.75rem; text-align: center;">
+                            <span style="color: #dc3545; font-weight: 500;">{{ tema_stats.peor_puntuacion|floatformat:1 }}%</span>
+                        </td>
+                        <td style="padding: 0.75rem; text-align: center;">
+                            <strong>{{ tema_stats.total_intentos }}</strong>
+                        </td>
+                        <td style="padding: 0.75rem; text-align: center;">
+                            <span style="color: #6c757d;">{{ tema_stats.total_preguntas }}</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 2rem; color: #999;">
+            No hay estadísticas de temas disponibles aún
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Enlaces de navegación -->
+    <div style="text-align: center; margin-top: 2rem;">
+        <a href="{% url 'boards:progreso_alumnos' %}" 
+           style="background: {{ THEME_COLORS.primary }}; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 6px; font-weight: 500; margin-right: 1rem;">
+            Ver Progreso Individual de Alumnos
+        </a>
+        <a href="{% url 'boards:dashboard_profesor' %}" 
+           style="background: #6c757d; color: white; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 6px; font-weight: 500;">
+            Volver al Dashboard
+        </a>
+    </div>
+</div>
+
+<style>
+.card {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 1rem;
+}
+
+table th {
+    border-bottom: 2px solid rgba(255,255,255,0.2);
+}
+
+@media (max-width: 768px) {
+    .grid-responsive {
+        grid-template-columns: 1fr;
+    }
+    
+    table {
+        font-size: 0.85rem;
+    }
+    
+    th, td {
+        padding: 0.5rem !important;
+    }
+}
+</style>
+{% endblock %}

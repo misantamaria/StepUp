@@ -19,7 +19,7 @@ def main():
     
     # Verificar que estamos en el directorio correcto
     if not os.path.exists('manage.py'):
-        print("❌ ERROR: Este script debe ejecutarse desde la carpeta 'app'")
+        print(" ERROR: Este script debe ejecutarse desde la carpeta 'app'")
         print("   Usa: cd app")
         sys.exit(1)
     
@@ -27,11 +27,11 @@ def main():
     if not os.path.exists('.env'):
         if os.path.exists('.env.example'):
             shutil.copy('.env.example', '.env')
-            print("✅ Archivo .env creado desde .env.example")
+            print(" Archivo .env creado desde .env.example")
             print("⚠️  IMPORTANTE: Edita el archivo .env con tus configuraciones reales")
             print()
         else:
-            print("❌ ERROR: No se encuentra .env.example")
+            print(" ERROR: No se encuentra .env.example")
             sys.exit(1)
     else:
         print("ℹ️  El archivo .env ya existe")

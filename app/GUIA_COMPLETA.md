@@ -277,7 +277,7 @@ Abre tu navegador en: **http://127.0.0.1:8000**
 
 ---
 
-## 📝 CREAR CONTENIDO DE EJEMPLO
+##  CREAR CONTENIDO DE EJEMPLO
 
 ### Crear preguntas de ejemplo:
 

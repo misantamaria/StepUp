@@ -39,23 +39,26 @@ def seleccionar_modo_alumno(request):
     if es_profesor:
         if modo_test:
             # Modo Test: solo disponible, incluye los no visibles
+            # EXCLUIR el tema "Exámenes" que es solo para modo examen específico
             tests_disponibles = Test.objects.filter(
                 activo=True, 
                 disponible_profesor=True
-            )
+            ).exclude(tema__tema_id="Exámenes")
         else:
             # Modo Normal: visible Y disponible
+            # EXCLUIR el tema "Exámenes" que es solo para modo examen específico
             tests_disponibles = Test.objects.filter(
                 activo=True, 
                 visible_profesor=True, 
                 disponible_profesor=True
-            )
+            ).exclude(tema__tema_id="Exámenes")
     else:
+        # EXCLUIR el tema "Exámenes" que es solo para modo examen específico
         tests_disponibles = Test.objects.filter(
             activo=True, 
             visible_alumnos=True, 
             disponible_alumno=True
-        )
+        ).exclude(tema__tema_id="Exámenes")
     
     # Recopilar todas las preguntas de estos tests
     preguntas_ids = []
@@ -89,26 +92,30 @@ def iniciar_examen(request):
     
     # Obtener todos los tests visibles y disponibles
     # En modo_test, solo verificar disponible_profesor (no visible_profesor)
+    # NOTA: Para exámenes normales, EXCLUIR siempre el tema "Exámenes"
     if es_profesor:
         if modo_test:
             # Modo Test: solo disponible, incluye los no visibles
+            # EXCLUIR el tema "Exámenes" que es solo para modo examen específico
             tests_disponibles = Test.objects.filter(
                 activo=True, 
                 disponible_profesor=True
-            )
+            ).exclude(tema__tema_id="Exámenes")
         else:
             # Modo Normal: visible Y disponible
+            # EXCLUIR el tema "Exámenes" que es solo para modo examen específico
             tests_disponibles = Test.objects.filter(
                 activo=True, 
                 visible_profesor=True, 
                 disponible_profesor=True
-            )
+            ).exclude(tema__tema_id="Exámenes")
     else:
+        # EXCLUIR el tema "Exámenes" que es solo para modo examen específico
         tests_disponibles = Test.objects.filter(
             activo=True, 
             visible_alumnos=True, 
             disponible_alumno=True
-        )
+        ).exclude(tema__tema_id="Exámenes")
     
     # Recopilar todas las preguntas de estos tests
     preguntas_ids = []
@@ -375,6 +382,11 @@ def detalle_tema(request, tema_id):
     es_profesor = request.user.is_staff
     
     # Obtener tema verificando que esté visible y disponible
+    # NUNCA permitir acceso al tema "Exámenes" en modo test normal
+    if tema_id == "Exámenes":
+        messages.error(request, 'El tema Exámenes solo está disponible en modo examen.')
+        return redirect('boards:seleccionar_modo_alumno')
+        
     if es_profesor:
         tema = get_object_or_404(Tema, tema_id=tema_id, activo=True, visible_profesor=True, disponible_profesor=True)
     else:
@@ -453,6 +465,11 @@ def detalle_tema(request, tema_id):
 @login_required
 def tests_nivel(request, tema_id, nivel):
     """Muestra los tests de un nivel específico de un tema"""
+    # NUNCA permitir acceso al tema "Exámenes" en modo test normal
+    if tema_id == "Exámenes":
+        messages.error(request, 'El tema Exámenes solo está disponible en modo examen.')
+        return redirect('boards:seleccionar_modo_alumno')
+        
     tema = get_object_or_404(Tema, tema_id=tema_id)
     
     # Determinar si es profesor en modo alumno

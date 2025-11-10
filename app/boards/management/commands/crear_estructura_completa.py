@@ -7,7 +7,7 @@ from django.db import transaction
 from boards.models import Tema, Test, Pregunta, Respuesta
 
 
-class Command(BaseCommand):<
+class Command(BaseCommand):
     help = 'Crea la estructura completa de 6 temas con tests por niveles'
 
     def add_arguments(self, parser):

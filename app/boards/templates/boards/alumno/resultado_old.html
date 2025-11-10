@@ -19,9 +19,9 @@
             {% if intento.puntuacion >= 70 %}
                  ¡Excelente trabajo!
             {% elif intento.puntuacion >= 50 %}
-                👍 Buen intento, sigue practicando
+                Buen intento, sigue practicando
             {% else %}
-                💪 No te desanimes, repasa y vuelve a intentarlo
+                No te desanimes, repasa y vuelve a intentarlo
             {% endif %}
         </div>
     </div>
@@ -56,7 +56,7 @@
         
         {% if respuesta.pregunta.explicacion %}
         <div style="background: #fff3cd; padding: 1rem; border-radius: 6px; margin-top: 0.5rem;">
-            <strong>💡 Explicación:</strong> {{ respuesta.pregunta.explicacion }}
+            <strong>Explicación:</strong> {{ respuesta.pregunta.explicacion }}
         </div>
         {% endif %}
     </div>

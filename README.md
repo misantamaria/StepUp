@@ -11,13 +11,8 @@ La aplicación tiene las siguientes herramientas:
 
 ## Requisitos
 - Python 3.11+
-- MySQL (o SQLite)
+- MySQL
 - pip/venv
-- Driver Python: este proyecto usa PyMySQL (ya incluido en `requirements.txt`). Si aparece `ModuleNotFoundError: No module named 'pymysql'`, ejecuta en el entorno virtual venv:
-
-```powershell
-    python -m pip install PyMySQL==1.1.1
-```
   
 ## Estructura del repositorio
 

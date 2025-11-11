@@ -582,13 +582,15 @@ def realizar_test(request, intento_id):
                         pregunta=pregunta
                     ).update(confirmada=True)
             
-        # Limpiar sesión
-        del request.session[session_key]
-        if confirmadas_key in request.session:
-            del request.session[confirmadas_key]
+            # Limpiar sesión
+            del request.session[session_key]
+            if confirmadas_key in request.session:
+                del request.session[confirmadas_key]
+            
+            messages.success(request, f'Test completado. Puntuación: {intento.puntuacion:.2f}/10')
+            return redirect('boards:resultado_test', intento_id=intento.id)
         
-        messages.success(request, f'Test completado! Puntuación: {intento.puntuacion:.2f}/10')
-        return redirect('boards:resultado_test', intento_id=intento.id)        # Navegar entre preguntas
+        # Navegar entre preguntas
         mostrar_modal = False
         if action == 'mostrar_confirmacion':
             # Solo guardar la respuesta y marcar para mostrar el modal

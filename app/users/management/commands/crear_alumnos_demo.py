@@ -27,9 +27,9 @@ class Command(BaseCommand):
             {"username": "david_lopez", "first_name": "David", "last_name": "López", "email": "david.lopez@alumnos.upm.es", "perfil": "regular"},
             {"username": "sara_gonzalez", "first_name": "Sara", "last_name": "González", "email": "sara.gonzalez@alumnos.upm.es", "perfil": "regular"},
             {"username": "javier_torres", "first_name": "Javier", "last_name": "Torres", "email": "javier.torres@alumnos.upm.es", "perfil": "regular"},
-            {"username": "paula_herrera", "first_name": "Paula", "last_name": "Herrera", "email": "paula.herrera@alumnos.upm.es", "perfil": "bajo"},
-            {"username": "miguel_jimenez", "first_name": "Miguel", "last_name": "Jiménez", "email": "miguel.jimenez@alumnos.upm.es", "perfil": "riesgo"},
-            {"username": "elena_morales", "first_name": "Elena", "last_name": "Morales", "email": "elena.morales@alumnos.upm.es", "perfil": "bajo"},
+            {"username": "paula_herrera", "first_name": "Paula", "last_name": "Herrera", "email": "paula.herrera@alumnos.upm.es", "perfil": "regular"},
+            {"username": "miguel_jimenez", "first_name": "Miguel", "last_name": "Jiménez", "email": "miguel.jimenez@alumnos.upm.es", "perfil": "bajo"},
+            {"username": "elena_morales", "first_name": "Elena", "last_name": "Morales", "email": "elena.morales@alumnos.upm.es", "perfil": "riesgo"},
         ]
         
         # Alumnos Clase B (9 alumnos)
@@ -40,9 +40,9 @@ class Command(BaseCommand):
             {"username": "carmen_ramos", "first_name": "Carmen", "last_name": "Ramos", "email": "carmen.ramos@alumnos.upm.es", "perfil": "bueno"},
             {"username": "alberto_ortega", "first_name": "Alberto", "last_name": "Ortega", "email": "alberto.ortega@alumnos.upm.es", "perfil": "regular"},
             {"username": "natalia_cruz", "first_name": "Natalia", "last_name": "Cruz", "email": "natalia.cruz@alumnos.upm.es", "perfil": "regular"},
-            {"username": "diego_mendez", "first_name": "Diego", "last_name": "Méndez", "email": "diego.mendez@alumnos.upm.es", "perfil": "bajo"},
-            {"username": "julia_vega", "first_name": "Julia", "last_name": "Vega", "email": "julia.vega@alumnos.upm.es", "perfil": "riesgo"},
-            {"username": "sergio_blanco", "first_name": "Sergio", "last_name": "Blanco", "email": "sergio.blanco@alumnos.upm.es", "perfil": "bajo"},
+            {"username": "diego_mendez", "first_name": "Diego", "last_name": "Méndez", "email": "diego.mendez@alumnos.upm.es", "perfil": "regular"},
+            {"username": "julia_vega", "first_name": "Julia", "last_name": "Vega", "email": "julia.vega@alumnos.upm.es", "perfil": "bajo"},
+            {"username": "sergio_blanco", "first_name": "Sergio", "last_name": "Blanco", "email": "sergio.blanco@alumnos.upm.es", "perfil": "riesgo"},
         ]
         
         # Crear alumnos
@@ -124,14 +124,14 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING("No hay tests disponibles para generar datos de demo"))
             return
         
-        # Perfiles de rendimiento
+        # Perfiles de rendimiento (ajustados para promedio ~6.8) - puntuaciones sobre 10
         perfiles_rendimiento = {
-            "excelente_especial": {"min": 85, "max": 98, "completados": 0.9},  # Roberto - especialmente bueno
-            "excelente": {"min": 80, "max": 95, "completados": 0.8},  # Ana
-            "bueno": {"min": 65, "max": 85, "completados": 0.7},
-            "regular": {"min": 50, "max": 70, "completados": 0.6},
-            "bajo": {"min": 35, "max": 55, "completados": 0.4},
-            "riesgo": {"min": 20, "max": 40, "completados": 0.3},  # Los dos en riesgo
+            "excelente_especial": {"min": 8.8, "max": 9.8, "completados": 0.9},  # Roberto - especialmente bueno
+            "excelente": {"min": 8.0, "max": 9.5, "completados": 0.8},  # Ana
+            "bueno": {"min": 6.8, "max": 8.5, "completados": 0.75},  # Mejorado
+            "regular": {"min": 5.5, "max": 7.0, "completados": 0.65},  # Mejorado
+            "bajo": {"min": 4.5, "max": 6.0, "completados": 0.5},  # Mejorado - ya no están en riesgo crítico
+            "riesgo": {"min": 3.0, "max": 4.5, "completados": 0.35},  # Solo 2 alumnos en riesgo real
         }
         
         alumnos_con_perfil = [
@@ -141,18 +141,18 @@ class Command(BaseCommand):
             ("david_lopez", "regular"),
             ("sara_gonzalez", "regular"),
             ("javier_torres", "regular"),
-            ("paula_herrera", "bajo"),
-            ("miguel_jimenez", "riesgo"),
-            ("elena_morales", "bajo"),
+            ("paula_herrera", "regular"),  # Mejorado de bajo a regular
+            ("miguel_jimenez", "bajo"),  # Mejorado de riesgo a bajo
+            ("elena_morales", "riesgo"),  # Sigue en riesgo
             ("roberto_silva", "excelente_especial"),  # Especialmente bueno
             ("maria_castro", "bueno"),
             ("pedro_vargas", "bueno"),
             ("carmen_ramos", "bueno"),
             ("alberto_ortega", "regular"),
             ("natalia_cruz", "regular"),
-            ("diego_mendez", "bajo"),
-            ("julia_vega", "riesgo"),  # En riesgo
-            ("sergio_blanco", "bajo"),
+            ("diego_mendez", "regular"),  # Mejorado de bajo a regular
+            ("julia_vega", "bajo"),  # Mejorado de riesgo a bajo
+            ("sergio_blanco", "riesgo"),  # Sigue en riesgo
         ]
         
         self.stdout.write("\nGenerando datos de rendimiento demo con actividad reciente...")
@@ -185,10 +185,10 @@ class Command(BaseCommand):
                     if IntentTest.objects.filter(alumno=user, test=test).exists():
                         continue
                     
-                    # Generar puntuación según el perfil
-                    puntuacion = random.randint(config["min"], config["max"])
+                    # Generar puntuación según el perfil (sobre 10)
+                    puntuacion = round(random.uniform(config["min"], config["max"]), 2)
                     total_preguntas = max(test.preguntas.count(), 3)  # Mínimo 3 preguntas
-                    respuestas_correctas = int((puntuacion / 100) * total_preguntas)
+                    respuestas_correctas = int((puntuacion / 10) * total_preguntas)
                     
                     # Generar fecha en la última semana (más actividad reciente)
                     dias_atras = random.randint(0, 6)  # Últimos 7 días

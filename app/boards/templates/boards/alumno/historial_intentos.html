@@ -5,10 +5,6 @@
 
 {% block content %}
 <div class="card" style="max-width: 1400px; margin: 0 auto;">
-    <a href="{% url 'boards:mi_progreso' %}" style="color: #667eea; text-decoration: none; font-size: 0.9rem; display: inline-block; margin-bottom: 1rem;">
-        ← Volver a Mi Progreso
-    </a>
-    
     <h2 style="color: #2c5282; margin-bottom: 2rem;">Historial de Intentos</h2>
     
     {% if ultimos_intentos %}
@@ -41,7 +37,7 @@
                         <td style="padding: 1rem; text-align: center;">
                             <a href="{% url 'boards:resultado_test' intento.id %}" 
                                style="background: #2c5282; color: white; padding: 0.5rem 1rem; text-decoration: none; border-radius: 4px; font-size: 0.9rem; display: inline-block;">
-                                Ver Detalle
+                                Ver detalle
                             </a>
                         </td>
                     </tr>

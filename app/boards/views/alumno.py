@@ -735,12 +735,13 @@ def resultado_test(request, intento_id):
             'fue_contestada': resp_alumno is not None,
         })
     
-    # Separar fallidas y correctas
-    respuestas_fallidas = [r for r in respuestas_detalle if not r['es_correcta']]
+    # Separar correctas, fallidas y sin contestar
     respuestas_correctas = [r for r in respuestas_detalle if r['es_correcta']]
+    respuestas_fallidas = [r for r in respuestas_detalle if not r['es_correcta'] and r['fue_contestada']]
+    respuestas_sin_contestar = [r for r in respuestas_detalle if not r['fue_contestada']]
     
-    # Calcular sin contestar
-    total_sin_contestar = intento.total_preguntas - len(respuestas_correctas) - len(respuestas_fallidas)
+    # Calcular totales
+    total_sin_contestar = len(respuestas_sin_contestar)
     
     # Limpiar la sesión del test
     session_key = f'test_{intento_id}_respuestas'

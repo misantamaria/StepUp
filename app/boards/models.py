@@ -228,9 +228,11 @@ class IntentTest(models.Model):
         return f"{self.alumno.username} - {self.test.nombre} ({self.fecha_inicio.strftime('%d/%m/%Y %H:%M')})"
     
     def calcular_puntuacion(self):
-        """Calcula la puntuación basada en respuestas correctas"""
+        """Calcula la puntuación basada en respuestas correctas.
+        IMPORTANTE: La puntuación siempre está en escala de 0 a 10.
+        """
         if self.total_preguntas > 0:
-            self.puntuacion = (self.respuestas_correctas / self.total_preguntas) * 100
+            self.puntuacion = (self.respuestas_correctas / self.total_preguntas) * 10
         else:
             self.puntuacion = 0
         self.save()

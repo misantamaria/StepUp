@@ -68,19 +68,19 @@
                 <p class="card-text">Alumnos Totales</p>
             </div>
         </div>
-        <div class="card {% if promedio_general >= 8 %}bg-success{% elif promedio_general >= 6 %}bg-warning{% else %}bg-danger{% endif %} text-white">
+        <div class="card {% if promedio_general >= 8 %}bg-success{% elif promedio_general >= 5 %}bg-warning{% else %}bg-danger{% endif %} text-white">
             <div class="card-body text-center">
                 <div class="h1">{{ promedio_general|floatformat:1 }}/10</div>
                 <p class="card-text">Promedio General</p>
             </div>
         </div>
-        <div class="card {% if promedio_temas >= 8 %}bg-success{% elif promedio_temas >= 6 %}bg-warning{% else %}bg-danger{% endif %} text-white">
+        <div class="card {% if promedio_temas >= 8 %}bg-success{% elif promedio_temas >= 5 %}bg-warning{% else %}bg-danger{% endif %} text-white">
             <div class="card-body text-center">
                 <div class="h1">{{ promedio_temas|floatformat:1 }}/10</div>
                 <p class="card-text">Promedio Temas</p>
             </div>
         </div>
-        <div class="card {% if promedio_examenes >= 8 %}bg-success{% elif promedio_examenes >= 6 %}bg-warning{% else %}bg-danger{% endif %} text-white">
+        <div class="card {% if promedio_examenes >= 8 %}bg-success{% elif promedio_examenes >= 5 %}bg-warning{% else %}bg-danger{% endif %} text-white">
             <div class="card-body text-center">
                 <div class="h1">{{ promedio_examenes|floatformat:1 }}/10</div>
                 <p class="card-text">Promedio Exámenes</p>
@@ -162,15 +162,12 @@
                             Nota Examenes <span class="sort-arrow"></span>
                         </th>
                         <th class="sortable-header" style="padding: 0.75rem;" onclick="sortTable(6)">
-                            Nº Tests Realizados <span class="sort-arrow"></span>
-                        </th>
-                        <th class="sortable-header" style="padding: 0.75rem;" onclick="sortTable(7)">
                             Progreso <span class="sort-arrow"></span>
                         </th>
-                        <th class="sortable-header" style="padding: 0.75rem;" onclick="sortTable(8)">
+                        <th class="sortable-header" style="padding: 0.75rem;" onclick="sortTable(7)">
                             Ultimo Acceso <span class="sort-arrow"></span>
                         </th>
-                        <th class="sortable-header" style="padding: 0.75rem;" onclick="sortTable(9)">
+                        <th class="sortable-header" style="padding: 0.75rem;" onclick="sortTable(8)">
                             Estado <span class="sort-arrow"></span>
                         </th>
                         <th style="padding: 0.75rem;">Acciones</th>
@@ -201,13 +198,13 @@
                             </div>
                         </td>
                         <td style="padding: 0.75rem; text-align: center;">
-                            <span style="background: #e8f4f8; color: {{ THEME_COLORS.primary }}; padding: 0.3rem 0.6rem; border-radius: 15px; font-size: 0.75rem; font-weight: 600;">
+                            <span style="color: {{ THEME_COLORS.primary }}; font-size: 0.85rem; font-weight: 500;">
                                 {{ alumno_data.grupo|default:"Sin grupo" }}
                             </span>
                         </td>
                         <td style="padding: 0.75rem; text-align: center;">
                             {% if alumno_data.total_intentos > 0 %}
-                                <span style="font-weight: 500; color: {% if alumno_data.nota_media_general >= 8 %}#28a745{% elif alumno_data.nota_media_general >= 6 %}#ffc107{% else %}#dc3545{% endif %};">
+                                <span style="font-weight: 500; color: {% if alumno_data.nota_media_general >= 8 %}{{ THEME_COLORS.success }}{% elif alumno_data.nota_media_general >= 5 %}{{ THEME_COLORS.warning }}{% else %}{{ THEME_COLORS.danger }}{% endif %};">
                                     {{ alumno_data.nota_media_general|floatformat:1 }}/10
                                 </span>
                             {% else %}
@@ -216,7 +213,7 @@
                         </td>
                         <td style="padding: 0.75rem; text-align: center;">
                             {% if alumno_data.intentos_temas > 0 %}
-                                <span style="font-weight: 500; color: {% if alumno_data.nota_media_temas >= 8 %}#28a745{% elif alumno_data.nota_media_temas >= 6 %}#ffc107{% else %}#dc3545{% endif %};">
+                                <span style="font-weight: 500; color: {% if alumno_data.nota_media_temas >= 8 %}{{ THEME_COLORS.success }}{% elif alumno_data.nota_media_temas >= 5 %}{{ THEME_COLORS.warning }}{% else %}{{ THEME_COLORS.danger }}{% endif %};">
                                     {{ alumno_data.nota_media_temas|floatformat:1 }}/10
                                 </span>
                                 <small style="color: #666;">({{ alumno_data.intentos_temas }})</small>
@@ -226,7 +223,7 @@
                         </td>
                         <td style="padding: 0.75rem; text-align: center;">
                             {% if alumno_data.intentos_examenes > 0 %}
-                                <span style="font-weight: 500; color: {% if alumno_data.nota_media_examenes >= 8 %}#28a745{% elif alumno_data.nota_media_examenes >= 6 %}#ffc107{% else %}#dc3545{% endif %};">
+                                <span style="font-weight: 500; color: {% if alumno_data.nota_media_examenes >= 8 %}{{ THEME_COLORS.success }}{% elif alumno_data.nota_media_examenes >= 5 %}{{ THEME_COLORS.warning }}{% else %}{{ THEME_COLORS.danger }}{% endif %};">
                                     {{ alumno_data.nota_media_examenes|floatformat:1 }}/10
                                 </span>
                                 <small style="color: #666;">({{ alumno_data.intentos_examenes }})</small>
@@ -235,11 +232,8 @@
                             {% endif %}
                         </td>
                         <td style="padding: 0.75rem; text-align: center;">
-                            <strong>{{ alumno_data.total_intentos }}</strong>
-                        </td>
-                        <td style="padding: 0.75rem; text-align: center;">
                             <div style="background: #e9ecef; border-radius: 10px; height: 8px; margin-bottom: 0.25rem;">
-                                <div style="background: {% if alumno_data.progreso_porcentaje >= 75 %}#28a745{% elif alumno_data.progreso_porcentaje >= 25 %}#ffc107{% else %}#dc3545{% endif %}; height: 100%; border-radius: 10px; width: {{ alumno_data.progreso_porcentaje }}%;"></div>
+                                <div style="background: {% if alumno_data.progreso_porcentaje >= 75 %}{{ THEME_COLORS.success }}{% elif alumno_data.progreso_porcentaje >= 25 %}{{ THEME_COLORS.warning }}{% else %}{{ THEME_COLORS.danger }}{% endif %}; height: 100%; border-radius: 10px; width: {{ alumno_data.progreso_porcentaje }}%;"></div>
                             </div>
                             <small>{{ alumno_data.progreso_porcentaje|floatformat:0 }}%</small>
                         </td>
@@ -252,15 +246,15 @@
                         </td>
                         <td style="padding: 0.75rem; text-align: center;">
                             {% if alumno_data.estado_alumno == 'EN RIESGO' %}
-                                <span style="background: #f8d7da; color: #721c24; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem; font-weight: 500;">EN RIESGO</span>
+                                <span style="color: {{ THEME_COLORS.danger }}; font-size: 0.85rem; font-weight: 600;">EN RIESGO</span>
                             {% elif alumno_data.estado_alumno == 'EXCELENTE' %}
-                                <span style="color: #28a745; font-weight: 500;">Excelente</span>
+                                <span style="color: {{ THEME_COLORS.success }}; font-weight: 500;">Excelente</span>
                             {% elif alumno_data.estado_alumno == 'BUENO' %}
-                                <span style="background: #fff3cd; color: #856404; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">Bueno</span>
+                                <span style="color: {{ THEME_COLORS.warning }}; font-size: 0.85rem; font-weight: 500;">Bueno</span>
                             {% elif alumno_data.estado_alumno == 'REGULAR' %}
-                                <span style="background: #e2e3e5; color: #6c757d; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">Regular</span>
+                                <span style="color: #6c757d; font-size: 0.85rem; font-weight: 500;">Regular</span>
                             {% elif alumno_data.total_intentos == 0 %}
-                                <span style="background: #e2e3e5; color: #6c757d; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">INACTIVO</span>
+                                <span style="color: #6c757d; font-size: 0.85rem; font-weight: 500;">INACTIVO</span>
                             {% else %}
                                 <span style="color: #999; font-style: italic;">Sin datos</span>
                             {% endif %}
@@ -268,7 +262,7 @@
                         <td style="padding: 0.75rem; text-align: center;">
                             <a href="{% url 'boards:detalle_alumno' alumno_data.alumno.id %}" 
                                style="background: {{ THEME_COLORS.primary }}; color: white; padding: 0.4rem 0.8rem; text-decoration: none; border-radius: 4px; font-size: 0.85rem; font-weight: 500;">
-                                Ver detalle
+                                Detalle
                             </a>
                         </td>
                     </tr>
@@ -348,13 +342,13 @@ table th {
 
 .sort-asc::after {
     content: ' ↑';
-    color: #28a745;
+    color: {{ THEME_COLORS.success }};
     font-weight: bold;
 }
 
 .sort-desc::after {
     content: ' ↓';
-    color: #dc3545;
+    color: {{ THEME_COLORS.danger }};
     font-weight: bold;
 }
 </style>

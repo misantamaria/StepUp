@@ -87,6 +87,28 @@ def get_dashboard_data() -> Dict[str, Any]:
             'preguntas_dificiles': preguntas_dificiles,
         })
     
+    # Lista separada SOLO para la tabla de gestión (INCLUYE "Exámenes")
+    temas_gestion = []
+    todos_temas_gestion = Tema.objects.all().prefetch_related('tests')
+    
+    for tema in todos_temas_gestion:
+        total_preguntas = Pregunta.objects.filter(tema=tema.tema_id).count()
+        tests = tema.tests.all().annotate(num_intentos=Count('intentos'))
+        
+        # Obtener estadísticas de dificultad
+        preguntas_faciles = Pregunta.objects.filter(tema=tema.tema_id, dificultad='Facil').count()
+        preguntas_medias = Pregunta.objects.filter(tema=tema.tema_id, dificultad='Media').count()
+        preguntas_dificiles = Pregunta.objects.filter(tema=tema.tema_id, dificultad='Dificil').count()
+        
+        temas_gestion.append({
+            'tema': tema,
+            'total_preguntas': total_preguntas,
+            'tests': tests,
+            'preguntas_faciles': preguntas_faciles,
+            'preguntas_medias': preguntas_medias,
+            'preguntas_dificiles': preguntas_dificiles,
+        })
+    
     # Totales (excluyendo tema especial "Exámenes" del conteo)
     total_tests = Test.objects.count()
     total_preguntas = Pregunta.objects.count()
@@ -266,7 +288,7 @@ def get_dashboard_data() -> Dict[str, Any]:
         'total_tests': total_tests,
         'total_preguntas': total_preguntas,
         'total_temas': total_temas,
-        'temas_con_tests': temas_con_tests,
+        'temas_con_tests': temas_gestion,  # USAR temas_gestion para la tabla (incluye Exámenes)
         'todos_tests': todos_tests,
         'todas_preguntas': todas_preguntas,
         'alumnos_unicos': alumnos_unicos,

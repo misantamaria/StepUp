@@ -1,4 +1,6 @@
 # StepUp Code
+<img src="media/logo.png" alt="Logotipo" width="200" />
+
 
 Repositorio GitHub para la aplicación [StepUP Code](https://www.youtube.com/watch?v=p-fRdRLUs44&feature=youtu.be), desarrollada dentro de un Proyecto de Innovación Educativa (PIE) para la realización de pruebas de tipo test en la asignatura Estructuras de Datos.
 

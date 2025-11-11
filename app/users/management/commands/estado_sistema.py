@@ -123,19 +123,19 @@ class Command(BaseCommand):
         
         # Buscar alumnos con perfiles específicos por nombre de usuario (basado en el comando crear_alumnos_demo)
         alumnos_especiales = [
-            ("ana_garcia", "🌟 Excelente (Clase A)"),
-            ("roberto_silva", "⭐ Especialmente bueno (Clase B)"),
-            ("miguel_jimenez", "⚠️ En riesgo (Clase A)"),
-            ("julia_vega", "⚠️ En riesgo (Clase B)"),
+            ("ana_garcia", "Excelente (Clase A)"),
+            ("roberto_silva", "Especialmente bueno (Clase B)"),
+            ("miguel_jimenez", "En riesgo (Clase A)"),
+            ("julia_vega", "En riesgo (Clase B)"),
         ]
         
-        self.stdout.write(f"\n  🎯 Perfiles destacados:")
+        self.stdout.write(f"\n  Perfiles destacados:")
         for username, descripcion in alumnos_especiales:
             try:
                 user = User.objects.get(username=username)
                 self.stdout.write(f"    {descripcion}: {user.first_name} {user.last_name}")
             except User.DoesNotExist:
-                self.stdout.write(f"    ❌ {descripcion}: Usuario {username} no encontrado")
+                self.stdout.write(f"    {descripcion}: Usuario {username} no encontrado")
 
     def _verificar_persistencia(self):
         """Verifica que la configuración de persistencia esté correcta"""

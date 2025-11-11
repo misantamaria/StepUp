@@ -769,7 +769,7 @@ def detalle_alumno(request, alumno_id):
                 'ultimo_intento': ultimo_intento,
             })
     
-    # Timeline de actividad (últimos 30 días)
+    # Histórico de actividad (últimos 30 días)
     hace_30_dias = datetime.now() - timedelta(days=30)
     intentos_recientes = intentos.filter(fecha_inicio__gte=hace_30_dias).order_by('fecha_inicio')
     

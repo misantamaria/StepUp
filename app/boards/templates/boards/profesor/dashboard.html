@@ -191,15 +191,15 @@ function toggleProgresoClase() {
 
     <!-- Resumen rápido - Primera fila: Promedios -->
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
-        <div style="background: linear-gradient(135deg, {% if promedio_general >= 8 %}{{ THEME_COLORS.success }}{% elif promedio_general >= 6 %}{{ THEME_COLORS.warning }}{% else %}{{ THEME_COLORS.danger }}{% endif %} 0%, {% if promedio_general >= 8 %}#155724{% elif promedio_general >= 6 %}#856404{% else %}#721c24{% endif %} 100%); color: white; padding: 1.5rem; border-radius: 8px;">
+        <div style="background: linear-gradient(135deg, {% if promedio_general >= 8 %}{{ THEME_COLORS.success }}{% elif promedio_general >= 5 %}{{ THEME_COLORS.warning }}{% else %}{{ THEME_COLORS.danger }}{% endif %} 0%, {% if promedio_general >= 8 %}#1e7e34{% elif promedio_general >= 5 %}#d39e00{% else %}#bd2130{% endif %} 100%); color: white; padding: 1.5rem; border-radius: 8px;">
             <div style="font-size: 2.5rem; font-weight: bold;">{{ promedio_general|floatformat:1 }}<span style="font-size: 1.5rem; opacity: 0.8;">/10</span></div>
             <div>Promedio General</div>
         </div>
-        <div style="background: linear-gradient(135deg, {% if promedio_temas >= 8 %}{{ THEME_COLORS.success }}{% elif promedio_temas >= 6 %}{{ THEME_COLORS.warning }}{% else %}{{ THEME_COLORS.danger }}{% endif %} 0%, {% if promedio_temas >= 8 %}#155724{% elif promedio_temas >= 6 %}#856404{% else %}#721c24{% endif %} 100%); color: white; padding: 1.5rem; border-radius: 8px;">
+        <div style="background: linear-gradient(135deg, {% if promedio_temas >= 8 %}{{ THEME_COLORS.success }}{% elif promedio_temas >= 5 %}{{ THEME_COLORS.warning }}{% else %}{{ THEME_COLORS.danger }}{% endif %} 0%, {% if promedio_temas >= 8 %}#1e7e34{% elif promedio_temas >= 5 %}#d39e00{% else %}#bd2130{% endif %} 100%); color: white; padding: 1.5rem; border-radius: 8px;">
             <div style="font-size: 2.5rem; font-weight: bold;">{{ promedio_temas|floatformat:1 }}<span style="font-size: 1.5rem; opacity: 0.8;">/10</span></div>
             <div>Promedio Temas</div>
         </div>
-        <div style="background: linear-gradient(135deg, {% if promedio_examenes >= 8 %}{{ THEME_COLORS.success }}{% elif promedio_examenes >= 6 %}{{ THEME_COLORS.warning }}{% else %}{{ THEME_COLORS.danger }}{% endif %} 0%, {% if promedio_examenes >= 8 %}#155724{% elif promedio_examenes >= 6 %}#856404{% else %}#721c24{% endif %} 100%); color: white; padding: 1.5rem; border-radius: 8px;">
+        <div style="background: linear-gradient(135deg, {% if promedio_examenes >= 8 %}{{ THEME_COLORS.success }}{% elif promedio_examenes >= 5 %}{{ THEME_COLORS.warning }}{% else %}{{ THEME_COLORS.danger }}{% endif %} 0%, {% if promedio_examenes >= 8 %}#1e7e34{% elif promedio_examenes >= 5 %}#d39e00{% else %}#bd2130{% endif %} 100%); color: white; padding: 1.5rem; border-radius: 8px;">
             <div style="font-size: 2.5rem; font-weight: bold;">{{ promedio_examenes|floatformat:1 }}<span style="font-size: 1.5rem; opacity: 0.8;">/10</span></div>
             <div>Promedio Exámenes</div>
         </div>
@@ -215,7 +215,7 @@ function toggleProgresoClase() {
             <div style="font-size: 2.5rem; font-weight: bold;">{{ alumnos_activos|default:0 }}<span style="font-size: 1.5rem; opacity: 0.8;">/{{ total_alumnos }}</span></div>
             <div>Activos (7 días)</div>
         </div>
-        <div style="background: linear-gradient(135deg, {{ THEME_COLORS.danger }} 0%, #721c24 100%); color: white; padding: 1.5rem; border-radius: 8px;">
+        <div style="background: linear-gradient(135deg, {{ THEME_COLORS.danger }} 0%, #bd2130 100%); color: white; padding: 1.5rem; border-radius: 8px;">
             <div style="font-size: 2.5rem; font-weight: bold;">{{ alumnos_en_riesgo|default:0 }}<span style="font-size: 1.5rem; opacity: 0.8;">/{{ total_alumnos }}</span></div>
             <div>En Riesgo</div>
         </div>

@@ -85,7 +85,7 @@
         <div class="tab-buttons">
             <button class="tab-btn active" onclick="switchTab('estadisticas')">Estadísticas Generales</button>
             <button class="tab-btn" onclick="switchTab('temas')">Por Temas</button>
-            <button class="tab-btn" onclick="switchTab('timeline')">Timeline de Actividad</button>
+            <button class="tab-btn" onclick="switchTab('timeline')">Histórico de Actividad</button>
             <button class="tab-btn" onclick="switchTab('comparacion')">Comparación Grupal</button>
         </div>
 
@@ -204,7 +204,7 @@
         <!-- Tab: Timeline -->
         <div id="tab-timeline" class="tab-content">
             <div class="card">
-                <h3 style="color: {{ THEME_COLORS.primary }};">📈 Timeline de Actividad (Últimos 30 días)</h3>
+                <h3 style="color: {{ THEME_COLORS.primary }};"> Histórico de Actividad (últimos 30 días)</h3>
                 
                 {% if intentos_recientes %}
                 <div class="timeline">

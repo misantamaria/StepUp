@@ -11,6 +11,7 @@ from ..models import Test, IntentTest, Tema, Pregunta, ProgresoTema, RespuestaAl
 from core.alumno.services import (
     get_dashboard_data as alumno_dashboard_data,
     start_test as alumno_start_test,
+    start_exam as alumno_start_exam,
     grade_attempt as alumno_grade_attempt
 )
 
@@ -103,7 +104,7 @@ def iniciar_examen(request):
         # Si solo hay 1 examen, ir directamente a realizarlo
         if tests_examenes.count() == 1:
             test = tests_examenes.first()
-            return redirect('boards:realizar_test', test_id=test.id)
+            return redirect('boards:iniciar_test', test_id=test.id)
         
         # Si hay varios, mostrar lista para seleccionar
         context = {
@@ -464,7 +465,13 @@ def tests_nivel(request, tema_id, nivel):
 def iniciar_test(request, test_id):
     """Inicia un nuevo intento de test"""
     test = get_object_or_404(Test, id=test_id, activo=True)
-    intento = alumno_start_test(request.user, test)
+    
+    # Si el test pertenece al tema "Exámenes" y es aleatorio, usar start_exam
+    if test.tema and test.tema.tema_id == "Exámenes" and test.es_aleatorio:
+        intento = alumno_start_exam(request.user, test)
+    else:
+        intento = alumno_start_test(request.user, test)
+    
     return redirect('boards:realizar_test', intento_id=intento.id)
 
 

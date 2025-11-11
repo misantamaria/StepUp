@@ -187,6 +187,51 @@ def start_test(user, test: Test) -> IntentTest:
     return intento
 
 
+def start_exam(user, test: Test) -> IntentTest:
+    """Crea un nuevo intento de examen con preguntas aleatorias."""
+    import random
+    
+    # Verificar que sea un test aleatorio
+    if not test.es_aleatorio or not test.configuracion_aleatoria:
+        # Si no es aleatorio, usar la función normal
+        return start_test(user, test)
+    
+    # Crear intento primero
+    intento = IntentTest.objects.create(
+        alumno=user,
+        test=test,
+        total_preguntas=0,  # Se actualizará después
+        es_examen=True,  # Marcar como examen
+    )
+    
+    # Generar preguntas aleatorias según configuración
+    preguntas_seleccionadas = []
+    for tema_id, num_preguntas in test.configuracion_aleatoria.items():
+        # Obtener preguntas del tema
+        preguntas_tema = list(Pregunta.objects.filter(tema=tema_id))
+        
+        # Seleccionar aleatoriamente el número especificado
+        if len(preguntas_tema) >= num_preguntas:
+            seleccionadas = random.sample(preguntas_tema, num_preguntas)
+        else:
+            # Si no hay suficientes, usar todas
+            seleccionadas = preguntas_tema
+        
+        preguntas_seleccionadas.extend(seleccionadas)
+    
+    # Mezclar todas las preguntas seleccionadas
+    random.shuffle(preguntas_seleccionadas)
+    
+    # Asignar las preguntas al test (solo para este intento)
+    test.preguntas.set(preguntas_seleccionadas)
+    
+    # Actualizar total de preguntas en el intento
+    intento.total_preguntas = len(preguntas_seleccionadas)
+    intento.save()
+    
+    return intento
+
+
 def grade_attempt(intento: IntentTest, post_data) -> IntentTest:
     """Corrige un intento con los datos del formulario y actualiza métricas."""
     if intento.completado:

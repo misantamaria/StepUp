@@ -5,12 +5,12 @@
 {% block content %}
 <div class="card" style="max-width: 800px; margin: 4rem auto;">
     <h2 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 2rem; text-align: center;">
-        📝 Selecciona un Examen
+        Selecciona un Examen
     </h2>
     
     <div style="display: grid; gap: 1.5rem;">
         {% for test in tests_examenes %}
-        <a href="{% url 'boards:realizar_test' test.id %}" style="text-decoration: none;">
+        <a href="{% url 'boards:iniciar_test' test.id %}" style="text-decoration: none;">
             <div style="
                 border: 3px solid {{ THEME_COLORS.warning }};
                 border-radius: 12px;

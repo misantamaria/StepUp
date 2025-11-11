@@ -189,30 +189,34 @@ function toggleProgresoClase() {
         <h2 style="color: {{ THEME_COLORS.primary }}; margin: 0;"> Panel del Profesor</h2>
     </div>
 
-    <!-- Resumen rápido -->
+    <!-- Resumen rápido - Primera fila: Promedios -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+        <div style="background: linear-gradient(135deg, {% if promedio_general >= 8 %}{{ THEME_COLORS.success }}{% elif promedio_general >= 6 %}{{ THEME_COLORS.warning }}{% else %}{{ THEME_COLORS.danger }}{% endif %} 0%, {% if promedio_general >= 8 %}#155724{% elif promedio_general >= 6 %}#856404{% else %}#721c24{% endif %} 100%); color: white; padding: 1.5rem; border-radius: 8px;">
+            <div style="font-size: 2.5rem; font-weight: bold;">{{ promedio_general|floatformat:1 }}<span style="font-size: 1.5rem; opacity: 0.8;">/10</span></div>
+            <div>Promedio General</div>
+        </div>
+        <div style="background: linear-gradient(135deg, {% if promedio_temas >= 8 %}{{ THEME_COLORS.success }}{% elif promedio_temas >= 6 %}{{ THEME_COLORS.warning }}{% else %}{{ THEME_COLORS.danger }}{% endif %} 0%, {% if promedio_temas >= 8 %}#155724{% elif promedio_temas >= 6 %}#856404{% else %}#721c24{% endif %} 100%); color: white; padding: 1.5rem; border-radius: 8px;">
+            <div style="font-size: 2.5rem; font-weight: bold;">{{ promedio_temas|floatformat:1 }}<span style="font-size: 1.5rem; opacity: 0.8;">/10</span></div>
+            <div>Promedio Temas</div>
+        </div>
+        <div style="background: linear-gradient(135deg, {% if promedio_examenes >= 8 %}{{ THEME_COLORS.success }}{% elif promedio_examenes >= 6 %}{{ THEME_COLORS.warning }}{% else %}{{ THEME_COLORS.danger }}{% endif %} 0%, {% if promedio_examenes >= 8 %}#155724{% elif promedio_examenes >= 6 %}#856404{% else %}#721c24{% endif %} 100%); color: white; padding: 1.5rem; border-radius: 8px;">
+            <div style="font-size: 2.5rem; font-weight: bold;">{{ promedio_examenes|floatformat:1 }}<span style="font-size: 1.5rem; opacity: 0.8;">/10</span></div>
+            <div>Promedio Exámenes</div>
+        </div>
+    </div>
+
+    <!-- Segunda fila: Alumnos y estadísticas -->
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
         <div style="background: linear-gradient(135deg, {{ THEME_COLORS.primary }} 0%, {{ THEME_COLORS.bg_medium }} 100%); color: white; padding: 1.5rem; border-radius: 8px;">
             <div style="font-size: 2.5rem; font-weight: bold;">{{ total_alumnos }}</div>
-            <div>Alumnos Activos</div>
+            <div>Total Alumnos</div>
         </div>
-        <div style="background: linear-gradient(135deg, {% if promedio_general >= 80 %}#28a745{% elif promedio_general >= 60 %}#ffc107{% else %}#dc3545{% endif %} 0%, {% if promedio_general >= 80 %}#155724{% elif promedio_general >= 60 %}#856404{% else %}#721c24{% endif %} 100%); color: white; padding: 1.5rem; border-radius: 8px;">
-            <div style="font-size: 2.5rem; font-weight: bold;">{{ promedio_general|floatformat:1 }}</div>
-            <div>Promedio General</div>
-        </div>
-        <div style="background: linear-gradient(135deg, {% if promedio_temas >= 80 %}#28a745{% elif promedio_temas >= 60 %}#ffc107{% else %}#dc3545{% endif %} 0%, {% if promedio_temas >= 80 %}#155724{% elif promedio_temas >= 60 %}#856404{% else %}#721c24{% endif %} 100%); color: white; padding: 1.5rem; border-radius: 8px;">
-            <div style="font-size: 2.5rem; font-weight: bold;">{{ promedio_temas|floatformat:1 }}</div>
-            <div>Promedio Temas</div>
-        </div>
-        <div style="background: linear-gradient(135deg, {% if promedio_examenes >= 80 %}#28a745{% elif promedio_examenes >= 60 %}#ffc107{% else %}#dc3545{% endif %} 0%, {% if promedio_examenes >= 80 %}#155724{% elif promedio_examenes >= 60 %}#856404{% else %}#721c24{% endif %} 100%); color: white; padding: 1.5rem; border-radius: 8px;">
-            <div style="font-size: 2.5rem; font-weight: bold;">{{ promedio_examenes|floatformat:1 }}</div>
-            <div>Promedio Exámenes</div>
-        </div>
-        <div style="background: linear-gradient(135deg, {{ THEME_COLORS.primary_light }} 0%, #00a8e8 100%); color: white; padding: 1.5rem; border-radius: 8px;">
-            <div style="font-size: 2.5rem; font-weight: bold;">{{ alumnos_activos|default:0 }}</div>
+        <div style="background: linear-gradient(135deg, {{ THEME_COLORS.primary_light }} 0%, {{ THEME_COLORS.info }} 100%); color: white; padding: 1.5rem; border-radius: 8px;">
+            <div style="font-size: 2.5rem; font-weight: bold;">{{ alumnos_activos|default:0 }}<span style="font-size: 1.5rem; opacity: 0.8;">/{{ total_alumnos }}</span></div>
             <div>Activos (7 días)</div>
         </div>
-        <div style="background: linear-gradient(135deg, #dc3545 0%, #721c24 100%); color: white; padding: 1.5rem; border-radius: 8px;">
-            <div style="font-size: 2.5rem; font-weight: bold;">{{ alumnos_en_riesgo|default:0 }}</div>
+        <div style="background: linear-gradient(135deg, {{ THEME_COLORS.danger }} 0%, #721c24 100%); color: white; padding: 1.5rem; border-radius: 8px;">
+            <div style="font-size: 2.5rem; font-weight: bold;">{{ alumnos_en_riesgo|default:0 }}<span style="font-size: 1.5rem; opacity: 0.8;">/{{ total_alumnos }}</span></div>
             <div>En Riesgo</div>
         </div>
     </div>
@@ -902,7 +906,7 @@ function toggleProgresoClase() {
                 <label style="display: flex; align-items: center; cursor: pointer; font-weight: 500;">
                     <input type="checkbox" id="inputTestAleatorio" onchange="toggleOpcionesAleatorias()" 
                            style="width: 18px; height: 18px; cursor: pointer; margin-right: 0.75rem; accent-color: #ffc107;">
-                    <span>🎲 Examen Aleatorio (selecciona preguntas al azar)</span>
+                    <span>Examen Aleatorio (selecciona preguntas al azar)</span>
                 </label>
             </div>
 

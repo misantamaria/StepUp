@@ -9,7 +9,7 @@ def nota_sobre_10(value):
     Ejemplo: 75 -> 7.5
     """
     try:
-        return round(float(value) / 10, 1)
+        return round(float(value) / 10, 2)
     except (ValueError, TypeError):
         return 0
 

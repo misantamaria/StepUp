@@ -15,7 +15,7 @@
     <div style="background: {% if intento.puntuacion >= 70 %}linear-gradient(135deg, #28a745 0%, #20c997 100%){% elif intento.puntuacion >= 50 %}linear-gradient(135deg, #ffc107 0%, #ff8c00 100%){% else %}linear-gradient(135deg, #dc3545 0%, #c82333 100%){% endif %}; 
                 color: white; padding: 2.5rem; border-radius: 12px; text-align: center; margin-bottom: 2rem; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
         <div style="font-size: 5rem; font-weight: bold; margin-bottom: 1.5rem;">
-            {{ intento.puntuacion|nota_sobre_10 }}/10
+            {{ intento.puntuacion }}
         </div>
         <!-- Contenedor suavizador -->
         <div style="background: rgba(255, 255, 255, 0.25); padding: 1rem; border-radius: 10px; display: inline-block;">
@@ -291,7 +291,7 @@
             {% else %}
             <a href="{% url 'boards:iniciar_test' siguiente_nivel.test.id %}" 
                style="background: linear-gradient(135deg, #ff8c00 0%, #ff6b00 100%); color: white; padding: 1rem 2rem; text-decoration: none; border-radius: 8px; font-weight: 600; display: inline-block; box-shadow: 0 2px 8px rgba(255,140,0,0.3);">
-                ⬆️ Siguiente Nivel ({{ siguiente_nivel.nombre }})
+                Siguiente Nivel ({{ siguiente_nivel.nombre }})
             </a>
             {% endif %}
         {% endif %}
@@ -305,15 +305,12 @@
             {% else %}
             <a href="{% url 'boards:iniciar_test' siguiente_tema.test.id %}" 
                style="background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); color: white; padding: 1rem 2rem; text-decoration: none; border-radius: 8px; font-weight: 600; display: inline-block; box-shadow: 0 2px 8px rgba(155,89,182,0.3);">
-                ➡️ Siguiente Tema ({{ siguiente_tema.tema.tema_id }})
+                Siguiente Tema ({{ siguiente_tema.tema.tema_id }})
             </a>
             {% endif %}
         {% endif %}
         
-        <a href="{% url 'boards:dashboard_alumno' %}?desde_seleccion=1" 
-           style="background: linear-gradient(135deg, #6c757d 0%, #495057 100%); color: white; padding: 1rem 2rem; text-decoration: none; border-radius: 8px; font-weight: 600; display: inline-block; box-shadow: 0 2px 8px rgba(108,117,125,0.3);">
-            Inicio
-        </a>
+        
     </div>
 </div>
 

@@ -1,7 +1,7 @@
 # Django
 __pycache__/
 *.py[cod]
-
+issues/
 # Archivos de configuración sensibles
 .env
 *.env

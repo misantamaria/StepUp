@@ -21,7 +21,7 @@ def get_dashboard_data(user, modo_test=False) -> Dict[str, Any]:
     if es_profesor and modo_test:
         # MODO TEST: Mostrar TODOS los temas disponibles para profesor (visibles o no)
         # Esto permite ver qué hay en borrador vs qué está publicado
-        # EXCLUIR siempre el tema "Exámenes" que es solo para modo examen
+        # EXCLUIR el tema "Exámenes" que aparece en el selector de modo
         temas_base = Tema.objects.filter(
             activo=True,
             disponible_profesor=True
@@ -29,7 +29,7 @@ def get_dashboard_data(user, modo_test=False) -> Dict[str, Any]:
     else:
         # MODO ALUMNO NORMAL: Mostrar TODOS los temas disponibles (incluidos no visibles)
         # Esto permite mostrar temas bloqueados secuencialmente con indicadores visuales
-        # EXCLUIR siempre el tema "Exámenes" que es solo para modo examen
+        # EXCLUIR el tema "Exámenes" que aparece en el selector de modo
         temas_base = Tema.objects.filter(
             activo=True, 
             disponible_alumno=True

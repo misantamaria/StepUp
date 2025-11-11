@@ -247,7 +247,15 @@ function toggleProgresoClase() {
 
     <!-- Contenido: Gestión de Temas -->
     <div id="content-temas" style="display: block;">
-        <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem; font-size: 1.2rem;"> Gestión de Temas</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h3 style="color: {{ THEME_COLORS.primary }}; margin: 0; font-size: 1.2rem;"> Gestión de Temas</h3>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <button onclick="location.reload()" 
+                        style="padding: 0.5rem 1rem; background: {{ THEME_COLORS.primary }}; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 0.5rem;">
+                    ⟳ Refrescar
+                </button>
+            </div>
+        </div>
         
         <div style="margin-bottom: 2rem; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
             <table id="tablaTemas" style="margin: 0;">
@@ -1376,7 +1384,7 @@ function toggleProgresoClase() {
         </div>
         
         <div style="padding: 1rem; background: #f8d7da; border-radius: 6px; border-left: 4px solid #dc3545;">
-            <h5 style="margin: 0 0 0.5rem 0; color: #721c24;">⚠️ Alumnos en Riesgo</h5>
+            <h5 style="margin: 0 0 0.5rem 0; color: #721c24;">Alumnos en Riesgo</h5>
             {% for alumno in alumnos_riesgo|slice:":5" %}
             <div style="font-size: 0.9rem; color: #721c24; margin-bottom: 0.25rem;">
                 {{ alumno.alumno.username }} ({{ alumno.nota_media|floatformat:1 }}/10)

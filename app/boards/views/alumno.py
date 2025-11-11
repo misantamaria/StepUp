@@ -657,6 +657,14 @@ def realizar_test(request, intento_id):
     else:
         mostrar_modal = False
     
+    # Calcular tiempo restante para exámenes
+    tiempo_restante_segundos = 0
+    if intento.es_examen:
+        from django.utils import timezone
+        tiempo_transcurrido = (timezone.now() - intento.fecha_inicio).total_seconds()
+        tiempo_limite_segundos = intento.test.tiempo_limite * 60  # Convertir minutos a segundos
+        tiempo_restante_segundos = max(0, int(tiempo_limite_segundos - tiempo_transcurrido))
+    
     context = {
         'intento': intento,
         'test': intento.test,
@@ -666,6 +674,7 @@ def realizar_test(request, intento_id):
         'es_primera': pregunta_actual_idx == 0,
         'es_ultima': pregunta_actual_idx == total_preguntas - 1,
         'es_examen': intento.es_examen,
+        'tiempo_restante_segundos': tiempo_restante_segundos,
         'estado_preguntas': estado_preguntas,
         'preguntas_contestadas': preguntas_contestadas,
         'preguntas_sin_contestar': preguntas_sin_contestar,

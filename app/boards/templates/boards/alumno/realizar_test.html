@@ -11,7 +11,7 @@
                 <h2 style="margin: 0; color: white;">{% if es_examen %}EXAMEN{% else %}{{ intento.test.nombre }}{% endif %}</h2>
                 <div style="margin-top: 0.5rem; opacity: 0.9;">
                     {% if es_examen %}
-                        {{ total_preguntas }} preguntas aleatorias - 20 minutos
+                        {{ total_preguntas }} preguntas aleatorias - {{ intento.test.tiempo_limite }} minutos
                     {% else %}
                         Tiempo límite: {{ intento.test.tiempo_limite }} minutos
                     {% endif %}

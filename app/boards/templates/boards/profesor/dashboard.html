@@ -308,6 +308,11 @@ function toggleProgresoClase() {
             </div>
         </div>
         
+        <!-- Botón para añadir nuevo tema -->
+        <div style="margin-bottom: 1.5rem;">
+            {% include 'boards/profesor/includes/boton_anadir.html' with titulo='tema' onclick='mostrarModalCrearTema()' %}
+        </div>
+        
         <div style="margin-bottom: 2rem; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
             <table id="tablaTemas" style="margin: 0;">
                 <thead>
@@ -323,6 +328,7 @@ function toggleProgresoClase() {
                     </tr>
                 </thead>
                 <tbody id="tbodyTemas">
+                    <!-- Temas  -->
                     {% for item in temas_con_tests %}
                     <tr class="fila-tema"
                         id="tema-row-{{ item.tema.tema_id }}" 
@@ -403,18 +409,7 @@ function toggleProgresoClase() {
                     </tr>
                     {% endfor %}
                     <!-- Fila para añadir nuevo tema -->
-                    <tr style="background: #f8f9fa; border-top: 2px solid #dee2e6;">
-                        <td colspan="8" style="text-align: center; padding: 1rem;">
-                            <a href="#" 
-                               onclick="mostrarModalCrearTema(); return false;"
-                               style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: {{ THEME_COLORS.primary_light }}; color: white; border-radius: 8px; text-decoration: none; font-size: 1.5rem; font-weight: bold; transition: all 0.2s;"
-                               onmouseover="this.style.background='#00a8e8'; this.style.transform='scale(1.1)'"
-                               onmouseout="this.style.background='{{ THEME_COLORS.primary_light }}'; this.style.transform='scale(1)'"
-                               title="Añadir tema">
-                                +
-                            </a>
-                        </td>
-                    </tr>
+                    {% include 'boards/profesor/includes/boton_anadir.html' with titulo='tema' use_plus=True onclick='mostrarModalCrearTema()' colspan=8 %}
                 </tbody>
             </table>
         </div>
@@ -423,6 +418,11 @@ function toggleProgresoClase() {
     <!-- Contenido: Tests -->
     <div id="content-tests" style="display: none;">
         <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem; font-size: 1.2rem;">Gestión de Tests</h3>
+        
+        <!-- Botón para añadir nuevo test -->
+        <div style="margin-bottom: 1.5rem;">
+            {% include 'boards/profesor/includes/boton_anadir.html' with titulo='test' onclick='mostrarModalCrearTest()' %}
+        </div>
         
         <!-- Total de tests -->
         <div style="margin-bottom: 1.5rem; padding: 0.75rem 1rem; background: #e7f3ff; border-left: 4px solid {{ THEME_COLORS.primary }}; border-radius: 4px;">
@@ -570,18 +570,7 @@ function toggleProgresoClase() {
                     </tr>
                     {% endfor %}
                     <!-- Fila para añadir nuevo test -->
-                    <tr style="background: #f8f9fa; border-top: 2px solid #dee2e6;">
-                        <td colspan="10" style="text-align: center; padding: 1rem;">
-                            <a href="#" 
-                               onclick="mostrarModalCrearTest(); return false;"
-                               style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: {{ THEME_COLORS.primary_light }}; color: white; border-radius: 8px; text-decoration: none; font-size: 1.5rem; font-weight: bold; transition: all 0.2s;"
-                               onmouseover="this.style.background='#00a8e8'; this.style.transform='scale(1.1)'"
-                               onmouseout="this.style.background='{{ THEME_COLORS.primary_light }}'; this.style.transform='scale(1)'"
-                               title="Crear nuevo test">
-                                +
-                            </a>
-                        </td>
-                    </tr>
+                    {% include 'boards/profesor/includes/boton_anadir.html' with titulo='test' use_plus=True onclick='mostrarModalCrearTest()' colspan=10 %}
                 </tbody>
             </table>
         </div>
@@ -590,6 +579,11 @@ function toggleProgresoClase() {
 <!-- Contenido: Gestionar Preguntas -->
 <div id="content-preguntas" style="display: none;">
     <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1.5rem; font-size: 1.2rem;"> Gestión de Preguntas</h3>
+    
+    <!-- Botón para añadir nueva pregunta -->
+    <div style="margin-bottom: 1.5rem;">
+        {% include 'boards/profesor/includes/boton_anadir.html' with titulo='pregunta' onclick='mostrarModalCrearPregunta()' %}
+    </div>
     
     <!-- Total de preguntas -->
     <div style="margin-bottom: 1.5rem; padding: 0.75rem 1rem; background: #e7f3ff; border-left: 4px solid {{ THEME_COLORS.primary }}; border-radius: 4px;">
@@ -697,18 +691,8 @@ function toggleProgresoClase() {
                 </tr>
                 {% endfor %}
                 <!-- Fila para añadir nueva pregunta -->
-                <tr style="background: #f8f9fa; border-top: 2px solid #dee2e6;">
-                    <td colspan="5" style="text-align: center; padding: 1rem;">
-                        <a href="#" 
-                           onclick="mostrarModalCrearPregunta(); return false;"
-                           style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: {{ THEME_COLORS.primary_light }}; color: white; border-radius: 8px; text-decoration: none; font-size: 1.5rem; font-weight: bold; transition: all 0.2s;"
-                           onmouseover="this.style.background='#00a8e8'; this.style.transform='scale(1.1)'"
-                           onmouseout="this.style.background='{{ THEME_COLORS.primary_light }}'; this.style.transform='scale(1)'"
-                           title="Crear nueva pregunta">
-                            +
-                        </a>
-                    </td>
-                </tr>
+                {% include 'boards/profesor/includes/boton_anadir.html' with titulo='pregunta' use_plus=True onclick='mostrarModalCrearPregunta()' colspan=10 %}
+            
             </tbody>
         </table>
     </div>
@@ -1062,15 +1046,7 @@ function toggleProgresoClase() {
                 <div id="contenedorRespuestas">
                     <!-- Las respuestas se añadirán dinámicamente aquí -->
                 </div>
-                <div style="margin-top: 1rem; text-align: center;">
-                    <button type="button" onclick="agregarRespuesta()" 
-                            style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: {{ THEME_COLORS.primary_light }}; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1.5rem; font-weight: bold; transition: all 0.2s;"
-                            onmouseover="this.style.background='#00a8e8'; this.style.transform='scale(1.1)'"
-                            onmouseout="this.style.background='{{ THEME_COLORS.primary_light }}'; this.style.transform='scale(1)'"
-                            title="Añadir respuesta">
-                        +
-                    </button>
-                </div>
+                {% include 'boards/profesor/includes/boton_anadir.html' with titulo='respuesta' onclick='agregarRespuesta()' tooltip='Añadir respuesta' %}
                 <div style="margin-top: 0.5rem; text-align: center;">
                     <small style="color: #6c757d; font-size: 0.85rem;">
                         Debe haber exactamente una respuesta correcta
@@ -1273,15 +1249,7 @@ function toggleProgresoClase() {
                 <div id="editContenedorRespuestas">
                     <!-- Las respuestas se cargarán dinámicamente aquí -->
                 </div>
-                <div style="text-align: center; margin-top: 1rem;">
-                    <button type="button" onclick="agregarRespuestaEditar()" 
-                            style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: {{ THEME_COLORS.primary_light }}; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1.5rem; font-weight: bold; transition: all 0.2s;"
-                            onmouseover="this.style.background='#00a8e8'; this.style.transform='scale(1.1)'"
-                            onmouseout="this.style.background='{{ THEME_COLORS.primary_light }}'; this.style.transform='scale(1)'"
-                            title="Añadir respuesta">
-                        +
-                    </button>
-                </div>
+                {% include 'boards/profesor/includes/boton_anadir.html' with titulo='respuesta' onclick='agregarRespuestaEditar()' tooltip='Añadir respuesta' %}
             </div>
 
             <div style="display: flex; gap: 1rem; justify-content: flex-end;">

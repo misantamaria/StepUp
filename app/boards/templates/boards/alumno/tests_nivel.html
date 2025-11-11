@@ -5,14 +5,7 @@
 
 {% block content %}
 <div class="card">
-    <div style="margin-bottom: 2rem;">
-        <a href="{% url 'boards:dashboard_alumno' %}" style="color: #667eea; text-decoration: none; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">
-            ← Home
-        </a>
-        <a href="{% url 'boards:detalle_tema' tema.tema_id %}" style="color: #667eea; text-decoration: none; font-size: 0.9rem; display: block; margin-bottom: 1rem;">
-            ← Volver a {{ tema.tema_id }}
-        </a>
-        
+    <div style="margin-bottom: 2rem;">        
         <div style="background: linear-gradient(135deg, {{ nivel_color }} 0%, {{ nivel_color_light }} 100%); color: white; padding: 2rem; border-radius: 12px; margin-bottom: 2rem;">
             <h2 style="margin: 0 0 0.5rem 0; font-size: 1.8rem;">
                 {{ nivel_nombre }}

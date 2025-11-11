@@ -20,30 +20,30 @@ El sistema StepUp tiene configurada una base de datos **persistente** usando vol
 Se han creado **18 alumnos** distribuidos en **2 clases** con perfiles de rendimiento realistas:
 
 #### Clase A (9 alumnos)
-- **Ana García** (`ana_garcia`) - 🌟 Excelente
+- **Ana García** (`ana_garcia`) - Excelente
 - **Carlos Ruiz** (`carlos_ruiz`) - Bueno
 - **Lucía Martín** (`lucia_martin`) - Bueno
 - **David López** (`david_lopez`) - Regular
 - **Sara González** (`sara_gonzalez`) - Regular
 - **Javier Torres** (`javier_torres`) - Regular
 - **Paula Herrera** (`paula_herrera`) - Bajo
-- **Miguel Jiménez** (`miguel_jimenez`) - ⚠️ En riesgo
+- **Miguel Jiménez** (`miguel_jimenez`) - En riesgo
 - **Elena Morales** (`elena_morales`) - Bajo
 
 #### Clase B (9 alumnos)
-- **Roberto Silva** (`roberto_silva`) - ⭐ Especialmente bueno
+- **Roberto Silva** (`roberto_silva`) - Especialmente bueno
 - **María Castro** (`maria_castro`) - Bueno
 - **Pedro Vargas** (`pedro_vargas`) - Bueno
 - **Carmen Ramos** (`carmen_ramos`) - Bueno
 - **Alberto Ortega** (`alberto_ortega`) - Regular
 - **Natalia Cruz** (`natalia_cruz`) - Regular
 - **Diego Méndez** (`diego_mendez`) - Bajo
-- **Julia Vega** (`julia_vega`) - ⚠️ En riesgo
+- **Julia Vega** (`julia_vega`) -  En riesgo
 - **Sergio Blanco** (`sergio_blanco`) - Bajo
 
 **Contraseña para todos los alumnos:** `alumno123`
 
-## Persistencia de Datos ✅
+## Persistencia de Datos 
 
 ### Configuración de Volúmenes
 - La base de datos MySQL usa el volumen `mysql_data` 

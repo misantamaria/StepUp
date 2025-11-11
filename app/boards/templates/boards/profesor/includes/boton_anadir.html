@@ -1,0 +1,74 @@
+{% comment %}
+Template reutilizable para botones de añadir elementos
+Parámetros:
+    - titulo: texto del botón (opcional, default: 'elemento')
+    - use_plus: si es true, muestra solo "+" (opcional, default: false)
+    - onclick: función JavaScript a llamar (requerido)
+    - colspan: número de columnas a ocupar (opcional) - si no se pasa, genera un div en lugar de tr/td
+    - tooltip: texto del tooltip (opcional, usa "Añadir {titulo}" por defecto)
+    - align: alineación cuando no está en tabla (opcional, default: center)
+
+Comportamiento:
+    - Si falta 'titulo' se usa 'elemento' por defecto.
+    - Si use_plus es true, se muestra solo "+" (con tooltip "Añadir {titulo}").
+    - Si use_plus es false, se muestra "Añadir {titulo}".
+{% endcomment %}
+
+{% with titulo_final=titulo|default:"elemento" %}
+{% with tooltip_text=tooltip|default:"Añadir "|add:titulo_final %}
+
+{% if colspan %}
+        {# Versión para tabla #}
+        <tr style="background: #f8f9fa; border-top: 2px solid #dee2e6;">
+                <td colspan="{{ colspan }}" style="text-align: center; padding: 1rem;">
+                        <div style="display: flex; justify-content: center;">
+                                {% if use_plus %}
+                                        <a href="#"
+                                             onclick="{{ onclick }}; return false;"
+                                             style="display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; background: {{ THEME_COLORS.primary_light }}; color:white; border-radius:50%; text-decoration:none; font-size:1.25rem; font-weight:700; transition:all 0.15s;"
+                                             onmouseover="this.style.background='#00a8e8'; this.style.transform='scale(1.05)'"
+                                             onmouseout="this.style.background='{{ THEME_COLORS.primary_light }}'; this.style.transform='scale(1)'"
+                                             title="{{ tooltip_text }}">
+                                                +
+                                        </a>
+                                {% else %}
+                                        <a href="#"
+                                             onclick="{{ onclick }}; return false;"
+                                             style="display:inline-flex; align-items:center; justify-content:center; padding:0.6rem 1.2rem; background: {{ THEME_COLORS.primary_light }}; color:white; border-radius:8px; text-decoration:none; font-size:1rem; font-weight:600; transition:all 0.2s;"
+                                             onmouseover="this.style.background='#00a8e8'; this.style.transform='scale(1.05)'"
+                                             onmouseout="this.style.background='{{ THEME_COLORS.primary_light }}'; this.style.transform='scale(1)'"
+                                             title="{{ tooltip_text }}">
+                                                Añadir {{ titulo_final }}
+                                        </a>
+                                {% endif %}
+                        </div>
+                </td>
+        </tr>
+{% else %}
+        {# Versión fuera de tabla #}
+        <div style="margin-top: 0; margin-bottom: 1rem; text-align: {{ align|default:'left' }};">
+                {% if use_plus %}
+                        <button type="button"
+                                        onclick="{{ onclick }}"
+                                        style="display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; background: {{ THEME_COLORS.primary_light }}; color:white; border:none; border-radius:50%; cursor:pointer; font-size:1.1rem; font-weight:700; transition:all 0.15s;"
+                                        onmouseover="this.style.background='#00a8e8'; this.style.transform='scale(1.05)'"
+                                        onmouseout="this.style.background='{{ THEME_COLORS.primary_light }}'; this.style.transform='scale(1)'"
+                                        title="{{ tooltip_text }}">
+                                +
+                        </button>
+                {% else %}
+                        <button type="button"
+                                        onclick="{{ onclick }}"
+                                        style="display:inline-flex; align-items:center; justify-content:center; padding:0.6rem 1.2rem; background: {{ THEME_COLORS.primary_light }}; color:white; border:none; border-radius:8px; cursor:pointer; font-size:1rem; font-weight:600; transition:all 0.2s; width:auto;"
+                                        onmouseover="this.style.background='#00a8e8'; this.style.transform='scale(1.05)'"
+                                        onmouseout="this.style.background='{{ THEME_COLORS.primary_light }}'; this.style.transform='scale(1)'"
+                                        title="{{ tooltip_text }}">
+                                Añadir {{ titulo_final }}
+                        </button>
+                {% endif %}
+        </div>
+{% endif %}
+
+{% endwith %}
+{% endwith %}
+

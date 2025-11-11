@@ -229,12 +229,13 @@ class IntentTest(models.Model):
     
     def calcular_puntuacion(self):
         """Calcula la puntuación basada en respuestas correctas.
-        IMPORTANTE: La puntuación siempre está en escala de 0 a 10.
+        La puntuación siempre está en escala de 0 a 10 y redondeada a 2 decimales.
         """
         if self.total_preguntas > 0:
-            self.puntuacion = (self.respuestas_correctas / self.total_preguntas) * 10
+            raw = (self.respuestas_correctas / self.total_preguntas) * 10
+            self.puntuacion = round(raw, 2)
         else:
-            self.puntuacion = 0
+            self.puntuacion = 0.0
         self.save()
 
 

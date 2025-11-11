@@ -222,13 +222,60 @@ function toggleProgresoClase() {
     </div>
 
     <!-- Botones de Gestión Rápida -->
-    <div style="margin-bottom: 2rem; padding: 1.5rem; background: #f8f9fa; border-radius: 8px;">
-        <h3 style="color: {{ THEME_COLORS.primary }}; margin-bottom: 1rem; font-size: 1.1rem;">Análisis de Progreso</h3>
-        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-            <a href="{% url 'boards:progreso_alumnos' %}" style="background: {{ THEME_COLORS.primary }}; color: white; padding: 0.6rem 1.2rem; text-decoration: none; border-radius: 6px; font-weight: 500; font-size: 0.9rem;">
-                 Progreso por Alumno
+    <div
+        style="
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        "
+    >
+        <h3
+            style="
+                color: {{ THEME_COLORS.primary }};
+                margin-bottom: 1rem;
+                font-size: 1.1rem;
+            "
+        >
+            Análisis de Progreso
+        </h3>
+        <!-- Componente de los botones de análisis  -->
+        <div
+            style="
+                display: flex;
+                gap: 1rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            "
+        >
+            <!-- Botón de análisis por alumno -->
+            <a
+                href="{% url 'boards:progreso_alumnos' %}"
+                style="
+                    background: {{ THEME_COLORS.primary }};
+                    color: white;
+                    padding: 0.8rem 1.6rem;
+                    text-decoration: none;
+                    border-radius: 6px;
+                    font-weight: 500;
+                    font-size: 1.15rem;
+                "
+            >
+                Progreso por Alumno
             </a>
-            <a href="{% url 'boards:progreso_clase' %}" style="background: {{ THEME_COLORS.primary }}; color: white; padding: 0.6rem 1.2rem; text-decoration: none; border-radius: 6px; font-weight: 500; font-size: 0.9rem;">
+            <!-- Botón de análisis por clase -->
+            <a
+                href="{% url 'boards:progreso_clase' %}"
+                style="
+                    background: {{ THEME_COLORS.primary }};
+                    color: white;
+                    padding: 0.8rem 1.6rem;
+                    text-decoration: none;
+                    border-radius: 6px;
+                    font-weight: 500;
+                    font-size: 1.15rem;
+                "
+            >
                 Progreso por Clase
             </a>
         </div>

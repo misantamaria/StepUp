@@ -1,6 +1,6 @@
 # StepUp Code
 <p align="center">
-	<img src="media/logo.png" alt="Logotipo" width="200" />
+	<img src="media/logo.png" alt="Logotipo" width="|" />
 </p>
 
 
@@ -41,3 +41,12 @@ StepUp/
 |── schema.sql
 └── README.md                     # Este archivo
 ```
+
+## Documentación
+### Guías de presentación
+- La [guía para alumnos](/docs/guiaAlumnos) contiene una descripción básica de la aplicación desde el punto de vista del estudiante.
+- La [guía para docentes](/docs/guiaDocentes.pdf) contiene una descripción básica de la aplicación desde el punto de vista del profesor.
+
+### Manuales de usuario
+- El [manual para alumnos](/docs/manualAlumnos.pdf) describe las distintas pantallas y funcionalidades de la aplicación para los alumnos.
+- El [manual para docentes](/docs/manualDocente.pdf) describe las distintas pantallas y funcionalidades de la aplicación para los docentes.
